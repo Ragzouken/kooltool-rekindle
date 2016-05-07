@@ -40,4 +40,12 @@ public class Position
     public Vector2 prev;
     public Vector2 next;
     public float progress;
+
+    public Vector2 current
+    {
+        get
+        {
+            return Vector2.Lerp(prev, next, progress);
+        }
+    }
 }

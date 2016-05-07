@@ -116,22 +116,21 @@
 				
 				int c = col.r * 16;
 
-				if (c == 0) return _Palette00;
-				if (c == 1) return _Palette01;
-				if (c == 2) return _Palette02;
-				if (c == 3) return _Palette03;
-				if (c == 4) return _Palette04;
-				if (c == 5) return _Palette05;
-				if (c == 6) return _Palette06;
-				if (c == 7) return _Palette07;
-				if (c == 8) return _Palette08;
-				if (c == 9) return _Palette09;
-				if (c == 10) return _Palette10;
-				if (c == 11) return _Palette11;
-				if (c == 12) return _Palette12;
-				if (c == 13) return _Palette13;
-				if (c == 14) return _Palette14;
-				if (c == 15) return _Palette15;
+				     if (c == 0)  col.rgb = _Palette00.rgb;
+				else if (c == 1)  col.rgb = _Palette01.rgb;
+				else if (c == 2)  col.rgb = _Palette02.rgb;
+				else if (c == 3)  col.rgb = _Palette03.rgb;
+				else if (c == 4)  col.rgb = _Palette04.rgb;
+				else if (c == 5)  col.rgb = _Palette05.rgb;
+				else if (c == 6)  col.rgb = _Palette06.rgb;
+				else if (c == 7)  col.rgb = _Palette07.rgb;
+				else if (c == 9)  col.rgb = _Palette09.rgb;
+				else if (c == 10) col.rgb = _Palette10.rgb;
+				else if (c == 11) col.rgb = _Palette11.rgb;
+				else if (c == 12) col.rgb = _Palette12.rgb;
+				else if (c == 13) col.rgb = _Palette13.rgb;
+				else if (c == 14) col.rgb = _Palette14.rgb;
+				else if (c == 15) col.rgb = _Palette15.rgb;
 
 				return col;
 			}
