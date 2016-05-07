@@ -14,6 +14,8 @@ public class Trail : MonoBehaviour
         public float offset;
     }
 
+    public CameraController cam;
+
     [SerializeField] private Transform particleParent;
     [SerializeField] private SpriteRenderer particlePrefab;
 
@@ -61,7 +63,7 @@ public class Trail : MonoBehaviour
 
         Vector3 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
 
-        next = Camera.main.ScreenToWorldPoint(Input.mousePosition) + offset * 4;
+        next = cam.ScreenToWorld(Input.mousePosition) + offset * 4;
 
         foreach (var point in PixelDraw.Bresenham.Line((int)prev.x, (int)prev.y, (int)next.x, (int)next.y))
         {
