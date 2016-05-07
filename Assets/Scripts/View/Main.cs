@@ -7,6 +7,7 @@ using System.Collections.Generic;
 
 public class Main : MonoBehaviour
 {
+    [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
     private World world;
@@ -46,8 +47,37 @@ public class Main : MonoBehaviour
         Vector2.left,
     };
 
+    private void CheckHotkeys()
+    {
+        var pan = Vector2.zero;
+
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            pan += Vector2.right;
+        }
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            pan += Vector2.left;
+        }
+
+        if (Input.GetKey(KeyCode.UpArrow))
+        {
+            pan += Vector2.up;
+        }
+
+        if (Input.GetKey(KeyCode.DownArrow))
+        {
+            pan += Vector2.down;
+        }
+
+        cameraController.focusTarget += pan * 64 * Time.deltaTime;
+    }
+
     private void Update()
     {
+        CheckHotkeys();
+
         foreach (Actor actor in world.actors)
         {
             actor.position.progress += Time.deltaTime;

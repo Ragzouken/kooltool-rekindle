@@ -61,9 +61,9 @@ public class Trail : MonoBehaviour
 
         float angle = ((Time.timeSinceLevelLoad * 2) % 1) * Mathf.PI * 2;
 
-        Vector3 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
+        Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
 
-        next = cam.ScreenToWorld(Input.mousePosition) + offset * 4;
+        next = cam.focusTarget + offset * 4;
 
         foreach (var point in PixelDraw.Bresenham.Line((int)prev.x, (int)prev.y, (int)next.x, (int)next.y))
         {
