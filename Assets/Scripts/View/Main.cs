@@ -10,6 +10,9 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
+    
+    [SerializeField] private Slider zoomSlider;
+
     private World world;
 
     private void Start()
@@ -72,6 +75,7 @@ public class Main : MonoBehaviour
         }
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
+        cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
     }
 
     private void Update()

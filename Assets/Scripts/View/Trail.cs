@@ -39,6 +39,16 @@ public class Trail : MonoBehaviour
         prev = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
 
+    private Vector2 Border(float u)
+    {
+        if (u <= 0.25f) return Vector2.Lerp(new Vector2( 1,  1), new Vector2( 1, -1), (u - 0.00f) * 4);
+        if (u <= 0.50f) return Vector2.Lerp(new Vector2( 1, -1), new Vector2(-1, -1), (u - 0.25f) * 4);
+        if (u <= 0.75f) return Vector2.Lerp(new Vector2(-1, -1), new Vector2(-1,  1), (u - 0.50f) * 4);
+        if (u <= 1.00f) return Vector2.Lerp(new Vector2(-1,  1), new Vector2( 1,  1), (u - 0.75f) * 4);
+
+        return Vector2.zero;
+    }
+
     private void Update()
     {
         foreach (Particle particle in particles)
@@ -59,11 +69,14 @@ public class Trail : MonoBehaviour
             cycle.Lightness = (int) (75 + 25 * Mathf.PingPong(p.lifetime, 1));
         });
 
-        float angle = ((Time.timeSinceLevelLoad * 2) % 1) * Mathf.PI * 2;
+        float u = ((Time.timeSinceLevelLoad * 2) % 1);
+        float angle = u * Mathf.PI * 2;
 
         Vector2 offset = new Vector2(Mathf.Cos(angle), Mathf.Sin(angle));
 
-        next = cam.focusTarget + offset * 4;
+        //offset = Border(u);
+
+        next = cam.focusTarget + offset * 8;
 
         foreach (var point in PixelDraw.Bresenham.Line((int)prev.x, (int)prev.y, (int)next.x, (int)next.y))
         {
