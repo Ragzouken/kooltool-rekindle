@@ -3,11 +3,28 @@ using System.Collections.Generic;
 
 public class HUSL
 {
+    public struct Pair
+    {
+        public double a, b;
+    }
+
+    public struct Triplet
+    {
+        public double a, b, c;
+    }
+
     protected static double[][] M = new double[][]
     {
         new double[] {  3.240969941904521, -1.537383177570093, -0.498610760293    },
         new double[] { -0.96924363628087,   1.87596750150772,   0.041555057407175 },
         new double[] {  0.055630079696993, -0.20397695888897,   1.056971514242878 },
+    };
+
+    protected static Triplet[] Mt = new Triplet[]
+    {
+        new Triplet { a =  3.240969941904521, b = -1.537383177570093, c = -0.498610760293    },
+        new Triplet { a = -0.96924363628087,  b =  1.87596750150772,  c =  0.041555057407175 },
+        new Triplet { a =  0.055630079696993, b = -0.20397695888897,  c =  1.056971514242878 },
     };
 
     protected static double[][] MInv = new double[][]
@@ -27,9 +44,11 @@ public class HUSL
     protected static double Kappa   = 903.2962962;
     protected static double Epsilon = 0.0088564516;
 
-    protected static IList<double[]> GetBounds(double L)
+    private static Pair[] bounds = new Pair[6];
+
+    protected static Pair[] GetBounds(double L, out int count)
     {
-        var result = new List<double[]>();
+        count = 0;
 
         double sub1 = Math.Pow(L + 16, 3) / 1560896;
         double sub2 = sub1 > Epsilon ? sub1 : L / Kappa;
@@ -46,46 +65,58 @@ public class HUSL
                 var top2 = (838422 * m3 + 769860 * m2 + 731718 * m1) * L * sub2 - 769860 * t * L;
                 var bottom = (632260 * m3 - 126452 * m2) * sub2 + 126452 * t;
 
-                result.Add(new double[] { top1 / bottom, top2 / bottom });
+                bounds[count] = new Pair { a = top1 / bottom, b = top2 / bottom };
+                count += 1;
             }
         }
 
-        return result;
+        return bounds;
     }
 
-    protected static double IntersectLineLine(IList<double> lineA,
-                                       IList<double> lineB)
+    protected static double IntersectLineLine(Pair lineA,
+                                              Pair lineB)
     {
-        return (lineA[1] - lineB[1]) / (lineB[0] - lineA[0]);
+        return (lineA.b - lineB.b) / (lineB.a - lineA.a);
     }
 
-    protected static double DistanceFromPole(IList<double> point)
+    protected static double DistanceFromPole(Pair point)
     {
-        return Math.Sqrt(Math.Pow(point[0], 2) + Math.Pow(point[1], 2));
+        return Math.Sqrt(Math.Pow(point.a, 2) + Math.Pow(point.b, 2));
     }
 
     protected static bool LengthOfRayUntilIntersect(double theta, 
-                                                    IList<double> line,
+                                                    Pair line,
                                                     out double length)
     {
-        length = line[1] / (Math.Sin(theta) - line[0] * Math.Cos(theta));
+        length = line.b / (Math.Sin(theta) - line.a * Math.Cos(theta));
 
         return length >= 0;
     }
 
     protected static double MaxSafeChromaForL(double L) 
     {
-        var bounds = GetBounds(L);
+        int count;
+
+        var bounds = GetBounds(L, out count);
         double min = Double.MaxValue;
+
+        Pair other = new Pair();
 
         for (int i = 0; i < 2; ++i)
         {
-            var m1 = bounds[i][0]; 
-            var b1 = bounds[i][1];
-            var line = new double[] { m1, b1 };
+            Pair line = bounds[i];
 
-            double x = IntersectLineLine(line, new double[] {-1 / m1, 0 });
-            double length = DistanceFromPole(new double[] { x, b1 + x * m1 });
+            var m1 = line.a; 
+            var b1 = line.b;
+
+            other.a = -1 / line.a;
+
+            double x = IntersectLineLine(line, other);
+
+            other.a = x;
+            other.b = line.b + x * line.a;
+
+            double length = DistanceFromPole(other);
 
             min = Math.Min(min, length);
         }
@@ -97,14 +128,16 @@ public class HUSL
     {
         double hrad = H / 360 * Math.PI * 2;
 
-        var bounds = GetBounds(L);
+        int count;
+
+        var bounds = GetBounds(L, out count);
         double min = Double.MaxValue;
 
-        foreach (var bound in bounds)
+        for (int i = 0; i < count; ++i)
         {
             double length;
 
-            if (LengthOfRayUntilIntersect(hrad, bound, out length))
+            if (LengthOfRayUntilIntersect(hrad, bounds[i], out length))
             {
                 min = Math.Min(min, length);
             }
@@ -124,6 +157,14 @@ public class HUSL
         }
 
         return sum;
+    }
+
+    protected static double DotProduct(Triplet a,
+                                       Triplet b)
+    {
+        return a.a * b.a
+             + a.b * b.b
+             + a.c * b.c;
     }
 
     protected static double Round(double value, int places) 
@@ -185,14 +226,17 @@ public class HUSL
         return results;
     }
 
-    public static IList<double> XYZToRGB(IList<double> tuple) 
+    public static Triplet XYZToRGB(Triplet triple) 
     {
-        return new double[]
-        {
-            FromLinear(DotProduct(M[0], tuple)),
-            FromLinear(DotProduct(M[1], tuple)),
-            FromLinear(DotProduct(M[2], tuple)),
-        };
+        double R = FromLinear(DotProduct(Mt[0], triple));
+        double G = FromLinear(DotProduct(Mt[1], triple));
+        double B = FromLinear(DotProduct(Mt[2], triple));
+
+        triple.a = R;
+        triple.b = G;
+        triple.c = B;
+
+        return triple;
     }
 
     public static IList<double> RGBToXYZ(IList<double> tuple) 
@@ -258,15 +302,19 @@ public class HUSL
         return new Double [] { L, U, V };
     }
     
-    public static IList<double> LUVToXYZ(IList<double> tuple) 
+    public static Triplet LUVToXYZ(Triplet triple) 
     {
-        double L = tuple[0];
-        double U = tuple[1];
-        double V = tuple[2];
+        double L = triple.a;
+        double U = triple.b;
+        double V = triple.c;
 
         if (L == 0) 
         {
-            return new double[] { 0, 0, 0 };
+            triple.a = 0;
+            triple.b = 0;
+            triple.c = 0;
+
+            return triple;
         }
 
         double varU = U / (13 * L) + RefU;
@@ -276,7 +324,11 @@ public class HUSL
         double X = 0 - (9 * Y * varU) / ((varU - 4) * varV - varU * varV);
         double Z = (9 * Y - (15 * varV * Y) - (varV * X)) / (3 * varV);
 
-        return new double[] { X, Y, Z };
+        triple.a = X;
+        triple.b = Y;
+        triple.c = Z;
+
+        return triple;
     }
     
     public static IList<double> LUVToLCH(IList<double> tuple) 
@@ -298,39 +350,55 @@ public class HUSL
         return new double[] { L, C, H };
     }
     
-    public static IList<double> LCHToLUV(IList<double> tuple) 
+    public static Triplet LCHToLUV(Triplet triple) 
     {
-        double L = tuple[0];
-        double C = tuple[1];
-        double H = tuple[2];
+        double L = triple.a;
+        double C = triple.b;
+        double H = triple.c;
 
         double Hrad = H / 360.0 * 2 * Math.PI;
         double U = Math.Cos(Hrad) * C;
         double V = Math.Sin(Hrad) * C;
 
-        return new Double [] { L, U, V };
+        triple.a = L;
+        triple.b = U;
+        triple.c = V;
+
+        return triple;
     }
     
-    public static IList<double> HUSLToLCH(IList<double> tuple) 
+    public static Triplet HUSLToLCH(Triplet triple) 
     {
-        double H = tuple[0];
-        double S = tuple[1]; 
-        double L = tuple[2];
+        double H = triple.a;
+        double S = triple.b; 
+        double L = triple.c;
 
         if (L > 99.9999999)
         {
-            return new Double[] { 100, 0, H };
+            triple.a = 100;
+            triple.b = 0;
+            triple.c = H;
+
+            return triple;
         }
 
         if (L < 0.00000001) 
         {
-            return new Double[] { 0, 0, H };
+            triple.a = 0;
+            triple.b = 0;
+            triple.c = H;
+
+            return triple;
         }
 
         double max = MaxChromaForLH(L, H);
         double C = max / 100 * S;
 
-        return new double[] { L, C, H };
+        triple.a = L;
+        triple.b = C;
+        triple.c = H;
+
+        return triple;
     }
     
     public static IList<double> LCHToHUSL(IList<double> tuple) 
@@ -355,26 +423,38 @@ public class HUSL
         return new double[] { H, S, L };
     }
     
-    public static IList<double> HUSLPToLCH(IList<double> tuple) 
+    public static Triplet HUSLPToLCH(Triplet triple) 
     {
-        double H = tuple[0];
-        double S = tuple[1]; 
-        double L = tuple[2];
+        double H = triple.a;
+        double S = triple.b; 
+        double L = triple.c;
         
         if (L > 99.9999999)
         {
-            return new Double[] { 100, 0, H };
+            triple.a = 100;
+            triple.b = 0;
+            triple.c = H;
+
+            return triple;
         }
         
         if (L < 0.00000001) 
         {
-            return new Double[] { 0, 0, H };
+            triple.a = 0;
+            triple.b = 0;
+            triple.c = H;
+
+            return triple;
         }
 
         double max = MaxSafeChromaForL(L);
         double C = max / 100 * S;
 
-        return new double[] { L, C, H };
+        triple.a = L;
+        triple.b = C;
+        triple.c = H;
+
+        return triple;
     }
     
     public static IList<double> LCHToHUSLP(IList<double> tuple) 
@@ -419,9 +499,9 @@ public class HUSL
         };
     }
     
-    public static IList<double> LCHToRGB(IList<double> tuple)
+    public static Triplet LCHToRGB(Triplet triple)
     {
-        return XYZToRGB(LUVToXYZ(LCHToLUV(tuple)));
+        return XYZToRGB(LUVToXYZ(LCHToLUV(triple)));
     }
     
     public static IList<double> RGBToLCH(IList<double> tuple)
@@ -429,9 +509,9 @@ public class HUSL
         return LUVToLCH(XYZToLUV(RGBToXYZ(tuple)));
     }
     
-    public static IList<double> HUSLToRGB(IList<double> tuple)
+    public static Triplet HUSLToRGB(Triplet triple)
     {
-        return LCHToRGB(HUSLToLCH(tuple));
+        return LCHToRGB(HUSLToLCH(triple));
     }
 
     public static IList<double> RGBToHUSL(IList<double> tuple)
@@ -439,9 +519,9 @@ public class HUSL
         return LCHToHUSL(RGBToLCH(tuple));
     }
     
-    public static IList<double> HUSLPToRGB(IList<double> tuple)
+    public static Triplet HUSLPToRGB(Triplet triple)
     {
-        return LCHToRGB(HUSLPToLCH(tuple));
+        return LCHToRGB(HUSLPToLCH(triple));
     }
     
     public static IList<double> RGBToHUSLP(IList<double> tuple)

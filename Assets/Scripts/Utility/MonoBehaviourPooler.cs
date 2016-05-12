@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public class MonoBehaviourPooler<TShortcut, TInstance> 
     where TInstance : Component
@@ -123,14 +124,32 @@ public class MonoBehaviourPooler<TShortcut, TInstance>
         }
     }
 
+    private bool locked;
+    private HashSet<TShortcut> SetActiveTempSet = new HashSet<TShortcut>();
+    private List<TShortcut> SetActiveTempList = new List<TShortcut>();
+
     public void SetActive(IEnumerable<TShortcut> active, bool sort=true)
     {
-        var collection = new HashSet<TShortcut>(active);
+        UnityEngine.Assertions.Assert.IsFalse(locked, "GC OPTIMISATION MEANS THESE CALLS CANNOT BE NESTED!!");
 
-        foreach (TShortcut shortcut in new List<TShortcut>(instances.Keys))
+        locked = true;
+        SetActiveTempSet.Clear();
+        SetActiveTempList.Clear();
+
+        var collection = SetActiveTempSet;
+        var existing = SetActiveTempList;
+
+        if (active.Any()) collection.UnionWith(active);
+        existing.AddRange(instances.Keys);
+
+        for (int i = 0; i < existing.Count; ++i)
         {
+            TShortcut shortcut = SetActiveTempList[i];
+
             if (!collection.Contains(shortcut)) Discard(shortcut);
         }
+
+        locked = false;
 
         foreach (TShortcut shortcut in active)
         {

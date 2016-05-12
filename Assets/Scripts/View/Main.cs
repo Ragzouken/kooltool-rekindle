@@ -10,10 +10,14 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
+    [SerializeField] private Toggle moveToggle, takeToggle, makeToggle, killToggle;
     
     [SerializeField] private Slider zoomSlider;
 
     private World world;
+    private World saved;
+
+    private Actor possessed;
 
     private void Start()
     {
@@ -33,13 +37,13 @@ public class Main : MonoBehaviour
                 position = new Position
                 {
                     prev = next,
-                    next = next,
+                    next = next + Vector2.right * 32,
                     progress = 0,
                 },
             });
         }
 
-        worldView.actors.SetActive(world.actors);
+        saved = world.Copy();
     }
 
     private static Vector2[] directions =
@@ -74,23 +78,99 @@ public class Main : MonoBehaviour
             pan += Vector2.down;
         }
 
+        if (possessed != null)
+        {
+            cameraController.focusTarget = worldView.actors.Get(possessed).transform.localPosition;
+
+            if (!possessed.position.moving)
+            {
+                possessed.position.next = possessed.position.prev + pan * 32;
+            }
+
+            pan = Vector2.zero;
+        }
+
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
         cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
     }
 
     private void Update()
     {
+        worldView.actors.SetActive(world.actors);
+
         CheckHotkeys();
 
         foreach (Actor actor in world.actors)
         {
+            if (!actor.position.moving) continue;
+
             actor.position.progress += Time.deltaTime;
+
+            if (actor == possessed && actor.position.progress >= 1)
+            {
+                actor.position.prev = actor.position.next;
+                actor.position.progress = 0;
+            }
 
             while (actor.position.progress >= 1)
             {
                 actor.position.prev = actor.position.next;
                 actor.position.next = actor.position.prev + directions[Random.Range(0, 4)] * 32;
                 actor.position.progress -= 1;
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftBracket))
+        {
+            saved = world.Copy();
+        }
+        else if (Input.GetKeyDown(KeyCode.RightBracket) && saved != null)
+        {
+            world = saved.Copy();
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            var plane = new Plane(Vector3.forward, Vector3.zero);
+            var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+
+            float t;
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                Actor actor = hit.collider.GetComponent<ActorView>().actor;
+
+                if (takeToggle.isOn)
+                {
+                    possessed = possessed == actor ? null : actor;
+                }
+                else if (killToggle.isOn)
+                {
+                    if (possessed == actor) possessed = null;
+
+                    world.actors.Remove(actor);
+                }
+            }
+            else if (plane.Raycast(ray, out t))
+            {
+                Vector3 point = ray.GetPoint(t);
+
+                if (makeToggle.isOn)
+                {
+                    point.x = Mathf.RoundToInt(point.x / 32);
+                    point.y = Mathf.RoundToInt(point.y / 32);
+
+                    world.actors.Add(new Actor
+                    {
+                        position = new Position { next = point * 32, prev = point * 32 },
+                        world = world,
+                    });
+                }
+                else if (moveToggle.isOn)
+                {
+                    cameraController.focusTarget = point;
+                }
             }
         }
     }

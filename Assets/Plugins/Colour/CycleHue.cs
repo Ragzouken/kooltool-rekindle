@@ -33,8 +33,8 @@ public class CycleHue : MonoBehaviour
     {
         float hue = (Time.timeSinceLevelLoad / period) % 1f;
 
-        IList<double> RGB = HUSL.HUSLPToRGB(new double[] { hue * 360, saturation * 100, lightness * 100 });
+        var RGB = HUSL.HUSLPToRGB(new HUSL.Triplet { a = hue * 360, b = saturation * 100, c = lightness * 100 });
 
-        return new Color((float)RGB[0], (float)RGB[1], (float)RGB[2], alpha);
+        return new Color((float) RGB.a, (float) RGB.b, (float) RGB.c, alpha);
     }
 }

@@ -7,18 +7,19 @@ using System.Collections.Generic;
 
 public class WorldView : MonoBehaviour 
 {
-    [SerializeField] private SpriteRenderer spritePrefab;
+    [SerializeField] private ActorView spritePrefab;
 
     [SerializeField] private Transform belowTileParent;
     [SerializeField] private Transform aboveTileParent;
     [SerializeField] private Transform actorParent;
 
-    public MonoBehaviourPooler<Actor, SpriteRenderer> actors;
+    public MonoBehaviourPooler<Actor, ActorView> actors;
 
     private void Awake()
     {
-        actors = new MonoBehaviourPooler<Actor, SpriteRenderer>(spritePrefab,
-                                                                actorParent);
+        actors = new MonoBehaviourPooler<Actor, ActorView>(spritePrefab,
+                                                           actorParent,
+                                                           (a, r) => r.SetActor(a));
     }
 
     private void Update()
