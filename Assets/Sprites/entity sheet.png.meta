@@ -1,0 +1,361 @@
+fileFormatVersion: 2
+guid: ac0eab62cd3dbee4499bfb687f17edd7
+timeCreated: 1463163003
+licenseType: Free
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: entity sheet_0
+    21300002: entity sheet_1
+    21300004: entity sheet_2
+    21300006: entity sheet_3
+    21300008: entity sheet_4
+    21300010: entity sheet_5
+    21300012: entity sheet_6
+    21300014: entity sheet_7
+    21300016: entity sheet_8
+    21300018: entity sheet_9
+    21300020: entity sheet_10
+    21300022: entity sheet_11
+    21300024: entity sheet_12
+    21300026: entity sheet_13
+    21300028: entity sheet_14
+    21300030: entity sheet_15
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 1
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 128
+  textureSettings:
+    filterMode: 0
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 0
+  spriteMeshType: 0
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 1
+  alphaIsTransparency: 1
+  textureType: 5
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: entity sheet_0
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_1
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_2
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_3
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 96
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_4
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_5
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_6
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_7
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 64
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_8
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_9
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_10
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_11
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 32
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_12
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_13
+      rect:
+        serializedVersion: 2
+        x: 32
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_14
+      rect:
+        serializedVersion: 2
+        x: 64
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    - name: entity sheet_15
+      rect:
+        serializedVersion: 2
+        x: 96
+        y: 0
+        width: 32
+        height: 32
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -14, y: 14}
+        - {x: -14, y: -11}
+        - {x: -13, y: -14}
+        - {x: 6, y: -14}
+        - {x: 14, y: -9}
+        - {x: 14, y: 10}
+        - {x: 11, y: 14}
+    outline: []
+  spritePackingTag: ui
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

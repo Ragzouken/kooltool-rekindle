@@ -24,9 +24,6 @@ public class WorldView : MonoBehaviour
 
     private void Update()
     {
-        actors.MapActive((actor, render) =>
-        {
-            render.transform.position = actor.position.current;
-        });
+        actors.MapActive((actor, render) => render.Refresh());
     }
 }

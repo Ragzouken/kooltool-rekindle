@@ -63,6 +63,21 @@ public class Map
 public class Costume
 {
     public World world;
+
+    public Sprite up, down, left, right;
+
+    public Sprite this[Position.Direction direction]
+    {
+        get
+        {
+            if (direction == Position.Direction.Right) return right;
+            if (direction == Position.Direction.Down) return down;
+            if (direction == Position.Direction.Left) return left;
+            if (direction == Position.Direction.Up) return up;
+
+            return right;
+        }
+    }
 }
 
 public class Actor : ICopyable<Actor>
@@ -76,6 +91,7 @@ public class Actor : ICopyable<Actor>
     public void Copy(Copier copier, Actor copy)
     {
         copy.world = copier.Copy(world);
+        copy.costume = costume;
         copy.position = copier.Copy(position);
     }
 }
@@ -83,9 +99,18 @@ public class Actor : ICopyable<Actor>
 [JsonObject(IsReference = false)]
 public class Position : ICopyable<Position>
 {
+    public enum Direction
+    {
+        Right,
+        Down,
+        Left,
+        Up,
+    }
+
     public Vector2 prev;
     public Vector2 next;
     public float progress;
+    public Direction direction;
 
     [JsonIgnore]
     public Vector2 current
@@ -110,5 +135,6 @@ public class Position : ICopyable<Position>
         copy.prev = prev;
         copy.next = next;
         copy.progress = progress;
+        copy.direction = direction;
     }
 }

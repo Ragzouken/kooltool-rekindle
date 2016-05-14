@@ -296,7 +296,7 @@ namespace PixelDraw
             Color[] canvasColors = canvas.GetPixelRect(canvasRect);
             Color[] brushColors  = brush.GetPixelRect(brushRect);
 
-            Assert.IsTrue(canvasColors.Length == brushColors.Length, "Mismatched texture rects!");
+            Assert.IsTrue(canvasColors.Length == brushColors.Length, string.Format("Mismatched texture rects! {0} vs {1}", canvasRect, brushRect));
 
             for (int i = 0; i < canvasColors.Length; ++i)
             {

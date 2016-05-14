@@ -15,4 +15,10 @@ public class ActorView : MonoBehaviour
     {
         this.actor = actor;
     }
+
+    public void Refresh()
+    {
+        transform.position = actor.position.current;
+        renderer.sprite = actor.costume[actor.position.direction];
+    }
 }
