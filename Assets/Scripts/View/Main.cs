@@ -5,6 +5,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using System.IO;
+
 public class Main : MonoBehaviour
 {
     [SerializeField] private CameraController cameraController;
@@ -76,6 +78,21 @@ public class Main : MonoBehaviour
         }
 
         saved = world.Copy();
+
+        string path = Application.streamingAssetsPath + "/test.txt";
+
+        Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
+
+        var watcher = new FileSystemWatcher(Application.streamingAssetsPath);
+
+        watcher.Changed += delegate
+        {
+            Debug.LogFormat("Changed:\n{0}", File.ReadAllText(path));
+        };
+
+        watcher.EnableRaisingEvents = true;
+
+        Application.OpenURL(path);
     }
 
     private static Vector2[] directions =
