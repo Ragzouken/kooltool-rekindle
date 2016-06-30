@@ -37,7 +37,7 @@ public class World : ICopyable<World>
 {
     public Color[] palette = new Color[16];
 
-    public List<Map> maps = new List<Map>();
+    public float timer;
     public List<Actor> actors = new List<Actor>();
 
     public World Copy()
@@ -51,13 +51,10 @@ public class World : ICopyable<World>
     {
         palette.CopyTo(copy.palette, 0);
 
+        copy.timer = timer;
+
         copy.actors.AddRange(actors.Select(actor => copier.Copy(actor)));
     }
-}
-
-public class Map
-{
-    public World world;
 }
 
 public class Costume
@@ -84,15 +81,18 @@ public class Actor : ICopyable<Actor>
 {
     public World world;
     public Costume costume;
+    public Script script;
 
-    public Map map;
     public Position position;
+    public State state;
 
     public void Copy(Copier copier, Actor copy)
     {
         copy.world = copier.Copy(world);
         copy.costume = costume;
+        copy.script = script;
         copy.position = copier.Copy(position);
+        copy.state = copier.Copy(state);
     }
 }
 
@@ -136,5 +136,28 @@ public class Position : ICopyable<Position>
         copy.next = next;
         copy.progress = progress;
         copy.direction = direction;
+    }
+}
+
+public class Script
+{
+    public Fragment[] fragments;
+}
+
+public class Fragment
+{
+    public string name;
+    public string[][] lines;
+}
+
+public class State : ICopyable<State>
+{
+    public string fragment;
+    public int line;
+
+    public void Copy(Copier copier, State copy)
+    {
+        copy.fragment = fragment;
+        copy.line = line;
     }
 }

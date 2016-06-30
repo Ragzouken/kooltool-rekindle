@@ -32,9 +32,66 @@ public class Main : MonoBehaviour
         }
     }
 
+    private Script ScriptFromCSV(string csv)
+    {
+        string[] lines = csv.Split('\n');
+
+        var fragments = new List<Fragment>();
+        var fragment = new Fragment { name = "start" };
+        var fraglines = new List<string[]>();
+
+        for (int i = 0; i < lines.Length; ++i)
+        {
+            if (lines[i].Trim() == "") continue;
+
+            string line = lines[i];
+
+            string[] tokens = line.Split(',')
+                                  .Select(token => token.Trim())
+                                  .ToArray();
+
+            if (tokens[0] == "script")
+            {
+                fragment.lines = fraglines.ToArray();
+                fraglines.Clear();
+                fragments.Add(fragment);
+
+                fragment = new Fragment { name = tokens[1] };
+            }
+            else
+            {
+                fraglines.Add(tokens);
+            }
+        }
+
+        fragment.lines = fraglines.ToArray();
+        fragments.Add(fragment);
+
+        return new Script
+        {
+            fragments = fragments.ToArray(),
+        };
+    }
+
+    private void DebugScript(Script script)
+    {
+        var builder = new System.Text.StringBuilder("SCRIPT:\n");
+
+        foreach (Fragment fragment in script.fragments)
+        {
+            builder.AppendFormat("[{0}]\n", fragment.name);
+            builder.AppendFormat("{0}\n\n", string.Join("\n", fragment.lines.Select(line => string.Join(", ", line)).ToArray()));
+        }
+
+        Debug.Log(builder.ToString());
+    }
+
     private void Start()
     {
         test = BlankTexture.New(128, 32, Color.white);
+
+        string path = Application.streamingAssetsPath + @"\test.txt";
+        var script = ScriptFromCSV(File.ReadAllText(path));
 
         for (int i = 0; i < 4; ++i)
         {
@@ -68,6 +125,8 @@ public class Main : MonoBehaviour
             {
                 world = world,
                 costume = costume,
+                script = script,
+                state = new State { fragment = "start", line = 0 },
                 position = new Position
                 {
                     prev = next,
@@ -79,15 +138,25 @@ public class Main : MonoBehaviour
 
         saved = world.Copy();
 
-        string path = Application.streamingAssetsPath + "/test.txt";
-
         Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
 
         var watcher = new FileSystemWatcher(Application.streamingAssetsPath);
 
-        watcher.Changed += delegate
+        watcher.Changed += (source, args) =>
         {
-            Debug.LogFormat("Changed:\n{0}", File.ReadAllText(path));
+            bool equal = string.Compare(Path.GetFullPath(path).TrimEnd('\\'),
+                                        Path.GetFullPath(args.Name).TrimEnd('\\'), 
+                                        true) == 0;
+
+            if (equal)
+            {
+                var script2 = ScriptFromCSV(File.ReadAllText(path));
+                DebugScript(script2);
+            }
+            else
+            {
+                Debug.LogFormat("boring, {0} changed", args.Name);
+            }
         };
 
         watcher.EnableRaisingEvents = true;
@@ -165,6 +234,63 @@ public class Main : MonoBehaviour
 
         CheckHotkeys();
 
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            foreach (Actor actor in world.actors)
+            {
+                actor.state.fragment = "bump";
+                actor.state.line = 0;
+            }
+        }
+
+        float interval = 0.1f;
+
+        world.timer += Time.deltaTime;
+
+        while (world.timer > interval)
+        {
+            world.timer -= interval;
+
+            foreach (Actor actor in world.actors)
+            {
+                if (actor.position.moving) continue;
+
+                while (true)
+                {
+                    var fragment = actor.script.fragments.FirstOrDefault(frag => frag.name == actor.state.fragment);
+
+                    if (fragment != null
+                     && actor.state.line < fragment.lines.Length)
+                    {
+                        string[] line = fragment.lines[actor.state.line];
+
+                        if (line[0] == "move")
+                        {
+                            int dir = 0;
+
+                            if (line[1] == "random") dir = Random.Range(0, 4);
+                            if (line[1] == "east") dir = 0;
+                            if (line[1] == "south") dir = 1;
+                            if (line[1] == "west") dir = 2;
+                            if (line[1] == "north") dir = 3;
+
+                            actor.position.next = actor.position.prev + directions[dir] * 32;
+                            actor.position.direction = (Position.Direction)dir;
+                        }
+                        else if (line[0] == "follow")
+                        {
+                            actor.state.fragment = line[1];
+                            actor.state.line = 0;
+                            continue;
+                        }
+
+                        actor.state.line += 1;
+                        break;
+                    }
+                }
+            }
+        }
+
         foreach (Actor actor in world.actors)
         {
             if (!actor.position.moving) continue;
@@ -175,20 +301,10 @@ public class Main : MonoBehaviour
 
             actor.position.progress += Time.deltaTime * 2;
 
-            if (actor == possessed && actor.position.progress >= 1)
+            if (actor.position.progress >= 1)
             {
                 actor.position.prev = actor.position.next;
                 actor.position.progress = 0;
-            }
-
-            while (actor.position.progress >= 1)
-            {
-                int dir = Random.Range(0, 4);
-
-                actor.position.prev = actor.position.next;
-                actor.position.next = actor.position.prev + directions[dir] * 32;
-                actor.position.direction = (Position.Direction) dir;
-                actor.position.progress -= 1;
             }
         }
 

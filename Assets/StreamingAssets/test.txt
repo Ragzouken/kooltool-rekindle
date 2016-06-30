@@ -1,5 +1,17 @@
-poo
-wee
-too
+name,COOLBOY
+follow,panic
 
-hello
+script,panic
+move,east
+move,east
+move,south
+move,south
+move,west
+move,west
+move,north
+move,north
+follow,panic
+
+script,bump
+move,random
+follow,panic
