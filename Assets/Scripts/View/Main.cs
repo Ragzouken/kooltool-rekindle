@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using System.IO;
+using InControl;
 
 public class Main : MonoBehaviour
 {
@@ -16,6 +17,8 @@ public class Main : MonoBehaviour
     
     [SerializeField] private Slider zoomSlider;
     [SerializeField] private Sprite[] sprites;
+
+    [SerializeField] private ToggleAnimatorBool toggler;
 
     private World world;
     private World saved;
@@ -161,8 +164,43 @@ public class Main : MonoBehaviour
 
         watcher.EnableRaisingEvents = true;
 
-        Application.OpenURL(path);
+        //Application.OpenURL(path);
+
+        input = new TestInputSet();
     }
+
+    private class TestInputSet : PlayerActionSet
+    {
+        public PlayerAction expand;
+        public PlayerTwoAxisAction move;
+
+        public TestInputSet()
+        {
+            expand = CreatePlayerAction("Expand");
+            expand.AddDefaultBinding(Mouse.RightButton);
+            expand.AddDefaultBinding(Key.Space);
+            expand.AddDefaultBinding(InputControlType.Action4);
+
+            var up = CreatePlayerAction("Up");
+            var down = CreatePlayerAction("Down");
+            var left = CreatePlayerAction("Left");
+            var right = CreatePlayerAction("Right");
+
+            up.AddDefaultBinding(Key.W);
+            down.AddDefaultBinding(Key.S);
+            left.AddDefaultBinding(Key.A);
+            right.AddDefaultBinding(Key.D);
+
+            up.AddDefaultBinding(InputControlType.LeftStickUp);
+            down.AddDefaultBinding(InputControlType.LeftStickDown);
+            left.AddDefaultBinding(InputControlType.LeftStickLeft);
+            right.AddDefaultBinding(InputControlType.LeftStickRight);
+
+            move = CreateTwoAxisPlayerAction(left, right, down, up);
+        }
+    }
+
+    private TestInputSet input;
 
     private static Vector2[] directions =
     {
@@ -174,35 +212,36 @@ public class Main : MonoBehaviour
 
     private void CheckHotkeys()
     {
-        var pan = Vector2.zero;
+        if (input.expand.WasPressed)
+        {
+            toggler.Toggle();
+        }
+
+        var pan = input.move.Value;
 
         Position.Direction direction = Position.Direction.Down;
         bool change = false;
 
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            pan += Vector2.right;
             direction = Position.Direction.Right;
             change = true;
         }
 
         if (Input.GetKey(KeyCode.LeftArrow))
         {
-            pan += Vector2.left;
             direction = Position.Direction.Left;
             change = true;
         }
 
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            pan += Vector2.up;
             direction = Position.Direction.Up;
             change = true;
         }
 
         if (Input.GetKey(KeyCode.DownArrow))
         {
-            pan += Vector2.down;
             direction = Position.Direction.Down;
             change = true;
         }
