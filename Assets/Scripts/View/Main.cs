@@ -299,6 +299,27 @@ public class Main : MonoBehaviour
 
         EventSystem.current.RaycastAll(pointer, raycasts);
 
+        if (raycasts.Count > 0)
+        {
+            if (hovering != raycasts[0].gameObject)
+            {
+                if (hovering != null)
+                {
+                    ExecuteEvents.ExecuteHierarchy(hovering, pointer, ExecuteEvents.pointerExitHandler);
+                }
+
+                ExecuteEvents.ExecuteHierarchy(raycasts[0].gameObject, pointer, ExecuteEvents.pointerEnterHandler);
+            }
+
+            hovering = raycasts[0].gameObject;
+        } 
+        else if (hovering != null)
+        {
+            ExecuteEvents.ExecuteHierarchy(hovering, pointer, ExecuteEvents.pointerExitHandler);
+
+            hovering = null;
+        }
+
         if (input.click.WasPressed && raycasts.Count > 0)
         {
             ExecuteEvents.ExecuteHierarchy(raycasts[0].gameObject, pointer, ExecuteEvents.pointerDownHandler);
@@ -321,6 +342,7 @@ public class Main : MonoBehaviour
         }
     }
 
+    private GameObject hovering;
     private GameObject dragging;
 
     private bool clickedOnWorld;
