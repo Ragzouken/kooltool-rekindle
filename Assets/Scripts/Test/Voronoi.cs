@@ -10,7 +10,8 @@ public class Voronoi : MonoBehaviour
     [SerializeField] private MeshRenderer conePrefab;
     [SerializeField] private Transform coneParent;
     [SerializeField] private Color[] palette;
-    [SerializeField] private Image[] images;
+    [SerializeField] private Material material1;
+    [SerializeField] private Material material2;
 
     private MonoBehaviourPooler<Color, MeshRenderer> colors;
 
@@ -41,6 +42,12 @@ public class Voronoi : MonoBehaviour
     {
         colors.SetActive(palette);
 
-        for (int i = 0; i < 15; ++i) images[i].color = palette[i];
+        for (int i = 0; i < 15; ++i)
+        {
+            string name = string.Format("_Palette{0:D2}", i+1);
+
+            material1.SetColor(name, palette[i]);
+            material2.SetColor(name, palette[i]);
+        }
     }
 }

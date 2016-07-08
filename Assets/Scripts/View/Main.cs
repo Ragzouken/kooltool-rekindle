@@ -22,6 +22,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] private ToggleAnimatorBool toggler;
     [SerializeField] private Transform cursor;
+    [SerializeField] private SpriteRenderer testDraw;
 
     private World world;
     private World saved;
@@ -92,8 +93,13 @@ public class Main : MonoBehaviour
         Debug.Log(builder.ToString());
     }
 
+    private Texture2D testTex;
+
     private void Start()
     {
+        testTex = BlankTexture.New(256, 256, Color.clear);
+        testDraw.sprite = BlankTexture.FullSprite(testTex, pixelsPerUnit: 1);
+
         test = BlankTexture.New(128, 32, Color.white);
 
         string path = Application.streamingAssetsPath + @"\test.txt";
@@ -286,7 +292,9 @@ public class Main : MonoBehaviour
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
         cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
 
-        cursor.localPosition += (Vector3) input.cursor.Value * 64 * Time.deltaTime;
+        float mult = input.click.IsPressed ? 32 : 64;
+
+        cursor.localPosition += (Vector3) input.cursor.Value * mult * Time.deltaTime;
 
         var system = EventSystem.current;
         var pointer = new PointerEventData(system);
@@ -349,8 +357,14 @@ public class Main : MonoBehaviour
     private bool clickingOnWorld;
     private Vector2 prevMouse;
 
+    private Vector2 nextCursor;
+    private Vector2 prevCursor;
+
     private void Update()
     {
+        nextCursor = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
+                                 (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
+
         worldView.actors.SetActive(world.actors);
 
         CheckHotkeys();
@@ -485,6 +499,13 @@ public class Main : MonoBehaviour
 
         if (moveToggle.isOn)
         {
+            var pos = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
+                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
+
+            ray = Camera.main.ScreenPointToRay(pos);
+            plane.Raycast(ray, out t);
+            point = ray.GetPoint(t);
+
             Vector2 delta = point - cameraController.focusTarget;
 
             //cameraController.focusTarget += delta * 2f * Time.deltaTime;
@@ -495,7 +516,7 @@ public class Main : MonoBehaviour
 
                 Vector2 local = point - actor.position.current - Vector2.one * 16;
 
-                if (clickedOnWorld)
+                if (input.click.IsPressed)
                 {
                     using (var brush = PixelDraw.Brush.Line(prevMouse, point, Color.red, 1))
                     //using (var brush = PixelDraw.Brush.Circle(3, Color.red))
@@ -523,8 +544,66 @@ public class Main : MonoBehaviour
                     }
                 }
             }
+
+            if (Physics.Raycast(ray, out hit))
+            {
+                Actor actor = hit.collider.GetComponent<ActorView>().actor;
+
+                Vector2 local = point - actor.position.current - Vector2.one * 16;
+
+                if (clickedOnWorld)
+                {
+                    using (var brush = PixelDraw.Brush.Line(prevMouse, point, Color.red, 1))
+                    //using (var brush = PixelDraw.Brush.Circle(3, Color.red))
+                    {
+                        var sprite = actor.costume[actor.position.direction];
+
+                        Vector2 current = actor.position.current;
+
+
+                        local.x = Mathf.Round(local.x);
+                        local.y = Mathf.Round(local.y);
+
+                        //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
+
+                        PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing)sprite,
+                                                         prevMouse - actor.position.current,
+                                                         local,
+                                                         1,
+                                                         Color.red,
+                                                         PixelDraw.Blend.Alpha);
+
+                        //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
+
+                        sprite.texture.Apply();
+                    }
+                }
+            }
+        }
+
+        //nextCursor = (Vector2.one * 128 + input.cursor.Value * 32) * 3;
+
+        if (!input.click.WasPressed && input.click.IsPressed)
+        {
+            Debug.Log(prevCursor + " / " + nextCursor);
+
+            var sprite = testDraw.sprite;
+
+            //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
+
+            PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing) sprite,
+                                                prevCursor * (1 / 3f),
+                                                nextCursor * (1 / 3f),
+                                                3,
+                                                Color.red,
+                                                PixelDraw.Blend.Alpha);
+
+            //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
+
+            sprite.texture.Apply();
         }
 
         prevMouse = point;
+        prevCursor = nextCursor;
     }
 }
