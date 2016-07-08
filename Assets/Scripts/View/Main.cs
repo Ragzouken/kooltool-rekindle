@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using System.IO;
 using InControl;
 
+using UnityEngine.EventSystems;
+
 public class Main : MonoBehaviour
 {
     [SerializeField] private CameraController cameraController;
@@ -19,6 +21,7 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite[] sprites;
 
     [SerializeField] private ToggleAnimatorBool toggler;
+    [SerializeField] private Transform cursor;
 
     private World world;
     private World saved;
@@ -173,6 +176,8 @@ public class Main : MonoBehaviour
     {
         public PlayerAction expand;
         public PlayerTwoAxisAction move;
+        public PlayerTwoAxisAction cursor;
+        public PlayerAction click;
 
         public TestInputSet()
         {
@@ -181,22 +186,41 @@ public class Main : MonoBehaviour
             expand.AddDefaultBinding(Key.Space);
             expand.AddDefaultBinding(InputControlType.Action4);
 
-            var up = CreatePlayerAction("Up");
-            var down = CreatePlayerAction("Down");
-            var left = CreatePlayerAction("Left");
-            var right = CreatePlayerAction("Right");
+            {
+                var up = CreatePlayerAction("Up");
+                var down = CreatePlayerAction("Down");
+                var left = CreatePlayerAction("Left");
+                var right = CreatePlayerAction("Right");
 
-            up.AddDefaultBinding(Key.W);
-            down.AddDefaultBinding(Key.S);
-            left.AddDefaultBinding(Key.A);
-            right.AddDefaultBinding(Key.D);
+                up.AddDefaultBinding(Key.W);
+                down.AddDefaultBinding(Key.S);
+                left.AddDefaultBinding(Key.A);
+                right.AddDefaultBinding(Key.D);
 
-            up.AddDefaultBinding(InputControlType.LeftStickUp);
-            down.AddDefaultBinding(InputControlType.LeftStickDown);
-            left.AddDefaultBinding(InputControlType.LeftStickLeft);
-            right.AddDefaultBinding(InputControlType.LeftStickRight);
+                up.AddDefaultBinding(InputControlType.LeftStickUp);
+                down.AddDefaultBinding(InputControlType.LeftStickDown);
+                left.AddDefaultBinding(InputControlType.LeftStickLeft);
+                right.AddDefaultBinding(InputControlType.LeftStickRight);
 
-            move = CreateTwoAxisPlayerAction(left, right, down, up);
+                move = CreateTwoAxisPlayerAction(left, right, down, up);
+            }
+
+            {
+                var up = CreatePlayerAction("Cursor Up");
+                var down = CreatePlayerAction("Cursor Down");
+                var left = CreatePlayerAction("Cursor Left");
+                var right = CreatePlayerAction("Cursor Right");
+
+                up.AddDefaultBinding(InputControlType.RightStickUp);
+                down.AddDefaultBinding(InputControlType.RightStickDown);
+                left.AddDefaultBinding(InputControlType.RightStickLeft);
+                right.AddDefaultBinding(InputControlType.RightStickRight);
+
+                cursor = CreateTwoAxisPlayerAction(left, right, down, up);
+
+                click = CreatePlayerAction("Cursor Click");
+                click.AddDefaultBinding(InputControlType.RightTrigger);
+            }
         }
     }
 
@@ -261,7 +285,43 @@ public class Main : MonoBehaviour
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
         cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
+
+        cursor.localPosition += (Vector3) input.cursor.Value * 64 * Time.deltaTime;
+
+        var system = EventSystem.current;
+        var pointer = new PointerEventData(system);
+        var raycasts = new List<RaycastResult>();
+
+        pointer.position = new Vector3((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
+                                       (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
+
+        //Debug.Log(pointer.position);
+
+        EventSystem.current.RaycastAll(pointer, raycasts);
+
+        if (input.click.WasPressed && raycasts.Count > 0)
+        {
+            ExecuteEvents.ExecuteHierarchy(raycasts[0].gameObject, pointer, ExecuteEvents.pointerDownHandler);
+            ExecuteEvents.ExecuteHierarchy(raycasts[0].gameObject, pointer, ExecuteEvents.beginDragHandler);
+
+            dragging = raycasts[0].gameObject;
+        }
+
+        if (input.click.IsPressed && dragging != null)
+        {
+            ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.dragHandler);
+        }
+
+        if (input.click.WasReleased && raycasts.Count > 0)
+        {
+            ExecuteEvents.ExecuteHierarchy(raycasts[0].gameObject, pointer, ExecuteEvents.pointerUpHandler);
+
+            if (dragging != null) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.endDragHandler);
+            if (dragging == raycasts[0].gameObject) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.pointerClickHandler);
+        }
     }
+
+    private GameObject dragging;
 
     private bool clickedOnWorld;
     private bool clickingOnWorld;
