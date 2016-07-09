@@ -24,6 +24,9 @@ public class Main : MonoBehaviour
     [SerializeField] private Transform cursor;
     [SerializeField] private SpriteRenderer testDraw;
 
+    [SerializeField] private Image brightImage;
+    [SerializeField] private Slider brightSlider;
+
     private World world;
     private World saved;
 
@@ -362,6 +365,11 @@ public class Main : MonoBehaviour
 
     private void Update()
     {
+        var color = Color.white * brightSlider.value;
+        color.a = 1;
+
+        brightImage.color = color;
+
         nextCursor = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
 
