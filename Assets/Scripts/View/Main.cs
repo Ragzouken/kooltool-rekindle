@@ -26,6 +26,10 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Image brightImage;
     [SerializeField] private Slider brightSlider;
+    [SerializeField] private PalettePanel palettePanel;
+
+    [SerializeField] private Material material1;
+    [SerializeField] private Material material2;
 
     private World world;
     private World saved;
@@ -38,7 +42,7 @@ public class Main : MonoBehaviour
     {
         get
         {
-            return UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject();
+            return EventSystem.current.IsPointerOverGameObject();
         }
     }
 
@@ -129,7 +133,14 @@ public class Main : MonoBehaviour
             up = sprites[3],
         };
 
-        world = new World();
+        var w = new World();
+        
+        for (int i = 1; i < 16; ++i)
+        {
+            w.palette[i] = new Color(Random.value, Random.value, Random.value, 1f);
+        }
+
+        SetWorld(w);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -353,6 +364,21 @@ public class Main : MonoBehaviour
         }
     }
 
+    private void SetWorld(World world)
+    {
+        this.world = world;
+
+        palettePanel.SetWorld(world);
+
+        for (int i = 0; i < 16; ++i)
+        {
+            string name = string.Format("_Palette{0:D2}", i);
+
+            material1.SetColor(name, world.palette[i]);
+            material2.SetColor(name, world.palette[i]);
+        }
+    }
+
     private GameObject hovering;
     private GameObject dragging;
 
@@ -462,7 +488,7 @@ public class Main : MonoBehaviour
         }
         else if (Input.GetKeyDown(KeyCode.RightBracket) && saved != null)
         {
-            world = saved.Copy();
+            SetWorld(saved.Copy());
         }
 
         var plane = new Plane(Vector3.forward, Vector3.zero);
