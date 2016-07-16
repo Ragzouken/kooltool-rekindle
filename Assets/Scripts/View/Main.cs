@@ -31,7 +31,7 @@ public class Main : MonoBehaviour
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
 
-    private World world;
+    public World world { get; private set; }
     private World saved;
 
     private Actor possessed;
@@ -372,11 +372,23 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < 16; ++i)
         {
-            string name = string.Format("_Palette{0:D2}", i);
-
-            material1.SetColor(name, world.palette[i]);
-            material2.SetColor(name, world.palette[i]);
+            RefreshPalette(i);
         }
+    }
+
+    public void EditPalette(int i, Color color)
+    {
+        world.palette[i] = color;
+
+        RefreshPalette(i);
+    }
+
+    private void RefreshPalette(int i)
+    {
+        string name = string.Format("_Palette{0:D2}", i);
+
+        material1.SetColor(name, world.palette[i]);
+        material2.SetColor(name, world.palette[i]);
     }
 
     private GameObject hovering;
