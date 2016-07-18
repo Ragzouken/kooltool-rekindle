@@ -119,9 +119,9 @@ public class Main : MonoBehaviour
     [SerializeField]
     private Transform stampParent;
     [SerializeField]
-    private Image stampPrefab;
+    private BrushToggle stampPrefab;
 
-    private MonoBehaviourPooler<Stamp, Image> stampsp;
+    private MonoBehaviourPooler<Stamp, BrushToggle> stampsp;
 
 
     private void Start()
@@ -152,7 +152,7 @@ public class Main : MonoBehaviour
 
         test.Apply();
 
-        stampsp = new MonoBehaviourPooler<Stamp, Image>(stampPrefab, stampParent, (s, i) => i.sprite = s.thumbnail);
+        stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
 
         for (int i = 1; i < 8; ++i)
         {
@@ -181,6 +181,7 @@ public class Main : MonoBehaviour
         }
 
         stampsp.SetActive(stamps);
+        { stamp = stamps[0]; }
 
         var costume = new Costume
         {
@@ -256,6 +257,8 @@ public class Main : MonoBehaviour
         public PlayerTwoAxisAction cursor;
         public PlayerAction click;
 
+        public PlayerOneAxisAction zoom;
+
         public TestInputSet()
         {
             expand = CreatePlayerAction("Expand");
@@ -297,6 +300,16 @@ public class Main : MonoBehaviour
 
                 click = CreatePlayerAction("Cursor Click");
                 click.AddDefaultBinding(InputControlType.RightTrigger);
+            }
+
+            {
+                var zoomIn = CreatePlayerAction("Zoom In");
+                var zoomOut = CreatePlayerAction("Zoom Out");
+
+                zoomIn.AddDefaultBinding(InputControlType.LeftStickButton);
+                zoomOut.AddDefaultBinding(InputControlType.RightStickButton);
+
+                zoom = CreateOneAxisPlayerAction(zoomOut, zoomIn);
             }
         }
     }
@@ -377,9 +390,11 @@ public class Main : MonoBehaviour
         pointer.position = new Vector3((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                        (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
 
-        //Debug.Log(pointer.position);
+        zoomSlider.value += input.zoom * 4 * Time.deltaTime;
 
         EventSystem.current.RaycastAll(pointer, raycasts);
+
+        Debug.Log(pointer.position);
 
         if (raycasts.Count > 0)
         {
@@ -440,6 +455,13 @@ public class Main : MonoBehaviour
         {
             RefreshPalette(i);
         }
+    }
+
+    private Stamp stamp;
+
+    public void SetStamp(Stamp stamp)
+    {
+        this.stamp = stamp;
     }
 
     public void EditPalette(int i, Color color)
@@ -740,16 +762,6 @@ public class Main : MonoBehaviour
             {
                 var sprite = testDraw.sprite;
 
-                //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
-
-                /*
-                PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing) sprite,
-                                                 prev,
-                                                 next,
-                                                 3,
-                                                 new Color(palettePanel.selected / 15f, 0, 0),
-                                                 PixelDraw.Blend.Alpha); */
-
                 var adj = new Color(palettePanel.selected / 15f, 0, 0);
 
                 PixelDraw.Blend.BlendFunction blend = delegate (Color canvas, Color brush)
@@ -760,10 +772,8 @@ public class Main : MonoBehaviour
                 PixelDraw.IDrawingPaint.SweepBrush((PixelDraw.SpriteDrawing)sprite,
                                                    prev,
                                                    next,
-                                                   stamps[6].brush,
+                                                   stamp.brush,
                                                    blend);
-
-                //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
 
                 sprite.texture.Apply();
             }
