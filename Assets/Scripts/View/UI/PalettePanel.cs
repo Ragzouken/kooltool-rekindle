@@ -24,14 +24,29 @@ public class PalettePanel : MonoBehaviour
 
     private void Awake()
     {
-        brightnessSlider.onValueChanged.AddListener(value => UpdateColourFromUI());
-        hueSaturationSlider.onUserChangedValue.AddListener(value => UpdateColourFromUI());
+        brightnessSlider.onValueChanged.AddListener(value => UpdateColourFromUI(false));
+        hueSaturationSlider.onUserChangedValue.AddListener(value => UpdateColourFromUI(false));
+
+        hueSaturationSlider.onUserChangedValueFull.AddListener((prev, next) =>
+        {
+            inside = false;
+
+            main.RecordPaletteHistory(selected, original, main.world.palette[selected]);
+        });
     }
 
+    private Color original;
+    private bool inside;
     private bool ignoreUI;
-    private void UpdateColourFromUI()
+    private void UpdateColourFromUI(bool undo)
     {
         if (ignoreUI) return;
+
+        if (!inside)
+        {
+            inside = true;
+            original = main.world.palette[selected];
+        }
 
         main.EditPalette(selected, Color.HSVToRGB(hueSaturationSlider.value.x, 
                                                   hueSaturationSlider.value.y, 

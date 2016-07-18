@@ -7,6 +7,22 @@ namespace PixelDraw
 {
     public static class IDrawingPaint
     {
+        public static void SweepBrush(this IDrawing drawing,
+                                      Vector2 start,
+                                      Vector2 end,
+                                      Brush brush,
+                                      Blend.BlendFunction blend)
+        {
+            Bresenham.PlotFunction plot = delegate (int x, int y)
+            {
+                drawing.Brush(new Point(x, y), brush, blend);
+
+                return true;
+            };
+
+            Bresenham.Line((int) start.x, (int) start.y, (int) end.x, (int) end.y, plot);
+        }
+
         public static void DrawLine(this IDrawing drawing,
                                     Vector2 start, 
                                     Vector2 end, 

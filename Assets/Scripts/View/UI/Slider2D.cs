@@ -9,14 +9,21 @@ using System.Collections.Generic;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 
-public class Slider2D : MonoBehaviour, IDragHandler, IPointerDownHandler
+public class Slider2D : MonoBehaviour, 
+                        IDragHandler, 
+                        IPointerDownHandler, 
+                        IPointerUpHandler
 {
     [Serializable]
     public class Change : UnityEvent<Vector2> { }
 
+    [Serializable]
+    public class ChangeFull : UnityEvent<Vector2, Vector2> { }
+
     [SerializeField] private RectTransform indicator;
 
     public Change onUserChangedValue;
+    public ChangeFull onUserChangedValueFull;
 
     private Vector2 _value;
     public Vector2 value
@@ -40,6 +47,10 @@ public class Slider2D : MonoBehaviour, IDragHandler, IPointerDownHandler
         }
     }
 
+    private Vector2 original;
+
+
+
     void IDragHandler.OnDrag(PointerEventData eventData)
     {
         var rtrans = transform as RectTransform;
@@ -57,6 +68,13 @@ public class Slider2D : MonoBehaviour, IDragHandler, IPointerDownHandler
 
     void IPointerDownHandler.OnPointerDown(PointerEventData eventData)
     {
+        original = value;
+
         (this as IDragHandler).OnDrag(eventData);
+    }
+
+    void IPointerUpHandler.OnPointerUp(PointerEventData eventData)
+    {
+        onUserChangedValueFull.Invoke(original, value);
     }
 }

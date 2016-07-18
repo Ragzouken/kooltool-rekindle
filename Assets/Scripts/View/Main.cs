@@ -21,7 +21,7 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite[] sprites;
 
     [SerializeField] private ToggleAnimatorBool toggler;
-    [SerializeField] private Transform cursor;
+    [SerializeField] private RectTransform cursor;
     [SerializeField] private SpriteRenderer testDraw;
 
     [SerializeField] private Image brightImage;
@@ -106,6 +106,24 @@ public class Main : MonoBehaviour
 
     private Texture2D testTex;
 
+    [System.Serializable]
+    public class Stamp
+    {
+        public Sprite thumbnail;
+        public Sprite brush;
+    }
+
+    [Header("Stamps")]
+    public List<Stamp> stamps = new List<Stamp>();
+
+    [SerializeField]
+    private Transform stampParent;
+    [SerializeField]
+    private Image stampPrefab;
+
+    private MonoBehaviourPooler<Stamp, Image> stampsp;
+
+
     private void Start()
     {
         testTex = BlankTexture.New(256, 256, Color.clear);
@@ -133,6 +151,36 @@ public class Main : MonoBehaviour
         }
 
         test.Apply();
+
+        stampsp = new MonoBehaviourPooler<Stamp, Image>(stampPrefab, stampParent, (s, i) => i.sprite = s.thumbnail);
+
+        for (int i = 1; i < 8; ++i)
+        {
+            var stamp = new Stamp();
+
+            //stamp.brush = PixelDraw.Brush.Circle(i, Color.white);
+            stamp.brush = PixelDraw.Brush.Rectangle(i, i, Color.clear);
+
+            for (int j = 0; j < i; ++j)
+            {
+                PixelDraw.IDrawingPaint.DrawCircle((PixelDraw.SpriteDrawing)stamp.brush,
+                                                   new Vector2(Random.Range(0, i), Random.Range(0, i)),
+                                                   1,
+                                                   Color.white,
+                                                   PixelDraw.Blend.Alpha);
+
+            }
+
+            stamp.thumbnail = PixelDraw.Brush.Rectangle(16, 16, Color.clear);
+            PixelDraw.Brush.Apply(stamp.brush, Vector2.one * 8, stamp.thumbnail, Vector2.zero, PixelDraw.Blend.Alpha);
+
+            stamp.brush.texture.Apply();
+            stamp.thumbnail.texture.Apply();
+
+            stamps.Add(stamp);
+        }
+
+        stampsp.SetActive(stamps);
 
         var costume = new Costume
         {
@@ -263,6 +311,9 @@ public class Main : MonoBehaviour
         Vector2.up,
     };
 
+    private Stack<System.Action> undos = new Stack<System.Action>();
+    private Stack<Texture2D> copies = new Stack<Texture2D>();
+
     private void CheckHotkeys()
     {
         if (input.expand.WasPressed)
@@ -371,6 +422,12 @@ public class Main : MonoBehaviour
             if (dragging != null) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.endDragHandler);
             if (dragging == raycasts[0].gameObject) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.pointerClickHandler);
         }
+
+        if (undos.Count > 0
+         && Input.GetKeyDown(KeyCode.Z))
+        {
+            undos.Pop()();
+        }
     }
 
     private void SetWorld(World world)
@@ -392,6 +449,11 @@ public class Main : MonoBehaviour
         RefreshPalette(i);
     }
 
+    public void RecordPaletteHistory(int i, Color prev, Color next)
+    {
+        undos.Push(() => EditPalette(i, prev));
+    }
+
     private void RefreshPalette(int i)
     {
         string name = string.Format("_Palette{0:D2}", i);
@@ -405,10 +467,9 @@ public class Main : MonoBehaviour
 
     private bool clickedOnWorld;
     private bool clickingOnWorld;
-    private Vector2 prevMouse;
 
-    private Vector2 nextCursor;
-    private Vector2 prevCursor;
+    private Vector2 nextCursor, nextMouse;
+    private Vector2 prevCursor, prevMouse;
 
     private void Update()
     {
@@ -641,16 +702,39 @@ public class Main : MonoBehaviour
         {
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             plane.Raycast(ray, out t);
-            point = ray.GetPoint(t);
+            nextMouse = ray.GetPoint(t);
 
-            nextCursor = point;
+            var cursorScreen = new Vector2(cursor.anchoredPosition.x / 256,
+                                           cursor.anchoredPosition.y / 256);
+
+            cursorScreen.Scale(Vector2.one * Screen.width);
+
+            nextCursor = cursorScreen;
+            ray = Camera.main.ScreenPointToRay(cursorScreen);
+            plane.Raycast(ray, out t);
+            nextCursor = ray.GetPoint(t);
         }
 
-        if (Input.GetMouseButton(0))
+        bool mouse = Input.GetMouseButton(0);
+        bool gamep = input.click.IsPressed;
+
+        Vector2 prev = gamep ? prevCursor : prevMouse;
+        Vector2 next = gamep ? nextCursor : nextMouse;
+
+        if (mouse || gamep)
         {
             if (!dragging_)
             {
                 dragging_ = true;
+
+                var prevt = new Texture2D(256, 256);
+                prevt.SetPixels32(testTex.GetPixels32());
+
+                undos.Push(() =>
+                {
+                    testTex.SetPixels32(prevt.GetPixels32());
+                    testTex.Apply();
+                });
             }
             else
             {
@@ -658,12 +742,26 @@ public class Main : MonoBehaviour
 
                 //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
 
+                /*
                 PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing) sprite,
-                                                 prevCursor,
-                                                 nextCursor,
+                                                 prev,
+                                                 next,
                                                  3,
                                                  new Color(palettePanel.selected / 15f, 0, 0),
-                                                 PixelDraw.Blend.Alpha);
+                                                 PixelDraw.Blend.Alpha); */
+
+                var adj = new Color(palettePanel.selected / 15f, 0, 0);
+
+                PixelDraw.Blend.BlendFunction blend = delegate (Color canvas, Color brush)
+                {
+                    return canvas * (1 - brush.a) + adj * brush.a;
+                };
+
+                PixelDraw.IDrawingPaint.SweepBrush((PixelDraw.SpriteDrawing)sprite,
+                                                   prev,
+                                                   next,
+                                                   stamps[6].brush,
+                                                   blend);
 
                 //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
 
@@ -675,7 +773,7 @@ public class Main : MonoBehaviour
             dragging_ = false;
         }
 
-        prevMouse = point;
+        prevMouse = nextMouse;
         prevCursor = nextCursor;
     }
 
