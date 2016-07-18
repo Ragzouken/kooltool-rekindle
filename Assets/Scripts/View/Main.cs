@@ -31,6 +31,10 @@ public class Main : MonoBehaviour
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
 
+    [Header("Test Drawing")]
+    [SerializeField] private SpriteRenderer testDrawing;
+    [SerializeField] private Texture2D testTexture;
+
     public World world { get; private set; }
     private World saved;
 
@@ -107,7 +111,12 @@ public class Main : MonoBehaviour
         testTex = BlankTexture.New(256, 256, Color.clear);
         testDraw.sprite = BlankTexture.FullSprite(testTex, pixelsPerUnit: 1);
 
+        testTex.SetPixels32(testTexture.GetPixels32());
+        testTex.Apply();
+
         test = BlankTexture.New(128, 32, Color.white);
+
+
 
         string path = Application.streamingAssetsPath + @"\test.txt";
         var script = ScriptFromCSV(File.ReadAllText(path));
@@ -629,27 +638,46 @@ public class Main : MonoBehaviour
 
         //nextCursor = (Vector2.one * 128 + input.cursor.Value * 32) * 3;
 
-        if (!input.click.WasPressed && input.click.IsPressed)
         {
-            Debug.Log(prevCursor + " / " + nextCursor);
+            ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            plane.Raycast(ray, out t);
+            point = ray.GetPoint(t);
 
-            var sprite = testDraw.sprite;
+            nextCursor = point;
+        }
 
-            //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
+        if (Input.GetMouseButton(0))
+        {
+            if (!dragging_)
+            {
+                dragging_ = true;
+            }
+            else
+            {
+                var sprite = testDraw.sprite;
 
-            PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing) sprite,
-                                                prevCursor * (1 / 3f),
-                                                nextCursor * (1 / 3f),
-                                                3,
-                                                Color.red,
-                                                PixelDraw.Blend.Alpha);
+                //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
 
-            //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
+                PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing) sprite,
+                                                 prevCursor,
+                                                 nextCursor,
+                                                 3,
+                                                 new Color(palettePanel.selected / 15f, 0, 0),
+                                                 PixelDraw.Blend.Alpha);
 
-            sprite.texture.Apply();
+                //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
+
+                sprite.texture.Apply();
+            }
+        }
+        else
+        {
+            dragging_ = false;
         }
 
         prevMouse = point;
         prevCursor = nextCursor;
     }
+
+    private bool dragging_;
 }
