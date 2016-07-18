@@ -737,8 +737,8 @@ public class Main : MonoBehaviour
             nextCursor = ray.GetPoint(t);
         }
 
-        bool mouse = Input.GetMouseButton(0);
-        bool gamep = input.click.IsPressed;
+        bool mouse = Input.GetMouseButton(0) && !mouseOverUI;
+        bool gamep = input.click.IsPressed && !hovering;
 
         Vector2 prev = gamep ? prevCursor : prevMouse;
         Vector2 next = gamep ? nextCursor : nextMouse;
