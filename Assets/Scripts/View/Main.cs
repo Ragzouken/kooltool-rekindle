@@ -10,6 +10,8 @@ using InControl;
 
 using UnityEngine.EventSystems;
 
+using Stopwatch = System.Diagnostics.Stopwatch;
+
 public class Main : MonoBehaviour
 {
     [SerializeField] private CameraController cameraController;
@@ -123,6 +125,7 @@ public class Main : MonoBehaviour
 
     private MonoBehaviourPooler<Stamp, BrushToggle> stampsp;
 
+    public Sprite[] testbrushes;
 
     private void Start()
     {
@@ -154,7 +157,7 @@ public class Main : MonoBehaviour
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
 
-        for (int i = 1; i < 8; ++i)
+        for (int i = 1; i < 5; ++i)
         {
             var stamp = new Stamp();
 
@@ -178,6 +181,15 @@ public class Main : MonoBehaviour
             stamp.thumbnail.texture.Apply();
 
             stamps.Add(stamp);
+        }
+
+        foreach (var sprite in testbrushes)
+        {
+            stamps.Add(new Stamp
+            {
+                brush = sprite,
+                thumbnail = sprite,
+            });
         }
 
         stampsp.SetActive(stamps);
@@ -327,6 +339,68 @@ public class Main : MonoBehaviour
     private Stack<System.Action> undos = new Stack<System.Action>();
     private Stack<Texture2D> copies = new Stack<Texture2D>();
 
+    private byte[] Encode(Texture2D texture)
+    {
+        return texture.EncodeToPNG();
+
+        var colors = texture.GetPixels32();
+        var data = new byte[colors.Length / 2];
+
+        for (int i = 0; i < data.Length; ++i)
+        {
+            int left  = colors[i * 2 + 0].r & 0xFF00;
+            int right = colors[i * 2 + 1].r >> 4;
+
+            data[i] = (byte) (left | right);
+        }
+
+        return data;
+    }
+
+    public Texture2D savetest;
+
+    private void TestSaving()
+    {
+        int count = 256;
+
+        var data = new List<byte[]>(count);
+        var timer = Stopwatch.StartNew();
+
+        for (int i = 0; i < count; ++i)
+        {
+            data.Add(Encode(savetest));
+        }
+
+        timer.Stop();
+
+        Debug.Log("Encode: " + (timer.Elapsed.TotalSeconds / (float) count));
+
+        Directory.CreateDirectory("C:\\KOOL\\");
+        Directory.CreateDirectory("D:\\KOOL\\");
+
+        timer = Stopwatch.StartNew();
+
+        for (int i = 0; i < count; ++i)
+        {
+            File.WriteAllBytes("C:\\KOOL\\test" + i + ".png", data[i]);
+        }
+
+        timer.Stop();
+
+        Debug.Log("Write SSD: " + (timer.Elapsed.TotalSeconds / (float) count));
+
+        timer = Stopwatch.StartNew();
+
+        for (int i = 0; i < count; ++i)
+        {
+            File.WriteAllBytes("D:\\KOOL\\test" + i + ".png", data[i]);
+        }
+
+        timer.Stop();
+
+        Debug.Log("Write HDD: " + (timer.Elapsed.TotalSeconds / (float)count));
+    }
+
     private void CheckHotkeys()
     {
         if (input.expand.WasPressed)
@@ -363,6 +437,11 @@ public class Main : MonoBehaviour
             change = true;
         }
 
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            TestSaving();
+        }
+
         if (possessed != null)
         {
             cameraController.focusTarget = worldView.actors.Get(possessed).transform.localPosition;
@@ -393,8 +472,6 @@ public class Main : MonoBehaviour
         zoomSlider.value += input.zoom * 4 * Time.deltaTime;
 
         EventSystem.current.RaycastAll(pointer, raycasts);
-
-        Debug.Log(pointer.position);
 
         if (raycasts.Count > 0)
         {
