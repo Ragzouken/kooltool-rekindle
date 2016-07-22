@@ -59,6 +59,8 @@ public class World : ICopyable<World>
     }
 }
 
+public class Changes { }
+
 public class ImageGrid : ICopyable<ImageGrid>
 {
     public int cellSize;
@@ -68,6 +70,16 @@ public class ImageGrid : ICopyable<ImageGrid>
     {
         copy.cellSize = cellSize;
         copy.cells = new Dictionary<Point, Sprite>(cells);
+    }
+
+    public void Brush(Changes changes, Sprite brush, Vector2 position)
+    {
+
+    }
+
+    public Color Sample(Vector2 position)
+    {
+        
     }
 }
 
