@@ -162,13 +162,13 @@ public class Main : MonoBehaviour
             var stamp = new Stamp();
 
             //stamp.brush = PixelDraw.Brush.Circle(i, Color.white);
-            stamp.brush = PixelDraw.Brush.Rectangle(i, i, Color.clear);
+            stamp.brush = PixelDraw.Brush.Rectangle(16, 16, Color.clear, px:8, py:8);
 
-            for (int j = 0; j < i; ++j)
+            for (int j = 0; j < i * 2; ++j)
             {
                 PixelDraw.IDrawingPaint.DrawCircle((PixelDraw.SpriteDrawing)stamp.brush,
-                                                   new Vector2(Random.Range(0, i), Random.Range(0, i)),
-                                                   1,
+                                                   new Vector2(Random.Range(-8, 8), Random.Range(-8, 8)),
+                                                   3,
                                                    Color.white,
                                                    PixelDraw.Blend.Alpha);
 
