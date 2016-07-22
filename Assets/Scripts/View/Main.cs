@@ -210,6 +210,16 @@ public class Main : MonoBehaviour
             w.palette[i] = new Color(Random.value, Random.value, Random.value, 1f);
         }
 
+        w.background.cellSize = 256;
+
+        for (int i = 0; i < 4; ++i)
+        {
+            var texture = BlankTexture.New(256, 256, Color.red);
+            var sprite = BlankTexture.FullSprite(texture, pixelsPerUnit: 1);
+
+            w.background.cells.Add(Point.One * i, sprite);
+        }
+
         SetWorld(w);
 
         for (int i = 0; i < 16; ++i)
@@ -526,6 +536,7 @@ public class Main : MonoBehaviour
     {
         this.world = world;
 
+        worldView.Setup(world);
         palettePanel.SetWorld(world);
 
         for (int i = 0; i < 16; ++i)

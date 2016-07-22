@@ -39,6 +39,7 @@ public class World : ICopyable<World>
 
     public float timer;
     public List<Actor> actors = new List<Actor>();
+    public ImageGrid background = new ImageGrid();
 
     public World Copy()
     {
@@ -54,6 +55,19 @@ public class World : ICopyable<World>
         copy.timer = timer;
 
         copy.actors.AddRange(actors.Select(actor => copier.Copy(actor)));
+        copy.background = copier.Copy(background);
+    }
+}
+
+public class ImageGrid : ICopyable<ImageGrid>
+{
+    public int cellSize;
+    public Dictionary<Point, Sprite> cells = new Dictionary<Point, Sprite>();
+
+    public void Copy(Copier copier, ImageGrid copy)
+    {
+        copy.cellSize = cellSize;
+        copy.cells = new Dictionary<Point, Sprite>(cells);
     }
 }
 
