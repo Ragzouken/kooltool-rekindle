@@ -122,6 +122,12 @@ public class ImageGrid : ICopyable<ImageGrid>
         public ImageGrid grid;
         public Dictionary<Point, Color[]> before = new Dictionary<Point, Color[]>();
         public Dictionary<Point, Color[]> after = new Dictionary<Point, Color[]>();
+        public HashSet<Point> added = new HashSet<Point>();
+
+        public void Added(Point point)
+        {
+            added.Add(point);
+        }
 
         public void Changed(Point point)
         {
@@ -135,6 +141,14 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         void IChange.Redo(Changes changes)
         {
+            foreach (var cell in added)
+            {
+                var texture = BlankTexture.New(grid.cellSize, grid.cellSize, Color.clear);
+                var sprite = texture.FullSprite(pixelsPerUnit: 1);
+
+                grid.cells.Add(cell, sprite);
+            }
+
             foreach (var pair in after)
             {
                 before[pair.Key] = grid.cells[pair.Key].GetPixels();
@@ -150,6 +164,11 @@ public class ImageGrid : ICopyable<ImageGrid>
                 after[pair.Key] = grid.cells[pair.Key].GetPixels();
                 grid.cells[pair.Key].SetPixels(before[pair.Key]);
                 grid.cells[pair.Key].Apply();
+            }
+
+            foreach (var cell in added)
+            {
+                grid.cells.Remove(cell);
             }
         }
     }
@@ -204,16 +223,10 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                 // TODO: track changes
 
-                if (cells.TryGetValue(cell, out sprite))
-                {
-                    chang.Changed(cell);
+                if (!cells.TryGetValue(cell, out sprite))
+                { 
+                    chang.Added(cell);
 
-                    sprite.Brush(brush, cell * cellSize);
-
-                    changes.sprites.Add(sprite);
-                }
-                else
-                {
                     var texture = BlankTexture.New(cellSize, cellSize, Color.clear);
                     sprite = texture.FullSprite(pixelsPerUnit: 1);
 
@@ -221,6 +234,12 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                     changes.sprites.Add(sprite);
                 }
+
+                chang.Changed(cell);
+
+                sprite.Brush(brush, cell * cellSize);
+
+                changes.sprites.Add(sprite);
             }
         }
     }
