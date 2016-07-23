@@ -59,7 +59,18 @@ public class World : ICopyable<World>
     }
 }
 
-public class Changes { }
+public class Changes
+{
+    public List<Sprite> sprites = new List<Sprite>();
+
+    public void ApplyTextures()
+    {
+        foreach (var texture in sprites.Select(sprite => sprite.texture).Distinct())
+        {
+            texture.Apply();
+        }
+    }
+}
 
 public class ImageGrid : ICopyable<ImageGrid>
 {
@@ -72,14 +83,73 @@ public class ImageGrid : ICopyable<ImageGrid>
         copy.cells = new Dictionary<Point, Sprite>(cells);
     }
 
-    public void Brush(Changes changes, Sprite brush, Vector2 position)
+    public void SweepSprite(Changes changes,
+                            Sprite sprite,
+                            Blend.Function blend,
+                            Vector2 begin,
+                            Vector2 end)
     {
-
+        PixelDraw.Bresenham.Line((int) begin.x,
+                                 (int) begin.y,
+                                 (int) end.x,
+                                 (int) end.y,
+                                 (x, y) => { Brush(changes, new Brush { position = new Vector2(x, y), blend = blend, sprite = sprite }); return true; });
     }
 
-    public Color Sample(Vector2 position)
+    public void Brush(Changes changes, Brush brush)
     {
-        
+        //brush.position -= brush.sprite.pivot;
+            
+        Vector2 cell_tl, local, cell;
+        Sprite sprite;
+
+        Vector2 adjusted = brush.position - brush.sprite.pivot;
+
+        adjusted.GridCoords(cellSize, out cell_tl, out local);
+         
+        var gw = Mathf.CeilToInt((brush.sprite.rect.width  + local.x) / cellSize);
+        var gh = Mathf.CeilToInt((brush.sprite.rect.height + local.y) / cellSize);
+
+        for (int y = 0; y < gh; ++y)
+        {
+            for (int x = 0; x < gw; ++x)
+            {
+                cell.x = cell_tl.x + x;
+                cell.y = cell_tl.y + y;
+
+                // TODO: track changes
+
+                if (cells.TryGetValue(cell, out sprite))
+                {
+                    sprite.Brush(brush, cell * cellSize);
+
+                    changes.sprites.Add(sprite);
+
+                    //Changed.Set(cell, true);
+                }
+                else
+                {
+                    // new cell?
+                }
+            }
+        }
+    }
+
+    public Color GetPixel(Vector2 position)
+    {
+        Vector2 cell, local;
+        Sprite sprite;
+
+        position.GridCoords(cellSize, out cell, out local);
+
+        return cells.TryGetValue(cell, out sprite)
+             ? sprite.GetPixel(local)
+             : Color.clear;
+    }
+
+    public void Apply()
+    {
+        foreach (var thing in cells.Values) thing.Apply();
     }
 }
 

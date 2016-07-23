@@ -85,7 +85,10 @@ public struct Point
 
     public override int GetHashCode()
     {
-        return string.Format("{0},{1}", x, y).GetHashCode();
+        int hash = 17;
+        hash = hash * 23 + x.GetHashCode();
+        hash = hash * 23 + y.GetHashCode();
+        return hash;
     }
 
     public override string ToString ()

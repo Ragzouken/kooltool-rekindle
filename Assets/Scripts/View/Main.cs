@@ -840,6 +840,8 @@ public class Main : MonoBehaviour
                 var prevt = new Texture2D(256, 256);
                 prevt.SetPixels32(testTex.GetPixels32());
 
+                
+
                 undos.Push(() =>
                 {
                     testTex.SetPixels32(prevt.GetPixels32());
@@ -848,22 +850,15 @@ public class Main : MonoBehaviour
             }
             else
             {
-                var sprite = testDraw.sprite;
-
                 var adj = new Color(palettePanel.selected / 15f, 0, 0);
 
-                PixelDraw.Blend.BlendFunction blend = delegate (Color canvas, Color brush)
-                {
-                    return canvas * (1 - brush.a) + adj * brush.a;
-                };
+                Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
 
-                PixelDraw.IDrawingPaint.SweepBrush((PixelDraw.SpriteDrawing)sprite,
-                                                   prev,
-                                                   next,
-                                                   stamp.brush,
-                                                   blend);
+                var changes = new Changes();
 
-                sprite.texture.Apply();
+                world.background.SweepSprite(changes, stamp.brush, blend, prev, next);
+
+                changes.ApplyTextures();
             }
         }
         else
