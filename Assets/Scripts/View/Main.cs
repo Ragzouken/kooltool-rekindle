@@ -351,7 +351,35 @@ public class Main : MonoBehaviour
     };
 
     private Stack<Changes> undos = new Stack<Changes>();
-    private Stack<Texture2D> copies = new Stack<Texture2D>();
+    private Stack<Changes> redos = new Stack<Changes>();
+
+    private void Do(Changes change)
+    {
+        redos.Clear();
+        undos.Push(change);
+    }
+
+    private void Undo()
+    {
+        if (undos.Count == 0) return;
+
+        var change = undos.Pop();
+
+        change.Undo();
+
+        redos.Push(change);
+    }
+
+    private void Redo()
+    {
+        if (redos.Count == 0) return;
+
+        var change = redos.Pop();
+
+        change.Redo();
+
+        undos.Push(change);
+    }
 
     private byte[] Encode(Texture2D texture)
     {
@@ -453,7 +481,10 @@ public class Main : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Y))
         {
-            TestSaving();
+            if (redos.Count > 0)
+            {
+                
+            }
         }
 
         if (possessed != null)
@@ -529,10 +560,14 @@ public class Main : MonoBehaviour
             if (dragging == raycasts[0].gameObject) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.pointerClickHandler);
         }
 
-        if (undos.Count > 0
-         && Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.Z))
         {
-            undos.Pop().Undo();
+            Undo();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            Redo();
         }
     }
 
@@ -862,7 +897,7 @@ public class Main : MonoBehaviour
 
             if (changes != null)
             {
-                undos.Push(changes);
+                Do(changes);
                 changes = null;
             }
         }

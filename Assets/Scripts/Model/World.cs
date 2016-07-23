@@ -105,6 +105,14 @@ public class Changes
             change.Undo(this);
         }
     }
+
+    public void Redo()
+    {
+        foreach (var change in changes.Values)
+        {
+            change.Redo(this);
+        }
+    }
 }
 
 public class ImageGrid : ICopyable<ImageGrid>
@@ -127,7 +135,12 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         void IChange.Redo(Changes changes)
         {
-            
+            foreach (var pair in after)
+            {
+                before[pair.Key] = grid.cells[pair.Key].GetPixels();
+                grid.cells[pair.Key].SetPixels(after[pair.Key]);
+                grid.cells[pair.Key].Apply();
+            }
         }
 
         void IChange.Undo(Changes changes)
