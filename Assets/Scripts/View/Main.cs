@@ -157,31 +157,35 @@ public class Main : MonoBehaviour
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
 
+        var circle = Brush.Circle(3, Color.white);
+        var brush = new Brush { sprite = circle, blend = Blend.alpha };
+
         for (int i = 1; i < 5; ++i)
         {
             var stamp = new Stamp();
 
-            //stamp.brush = PixelDraw.Brush.Circle(i, Color.white);
-            stamp.brush = PixelDraw.Brush.Rectangle(16, 16, Color.clear, px:8, py:8);
+            //stamp.brush = Brush.Circle(i, Color.white);
+            stamp.brush = Brush.Rectangle(16, 16, Color.clear, 8, 8);
 
             for (int j = 0; j < i * 2; ++j)
             {
-                PixelDraw.IDrawingPaint.DrawCircle((PixelDraw.SpriteDrawing)stamp.brush,
-                                                   new Vector2(Random.Range(-8, 8), Random.Range(-8, 8)),
-                                                   3,
-                                                   Color.white,
-                                                   PixelDraw.Blend.Alpha);
+                brush.position.x = Random.Range(-8, 8);
+                brush.position.y = Random.Range(-8, 8);
 
+                stamp.brush.Brush(brush);
             }
 
-            stamp.thumbnail = PixelDraw.Brush.Rectangle(16, 16, Color.clear);
-            PixelDraw.Brush.Apply(stamp.brush, Vector2.one * 8, stamp.thumbnail, Vector2.zero, PixelDraw.Blend.Alpha);
+            stamp.thumbnail = Brush.Rectangle(16, 16, Color.clear);
+            stamp.thumbnail.Brush(stamp.brush.AsBrush(Vector2.one * 8, Blend.alpha));
 
             stamp.brush.texture.Apply();
             stamp.thumbnail.texture.Apply();
 
             stamps.Add(stamp);
         }
+
+        Destroy(circle.texture);
+        Destroy(circle);
 
         foreach (var sprite in testbrushes)
         {

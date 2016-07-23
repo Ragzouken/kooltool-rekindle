@@ -29,6 +29,18 @@ public static partial class SpriteExtensions
              : Color.clear;
     }
 
+    public static Brush AsBrush(this Sprite sprite,
+                                Vector2 position,
+                                Blend.Function blend)
+    {
+        return new Brush
+        {
+            sprite = sprite,
+            position = position,
+            blend = blend,
+        };
+    }
+
     public static bool Brush(this Sprite canvas,
                              Brush brush,
                              Vector2 canvasPosition=default(Vector2))
@@ -146,4 +158,130 @@ public struct Brush
     public Sprite sprite;
     public Vector2 position;
     public Blend.Function blend;
+
+    public static Sprite Circle(int diameter, Color color)
+    {
+        int left = Mathf.FloorToInt(diameter / 2f);
+        float piv = left / (float) diameter;
+
+        Texture2D image = BlankTexture.New(diameter, diameter, Color.clear);
+
+        Sprite brush = Sprite.Create(image, 
+                                     new Rect(0, 0, diameter, diameter),
+                                     Vector2.one * piv,
+                                     1);
+        brush.name = "Circle (Brush)";
+
+        int radius = (diameter - 1) / 2;
+        int offset = (diameter % 2 == 0) ? 1 : 0;
+
+        int x0 = radius;
+        int y0 = radius;
+
+        int x = radius;
+        int y = 0;
+        int radiusError = 1-x;
+            
+        while (x >= y)
+        {
+            int yoff = (y > 0 ? 1 : 0) * offset;
+            int xoff = (x > 0 ? 1 : 0) * offset;
+
+            for (int i = -x + x0; i <= x + x0 + offset; ++i)
+            {
+                image.SetPixel(i,  y + y0 + yoff, color);
+                image.SetPixel(i, -y + y0, color);
+            }
+
+            for (int i = -y + y0; i <= y + y0 + offset; ++i)
+            {
+                image.SetPixel(i,  x + y0 + xoff, color);
+                image.SetPixel(i, -x + y0, color);
+            }
+
+            y++;
+
+            if (radiusError < 0)
+            {
+                radiusError += 2 * y + 1;
+            }
+            else
+            {
+                x--;
+                radiusError += 2 * (y - x) + 1;
+            }
+        }
+
+        if (offset > 0)
+        {
+            for (int i = 0; i < diameter; ++i)
+            {
+                image.SetPixel(i, y0 + 1, color);
+            }
+        }
+
+        return brush;
+    }
+
+    public static Sprite Rectangle(int width, int height,
+                                   Color color,
+                                   float pivotX = 0, float pivotY = 0)
+    {
+        Texture2D image = BlankTexture.New(width, height, color);
+
+        Sprite brush = Sprite.Create(image, 
+                                     new Rect(0, 0, width, height),
+                                     new Vector2(pivotX / width, pivotY / height),
+                                     1);
+        brush.name = "Rectangle (Brush)";
+
+        return brush;
+    }
+
+    public static Sprite Line(Vector2 start,
+                              Vector2 end,
+                              Color color, 
+                              int thickness)
+    {
+        var tl = new Vector2(Mathf.Min(start.x, end.x),
+                             Mathf.Min(start.y, end.y));
+
+        int left = Mathf.FloorToInt(thickness / 2f);
+
+        Vector2 size = new Vector2(Mathf.Abs(end.x - start.x) + thickness,
+                                   Mathf.Abs(end.y - start.y) + thickness);
+
+        var pivot  = tl * -1 + Vector2.one * left;
+        var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
+        var rect   = new Rect(0, 0, size.x, size.y);
+
+        Texture2D image = BlankTexture.New((int) size.x, (int) size.y, Color.clear);
+        Sprite brush = Sprite.Create(image, rect, anchor, 1);
+        brush.name = "Line (Brush)";
+
+        Sprite circle = Circle(thickness, color);
+        {
+            var brush_ = new Brush { sprite = circle, blend = Blend.alpha };
+
+            PixelDraw.Bresenham.PlotFunction plot = delegate (int x, int y)
+            {
+                brush_.position.x = x;
+                brush_.position.y = y;
+
+                brush.Brush(brush_);
+                
+                return true;
+            };
+
+            PixelDraw.Bresenham.Line((int) start.x, 
+                                     (int) start.y, 
+                                     (int) end.x, 
+                                     (int) end.y, 
+                                     plot);
+        }
+        UnityEngine.Object.Destroy(circle.texture);
+        UnityEngine.Object.Destroy(circle);
+
+        return brush;
+    }
 }
