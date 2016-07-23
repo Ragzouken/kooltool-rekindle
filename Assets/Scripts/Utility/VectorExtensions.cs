@@ -13,9 +13,8 @@ public static partial class VectorExtensions
                                   out Vector2 cell, 
                                   out Vector2 local)
     {
-        position /= cellSize;
-
-        cell = new Vector2(Mathf.Floor(position.x), Mathf.Floor(position.y));
+        cell = new Vector2(Mathf.Floor(position.x / cellSize), 
+                           Mathf.Floor(position.y / cellSize));
 
         float ox = position.x % cellSize;
         float oy = position.y % cellSize;

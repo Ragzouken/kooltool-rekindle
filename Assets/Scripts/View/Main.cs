@@ -10,8 +10,6 @@ using InControl;
 
 using UnityEngine.EventSystems;
 
-using Stopwatch = System.Diagnostics.Stopwatch;
-
 public class Main : MonoBehaviour
 {
     [SerializeField] private CameraController cameraController;
@@ -19,6 +17,8 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Toggle moveToggle, takeToggle, makeToggle, killToggle;
     
+    [SerializeField] private Toggle freeToggle, stampToggle;
+
     [SerializeField] private Slider zoomSlider;
     [SerializeField] private Sprite[] sprites;
 
@@ -32,10 +32,6 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
-
-    [Header("Test Drawing")]
-    [SerializeField] private SpriteRenderer testDrawing;
-    [SerializeField] private Texture2D testTexture;
 
     public World world { get; private set; }
     private World saved;
@@ -129,15 +125,9 @@ public class Main : MonoBehaviour
 
     private void Start()
     {
-        testTex = BlankTexture.New(256, 256, Color.clear);
-        testDraw.sprite = BlankTexture.FullSprite(testTex, pixelsPerUnit: 1);
-
-        testTex.SetPixels32(testTexture.GetPixels32());
-        testTex.Apply();
+        freeToggle.isOn = true;
 
         test = BlankTexture.New(128, 32, Color.white);
-
-
 
         string path = Application.streamingAssetsPath + @"\test.txt";
         var script = ScriptFromCSV(File.ReadAllText(path));
@@ -156,36 +146,6 @@ public class Main : MonoBehaviour
         test.Apply();
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
-
-        var circle = Brush.Circle(3, Color.white);
-        var brush = new Brush { sprite = circle, blend = Blend.alpha };
-
-        for (int i = 1; i < 5; ++i)
-        {
-            var stamp = new Stamp();
-
-            //stamp.brush = Brush.Circle(i, Color.white);
-            stamp.brush = Brush.Rectangle(16, 16, Color.clear, 8, 8);
-
-            for (int j = 0; j < i * 2; ++j)
-            {
-                brush.position.x = Random.Range(-8, 8);
-                brush.position.y = Random.Range(-8, 8);
-
-                stamp.brush.Brush(brush);
-            }
-
-            stamp.thumbnail = Brush.Rectangle(16, 16, Color.clear);
-            stamp.thumbnail.Brush(stamp.brush.AsBrush(Vector2.one * 8, Blend.alpha));
-
-            stamp.brush.texture.Apply();
-            stamp.thumbnail.texture.Apply();
-
-            stamps.Add(stamp);
-        }
-
-        Destroy(circle.texture);
-        Destroy(circle);
 
         foreach (var sprite in testbrushes)
         {
@@ -215,15 +175,6 @@ public class Main : MonoBehaviour
         }
 
         w.background.cellSize = 256;
-
-        for (int i = 0; i < 4; ++i)
-        {
-            var texture = BlankTexture.New(256, 256, Color.red);
-            var sprite = BlankTexture.FullSprite(texture, pixelsPerUnit: 1);
-
-            w.background.cells.Add(Point.One * i, sprite);
-        }
-
         SetWorld(w);
 
         for (int i = 0; i < 16; ++i)
@@ -397,50 +348,6 @@ public class Main : MonoBehaviour
         }
 
         return data;
-    }
-
-    public Texture2D savetest;
-
-    private void TestSaving()
-    {
-        int count = 256;
-
-        var data = new List<byte[]>(count);
-        var timer = Stopwatch.StartNew();
-
-        for (int i = 0; i < count; ++i)
-        {
-            data.Add(Encode(savetest));
-        }
-
-        timer.Stop();
-
-        Debug.Log("Encode: " + (timer.Elapsed.TotalSeconds / (float) count));
-
-        Directory.CreateDirectory("C:\\KOOL\\");
-        Directory.CreateDirectory("D:\\KOOL\\");
-
-        timer = Stopwatch.StartNew();
-
-        for (int i = 0; i < count; ++i)
-        {
-            File.WriteAllBytes("C:\\KOOL\\test" + i + ".png", data[i]);
-        }
-
-        timer.Stop();
-
-        Debug.Log("Write SSD: " + (timer.Elapsed.TotalSeconds / (float) count));
-
-        timer = Stopwatch.StartNew();
-
-        for (int i = 0; i < count; ++i)
-        {
-            File.WriteAllBytes("D:\\KOOL\\test" + i + ".png", data[i]);
-        }
-
-        timer.Stop();
-
-        Debug.Log("Write HDD: " + (timer.Elapsed.TotalSeconds / (float)count));
     }
 
     private void CheckHotkeys()
@@ -752,7 +659,7 @@ public class Main : MonoBehaviour
         RaycastHit hit;
 
         if (clickedOnWorld)
-        { 
+        {
             if (Physics.Raycast(ray, out hit))
             {
                 Actor actor = hit.collider.GetComponent<ActorView>().actor;
@@ -811,7 +718,7 @@ public class Main : MonoBehaviour
                         var sprite = actor.costume[actor.position.direction];
 
                         Vector2 current = actor.position.current;
-                        
+
 
                         local.x = Mathf.Round(local.x);
                         local.y = Mathf.Round(local.y);
@@ -892,12 +799,21 @@ public class Main : MonoBehaviour
         Vector2 prev = gamep ? prevCursor : prevMouse;
         Vector2 next = gamep ? nextCursor : nextMouse;
 
-        prev.x = (int) prev.x;
-        prev.y = (int) prev.y;
-        next.x = (int) next.x;
-        next.y = (int) next.y;
+        prev.x = (int)prev.x;
+        prev.y = (int)prev.y;
+        next.x = (int)next.x;
+        next.y = (int)next.y;
 
-        if (mouse || gamep)
+        if ((Input.GetMouseButtonUp(0) || input.click.WasPressed) 
+         && !mouseOverUI
+         && palettePanel.mode == PalettePanel.Mode.Colors)
+        {
+            int index = (int) (world.background.GetPixel(next).r * 15);
+
+            palettePanel.SelectPaletteIndex(index);
+        }
+
+        if ((mouse || gamep) && palettePanel.mode == PalettePanel.Mode.Paint)
         {
             if (!dragging_)
             {
@@ -906,19 +822,40 @@ public class Main : MonoBehaviour
             }
             else
             {
-                var adj = new Color(palettePanel.selected / 15f, 0, 0);
+                if (freeToggle.isOn)
+                {
+                    var adj = new Color(palettePanel.selected / 15f, 0, 0);
 
-                Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
+                    Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
 
-                var line = Brush.Sweep(stamp.brush, prev, next);
-                world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
+                    var line = Brush.Sweep(stamp.brush, prev, next);
+                    world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
 
-                changes.ApplyTextures();
+                    changes.ApplyTextures();
+                }
+                else if (stampToggle.isOn)
+                {
+                    stampTimer -= Time.deltaTime;
+
+                    if (stampTimer <= 0f)
+                    {
+                        stampTimer += mouse ? 0.1f : 0.2f;
+
+                        var adj = new Color(palettePanel.selected / 15f, 0, 0);
+
+                        Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
+
+                        world.background.Brush(changes, new Brush { sprite = stamp.brush, position = next, blend = blend });
+
+                        changes.ApplyTextures();
+                    }
+                }
             }
         }
         else
         {
             dragging_ = false;
+            stampTimer = 0;
 
             if (changes != null)
             {
@@ -933,4 +870,5 @@ public class Main : MonoBehaviour
 
     private Changes changes;
     private bool dragging_;
+    private float stampTimer;
 }

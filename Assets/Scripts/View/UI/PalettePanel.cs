@@ -7,7 +7,16 @@ using System.Collections.Generic;
 
 public class PalettePanel : MonoBehaviour 
 {
+    public enum Mode
+    {
+        Paint,
+        Colors,
+        Select,
+    }
+
     [SerializeField] private Main main;
+
+    [SerializeField] private Animator animator;
 
     [SerializeField] private Toggle[] colorToggles;
     [SerializeField] private Image[] colorImages;
@@ -18,6 +27,7 @@ public class PalettePanel : MonoBehaviour
 
     public event System.Action<int> OnPaletteIndexSelected = delegate { };
 
+    public Mode mode { get; private set; }
     public int selected { get; private set; }
 
     private World world;
@@ -69,6 +79,17 @@ public class PalettePanel : MonoBehaviour
         }
 
         colorToggles[0].isOn = true;
+    }
+
+    public void SetModePaint()  { SetMode(Mode.Paint); }
+    public void SetModeColors() { SetMode(Mode.Colors); }
+    public void SetModeSelect() { SetMode(Mode.Select); }
+
+    public void SetMode(Mode mode)
+    {
+        this.mode = mode;
+
+        animator.SetInteger("Mode", (int) mode);
     }
 
     public void SelectPaletteIndex(int index)
