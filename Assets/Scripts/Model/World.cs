@@ -98,24 +98,27 @@ public class ImageGrid : ICopyable<ImageGrid>
 
     public void Brush(Changes changes, Brush brush)
     {
-        //brush.position -= brush.sprite.pivot;
-            
-        Vector2 cell_tl, local, cell;
+        Vector2 cellMin, cellMax, cell;
+        Vector2 local;
         Sprite sprite;
 
-        Vector2 adjusted = brush.position - brush.sprite.pivot;
+        // find the rectangle of cells that contains the brush
+        Vector2 brushMin = brush.position - brush.sprite.pivot;
+        Vector2 brushMax = brushMin + new Vector2(brush.sprite.rect.width,
+                                                  brush.sprite.rect.height);
 
-        adjusted.GridCoords(cellSize, out cell_tl, out local);
-         
-        var gw = Mathf.CeilToInt((brush.sprite.rect.width  + local.x) / cellSize);
-        var gh = Mathf.CeilToInt((brush.sprite.rect.height + local.y) / cellSize);
+        brushMin.GridCoords(cellSize, out cellMin, out local);
+        brushMax.GridCoords(cellSize, out cellMax, out local);
 
-        for (int y = 0; y < gh; ++y)
+        var rect = Rect.MinMaxRect(cellMin.x, cellMin.y, cellMax.x, cellMax.y);
+
+        // apply the brush to all cells it overlaps
+        for (int y = (int) cellMin.y; y <= cellMax.y; ++y)
         {
-            for (int x = 0; x < gw; ++x)
+            for (int x = (int) cellMin.x; x <= cellMax.x; ++x)
             {
-                cell.x = cell_tl.x + x;
-                cell.y = cell_tl.y + y;
+                cell.x = x;
+                cell.y = y;
 
                 // TODO: track changes
 
@@ -129,7 +132,12 @@ public class ImageGrid : ICopyable<ImageGrid>
                 }
                 else
                 {
-                    // new cell?
+                    var texture = BlankTexture.New(cellSize, cellSize, Color.clear);
+                    sprite = texture.FullSprite(pixelsPerUnit: 1);
+
+                    cells[cell] = sprite;
+
+                    changes.sprites.Add(sprite);
                 }
             }
         }
