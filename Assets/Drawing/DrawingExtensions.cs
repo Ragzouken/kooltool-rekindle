@@ -248,6 +248,47 @@ public struct Brush
         return brush;
     }
 
+    public static Sprite Sweep(Sprite sprite,
+                               Vector2 start,
+                               Vector2 end)
+    {
+        var tl = new Vector2(Mathf.Min(start.x, end.x),
+                             Mathf.Min(start.y, end.y));
+
+        Vector2 size = new Vector2(Mathf.Abs(end.x - start.x) + sprite.rect.width,
+                                   Mathf.Abs(end.y - start.y) + sprite.rect.height);
+
+        var pivot = tl * -1 + sprite.pivot;
+        var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
+        var rect = new Rect(0, 0, size.x, size.y);
+
+        Texture2D image = BlankTexture.New((int) size.x, (int) size.y, Color.clear);
+        Sprite brush = Sprite.Create(image, rect, anchor, 1);
+        brush.name = "Line (Brush)";
+
+        {
+            var brush_ = new Brush { sprite = sprite, blend = Blend.alpha };
+
+            PixelDraw.Bresenham.PlotFunction plot = delegate (int x, int y)
+            {
+                brush_.position.x = x;
+                brush_.position.y = y;
+
+                brush.Brush(brush_);
+
+                return true;
+            };
+
+            PixelDraw.Bresenham.Line((int)start.x,
+                                     (int)start.y,
+                                     (int)end.x,
+                                     (int)end.y,
+                                     plot);
+        }
+
+        return brush;
+    }
+
     public static Sprite Line(Vector2 start,
                               Vector2 end,
                               Color color, 

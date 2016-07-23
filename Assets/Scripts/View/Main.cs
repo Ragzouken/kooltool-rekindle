@@ -598,9 +598,31 @@ public class Main : MonoBehaviour
         RefreshPalette(i);
     }
 
+    public class PaletteChange : IChange
+    {
+        public Main main;
+        public int index;
+        public Color prev, next;
+
+        void IChange.Redo(Changes changes)
+        {
+            main.EditPalette(index, next);
+        }
+
+        void IChange.Undo(Changes changes)
+        {
+            main.EditPalette(index, prev);
+        }
+    }
+
     public void RecordPaletteHistory(int i, Color prev, Color next)
     {
         //undos.Push(() => EditPalette(i, prev));
+
+        var changes = new Changes();
+        changes.changes[this] = new PaletteChange { main = this, index = i, prev = prev, next = next };
+
+        Do(changes);
     }
 
     private void RefreshPalette(int i)
@@ -870,15 +892,17 @@ public class Main : MonoBehaviour
         Vector2 prev = gamep ? prevCursor : prevMouse;
         Vector2 next = gamep ? nextCursor : nextMouse;
 
+        prev.x = (int) prev.x;
+        prev.y = (int) prev.y;
+        next.x = (int) next.x;
+        next.y = (int) next.y;
+
         if (mouse || gamep)
         {
             if (!dragging_)
             {
                 dragging_ = true;
                 changes = new Changes();
-
-                var prevt = new Texture2D(256, 256);
-                prevt.SetPixels32(testTex.GetPixels32());
             }
             else
             {
@@ -886,7 +910,8 @@ public class Main : MonoBehaviour
 
                 Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
 
-                world.background.SweepSprite(changes, stamp.brush, blend, prev, next);
+                var line = Brush.Sweep(stamp.brush, prev, next);
+                world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
 
                 changes.ApplyTextures();
             }

@@ -79,7 +79,7 @@ public class DrawingTests
         var generated2 = Brush.Rectangle(64, 64, Color.white);
 
         Vector2 start = new Vector2(4, 4);
-        Vector2 end = new Vector2(32, 32);
+        Vector2 end = new Vector2(60, 60);
 
         var lineAbs = Brush.Line(start, end, Color.magenta, 5);
         generated1.Brush(lineAbs.AsBrush(Vector2.zero, Blend.alpha));
@@ -92,6 +92,32 @@ public class DrawingTests
         AssetDatabase.Refresh();
 
         int difference = Difference(lineAbs.texture, lineRel.texture);
+
+        Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
+    }
+
+    [Test]
+    public void LineSweep()
+    {
+        var generated1 = Brush.Rectangle(64, 64, Color.white);
+        var generated2 = Brush.Rectangle(64, 64, Color.white);
+
+        Vector2 start = new Vector2(4, 4);
+        Vector2 end = new Vector2(60, 60);
+
+        var circle5 = Brush.Circle(5, Color.magenta);
+
+        var line = Brush.Line(start, end, Color.magenta, 5);
+        generated1.Brush(line.AsBrush(Vector2.zero, Blend.alpha));
+
+        var sweep = Brush.Sweep(circle5, start, end);
+        generated2.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
+
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Line.png", generated1.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Sweep.png", generated2.texture.EncodeToPNG());
+        AssetDatabase.Refresh();
+
+        int difference = Difference(generated1.texture, generated2.texture);
 
         Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
     }
