@@ -29,6 +29,16 @@ public static partial class SpriteExtensions
              : Color.clear;
     }
 
+    public static Color[] GetPixels(this Sprite sprite)
+    {
+        return sprite.texture.GetPixels(sprite.textureRect);
+    }
+
+    public static void SetPixels(this Sprite sprite, Color[] colors)
+    {
+        sprite.texture.SetPixels(sprite.textureRect, colors);
+    }
+
     public static Brush AsBrush(this Sprite sprite,
                                 Vector2 position,
                                 Blend.Function blend)

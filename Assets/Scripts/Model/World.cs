@@ -59,9 +59,36 @@ public class World : ICopyable<World>
     }
 }
 
+public interface IChange
+{
+    void Undo(Changes changes);
+    void Redo(Changes changes);
+}
+
 public class Changes
 {
     public List<Sprite> sprites = new List<Sprite>();
+
+    public Dictionary<object, IChange> changes = new Dictionary<object, IChange>();
+
+    public TChange GetChange<TChange>(object key, Func<TChange> construct)
+        where TChange : class, IChange
+    {
+        IChange change;
+
+        if (changes.TryGetValue(key, out change))
+        {
+            return change as TChange;
+        }
+        else
+        {
+            change = construct();
+
+            changes[key] = change;
+
+            return change as TChange;
+        }
+    }
 
     public void ApplyTextures()
     {
@@ -70,10 +97,50 @@ public class Changes
             texture.Apply();
         }
     }
+
+    public void Undo()
+    {
+        foreach (var change in changes.Values)
+        {
+            change.Undo(this);
+        }
+    }
 }
 
 public class ImageGrid : ICopyable<ImageGrid>
 {
+    public class Change : IChange
+    {
+        public ImageGrid grid;
+        public Dictionary<Point, Color[]> before = new Dictionary<Point, Color[]>();
+        public Dictionary<Point, Color[]> after = new Dictionary<Point, Color[]>();
+
+        public void Changed(Point point)
+        {
+            Color[] original;
+
+            if (!before.TryGetValue(point, out original))
+            {
+                before[point] = grid.cells[point].GetPixels();
+            }
+        }
+
+        void IChange.Redo(Changes changes)
+        {
+            
+        }
+
+        void IChange.Undo(Changes changes)
+        {
+            foreach (var pair in before)
+            {
+                after[pair.Key] = grid.cells[pair.Key].GetPixels();
+                grid.cells[pair.Key].SetPixels(before[pair.Key]);
+                grid.cells[pair.Key].Apply();
+            }
+        }
+    }
+
     public int cellSize;
     public Dictionary<Point, Sprite> cells = new Dictionary<Point, Sprite>();
 
@@ -112,6 +179,8 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         var rect = Rect.MinMaxRect(cellMin.x, cellMin.y, cellMax.x, cellMax.y);
 
+        var chang = changes.GetChange(this, () => new Change { grid = this });
+
         // apply the brush to all cells it overlaps
         for (int y = (int) cellMin.y; y <= cellMax.y; ++y)
         {
@@ -124,11 +193,11 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                 if (cells.TryGetValue(cell, out sprite))
                 {
+                    chang.Changed(cell);
+
                     sprite.Brush(brush, cell * cellSize);
 
                     changes.sprites.Add(sprite);
-
-                    //Changed.Set(cell, true);
                 }
                 else
                 {

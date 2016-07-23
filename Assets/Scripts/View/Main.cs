@@ -350,7 +350,7 @@ public class Main : MonoBehaviour
         Vector2.up,
     };
 
-    private Stack<System.Action> undos = new Stack<System.Action>();
+    private Stack<Changes> undos = new Stack<Changes>();
     private Stack<Texture2D> copies = new Stack<Texture2D>();
 
     private byte[] Encode(Texture2D texture)
@@ -532,7 +532,7 @@ public class Main : MonoBehaviour
         if (undos.Count > 0
          && Input.GetKeyDown(KeyCode.Z))
         {
-            undos.Pop()();
+            undos.Pop().Undo();
         }
     }
 
@@ -565,7 +565,7 @@ public class Main : MonoBehaviour
 
     public void RecordPaletteHistory(int i, Color prev, Color next)
     {
-        undos.Push(() => EditPalette(i, prev));
+        //undos.Push(() => EditPalette(i, prev));
     }
 
     private void RefreshPalette(int i)
@@ -840,25 +840,16 @@ public class Main : MonoBehaviour
             if (!dragging_)
             {
                 dragging_ = true;
+                changes = new Changes();
 
                 var prevt = new Texture2D(256, 256);
                 prevt.SetPixels32(testTex.GetPixels32());
-
-                
-
-                undos.Push(() =>
-                {
-                    testTex.SetPixels32(prevt.GetPixels32());
-                    testTex.Apply();
-                });
             }
             else
             {
                 var adj = new Color(palettePanel.selected / 15f, 0, 0);
 
                 Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
-
-                var changes = new Changes();
 
                 world.background.SweepSprite(changes, stamp.brush, blend, prev, next);
 
@@ -868,11 +859,18 @@ public class Main : MonoBehaviour
         else
         {
             dragging_ = false;
+
+            if (changes != null)
+            {
+                undos.Push(changes);
+                changes = null;
+            }
         }
 
         prevMouse = nextMouse;
         prevCursor = nextCursor;
     }
 
+    private Changes changes;
     private bool dragging_;
 }
