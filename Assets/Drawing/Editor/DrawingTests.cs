@@ -67,6 +67,7 @@ public class DrawingTests
         int difference = Difference(reference, generated.texture);
 
         System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-Reference-01.png", generated.texture.EncodeToPNG());
+        AssetDatabase.Refresh();
 
         Assert.AreEqual(difference, 0, string.Format("Generated image doesn't match reference! ({0} difference)", difference));
     }
@@ -88,6 +89,7 @@ public class DrawingTests
 
         System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineCoords-Abs.png", generated1.texture.EncodeToPNG());
         System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineCoords-Rel.png", generated2.texture.EncodeToPNG());
+        AssetDatabase.Refresh();
 
         int difference = Difference(lineAbs.texture, lineRel.texture);
 
