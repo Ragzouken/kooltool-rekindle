@@ -279,8 +279,8 @@ public struct Brush
                                      (int) end.y, 
                                      plot);
         }
-        UnityEngine.Object.Destroy(circle.texture);
-        UnityEngine.Object.Destroy(circle);
+        UnityEngine.Object.DestroyImmediate(circle.texture);
+        UnityEngine.Object.DestroyImmediate(circle);
 
         return brush;
     }
