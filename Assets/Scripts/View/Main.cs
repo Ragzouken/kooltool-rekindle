@@ -127,7 +127,7 @@ public class Main : MonoBehaviour
     {
         freeToggle.isOn = true;
 
-        test = BlankTexture.New(128, 32, Color.white);
+        test = Texture2DExtensions.Blank(128, 32, Color.white);
 
         string path = Application.streamingAssetsPath + @"\test.txt";
         var script = ScriptFromCSV(File.ReadAllText(path));
@@ -136,9 +136,9 @@ public class Main : MonoBehaviour
         {
             var rect = new Rect(32 * i, 0, 32, 32);
 
-            PixelDraw.Brush.Apply(test, rect,
-                                  sprites[i].texture, sprites[i].textureRect,
-                                  PixelDraw.Blend.Replace);
+            Texture2DExtensions.Brush(test, rect,
+                                      sprites[i].texture, sprites[i].textureRect,
+                                      Blend.replace);
 
             sprites[i] = Sprite.Create(test, rect, Vector2.one * 0.5f, 1);
         }
@@ -712,6 +712,7 @@ public class Main : MonoBehaviour
 
                 if (input.click.IsPressed)
                 {
+                    /*
                     using (var brush = PixelDraw.Brush.Line(prevMouse, point, Color.red, 1))
                     //using (var brush = PixelDraw.Brush.Circle(3, Color.red))
                     {
@@ -736,6 +737,7 @@ public class Main : MonoBehaviour
 
                         sprite.texture.Apply();
                     }
+                    */
                 }
             }
 
@@ -747,6 +749,7 @@ public class Main : MonoBehaviour
 
                 if (clickedOnWorld)
                 {
+                    /*
                     using (var brush = PixelDraw.Brush.Line(prevMouse, point, Color.red, 1))
                     //using (var brush = PixelDraw.Brush.Circle(3, Color.red))
                     {
@@ -771,6 +774,7 @@ public class Main : MonoBehaviour
 
                         sprite.texture.Apply();
                     }
+                    */
                 }
             }
         }

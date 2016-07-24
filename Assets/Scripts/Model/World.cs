@@ -143,7 +143,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var cell in added)
             {
-                var texture = BlankTexture.New(grid.cellSize, grid.cellSize, Color.clear);
+                var texture = Texture2DExtensions.Blank(grid.cellSize, grid.cellSize, Color.clear);
                 var sprite = texture.FullSprite(pixelsPerUnit: 1);
 
                 grid.cells.Add(cell, sprite);
@@ -182,19 +182,6 @@ public class ImageGrid : ICopyable<ImageGrid>
         copy.cells = new Dictionary<Point, Sprite>(cells);
     }
 
-    public void SweepSprite(Changes changes,
-                            Sprite sprite,
-                            Blend.Function blend,
-                            Vector2 begin,
-                            Vector2 end)
-    {
-        PixelDraw.Bresenham.Line((int) begin.x,
-                                 (int) begin.y,
-                                 (int) end.x,
-                                 (int) end.y,
-                                 (x, y) => { Brush(changes, new Brush { position = new Vector2(x, y), blend = blend, sprite = sprite }); return true; });
-    }
-
     public void Brush(Changes changes, Brush brush)
     {
         Vector2 cellMin, cellMax, cell;
@@ -208,8 +195,6 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         brushMin.GridCoords(cellSize, out cellMin, out local);
         brushMax.GridCoords(cellSize, out cellMax, out local);
-
-        var rect = Rect.MinMaxRect(cellMin.x, cellMin.y, cellMax.x, cellMax.y);
 
         var chang = changes.GetChange(this, () => new Change { grid = this });
 
@@ -227,7 +212,7 @@ public class ImageGrid : ICopyable<ImageGrid>
                 { 
                     chang.Added(cell);
 
-                    var texture = BlankTexture.New(cellSize, cellSize, Color.clear);
+                    var texture = Texture2DExtensions.Blank(cellSize, cellSize, Color.clear);
                     sprite = texture.FullSprite(pixelsPerUnit: 1);
 
                     cells[cell] = sprite;

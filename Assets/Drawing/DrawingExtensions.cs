@@ -1,10 +1,16 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.Assertions;
-using System;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
+
+public static partial class Vector2Extensions
+{
+    public static Vector2 Floored(this Vector2 vector)
+    {
+        vector.x = Mathf.Floor(vector.x);
+        vector.y = Mathf.Floor(vector.y);
+
+        return vector;
+    }
+}
 
 public static partial class DrawingExtensions
 {
@@ -100,6 +106,43 @@ public static partial class SpriteExtensions
 
 public static partial class Texture2DExtensions
 {
+    public static Texture2D Blank(int width, int height, Color32 color)
+    {
+        var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
+        texture.filterMode = FilterMode.Point;
+
+        var pixels = new byte[width * height * 4];
+
+        for (int i = 0; i < pixels.Length; i += 4)
+        {
+            pixels[i + 0] = color.a;
+            pixels[i + 1] = color.r;
+            pixels[i + 2] = color.g;
+            pixels[i + 3] = color.b;
+        }
+
+        texture.LoadRawTextureData(pixels);
+        texture.Apply();
+
+        return texture;
+    }
+
+    public static Sprite FullSprite(this Texture2D texture,
+                                    Vector2 pivot = default(Vector2),
+                                    int pixelsPerUnit = 1)
+    {
+        var rect = new Rect(0, 0, texture.width, texture.height);
+
+        Sprite sprite = Sprite.Create(texture,
+                                      rect,
+                                      pivot,
+                                      pixelsPerUnit,
+                                      0U,
+                                      SpriteMeshType.FullRect);
+
+        return sprite;
+    }
+
     public static Color[] GetPixels(this Texture2D texture, 
                                     Rect rect)
     {
@@ -174,7 +217,7 @@ public struct Brush
         int left = Mathf.FloorToInt(diameter / 2f);
         float piv = left / (float) diameter;
 
-        Texture2D image = BlankTexture.New(diameter, diameter, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank(diameter, diameter, Color.clear);
 
         Sprite brush = Sprite.Create(image, 
                                      new Rect(0, 0, diameter, diameter),
@@ -237,7 +280,7 @@ public struct Brush
                                    Color color,
                                    float pivotX = 0, float pivotY = 0)
     {
-        Texture2D image = BlankTexture.New(width, height, color);
+        Texture2D image = Texture2DExtensions.Blank(width, height, color);
 
         Sprite brush = Sprite.Create(image, 
                                      new Rect(0, 0, width, height),
@@ -262,28 +305,26 @@ public struct Brush
         var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
         var rect = new Rect(0, 0, size.x, size.y);
 
-        Texture2D image = BlankTexture.New((int) size.x, (int) size.y, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y, Color.clear);
         Sprite brush = Sprite.Create(image, rect, anchor, 1);
         brush.name = "Line (Brush)";
 
         {
             var brush_ = new Brush { sprite = sprite, blend = Blend.alpha };
 
-            PixelDraw.Bresenham.PlotFunction plot = delegate (int x, int y)
+            Bresenham.PlotFunction plot = delegate (int x, int y)
             {
                 brush_.position.x = x;
                 brush_.position.y = y;
 
                 brush.Brush(brush_);
-
-                return true;
             };
 
-            PixelDraw.Bresenham.Line((int)start.x,
-                                     (int)start.y,
-                                     (int)end.x,
-                                     (int)end.y,
-                                     plot);
+            Bresenham.Line((int)start.x,
+                           (int)start.y,
+                           (int)end.x,
+                           (int)end.y,
+                           plot);
         }
 
         return brush;
@@ -306,7 +347,7 @@ public struct Brush
         var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
         var rect   = new Rect(0, 0, size.x, size.y);
 
-        Texture2D image = BlankTexture.New((int) size.x, (int) size.y, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y, Color.clear);
         Sprite brush = Sprite.Create(image, rect, anchor, 1);
         brush.name = "Line (Brush)";
 
@@ -314,25 +355,59 @@ public struct Brush
         {
             var brush_ = new Brush { sprite = circle, blend = Blend.alpha };
 
-            PixelDraw.Bresenham.PlotFunction plot = delegate (int x, int y)
+            Bresenham.PlotFunction plot = delegate (int x, int y)
             {
                 brush_.position.x = x;
                 brush_.position.y = y;
 
                 brush.Brush(brush_);
-                
-                return true;
             };
 
-            PixelDraw.Bresenham.Line((int) start.x, 
-                                     (int) start.y, 
-                                     (int) end.x, 
-                                     (int) end.y, 
-                                     plot);
+            Bresenham.Line((int) start.x, 
+                           (int) start.y, 
+                           (int) end.x, 
+                           (int) end.y, 
+                           plot);
         }
         UnityEngine.Object.DestroyImmediate(circle.texture);
         UnityEngine.Object.DestroyImmediate(circle);
 
         return brush;
+    }
+}
+
+// Author: Jason Morley (Source: http://www.morleydev.co.uk/blog/2010/11/18/generic-bresenhams-line-algorithm-in-visual-basic-net/)
+public static class Bresenham
+{
+    private static void Swap<T>(ref T lhs, ref T rhs) { T temp; temp = lhs; lhs = rhs; rhs = temp; }
+
+    public delegate void PlotFunction(int x, int y);
+
+    public static void Line(int x0, int y0, int x1, int y1, PlotFunction plot)
+    {
+        bool steep = Mathf.Abs(y1 - y0) > Mathf.Abs(x1 - x0);
+
+        if (steep) { Swap(ref x0, ref y0); Swap(ref x1, ref y1); }
+        if (x0 > x1) { Swap(ref x0, ref x1); Swap(ref y0, ref y1); }
+
+        int dX = (x1 - x0);
+        int dY = Mathf.Abs(y1 - y0);
+        int err = (dX / 2);
+        int ystep = (y0 < y1 ? 1 : -1);
+        int y = y0;
+
+        for (int x = x0; x <= x1; ++x)
+        {
+            if (steep) plot(y, x);
+            else plot(x, y);
+
+            err = err - dY;
+
+            if (err < 0)
+            {
+                y += ystep;
+                err += dX;
+            }
+        }
     }
 }

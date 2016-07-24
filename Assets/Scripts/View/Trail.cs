@@ -78,15 +78,15 @@ public class Trail : MonoBehaviour
 
         next = cam.focusTarget + offset * 8;
 
-        foreach (var point in PixelDraw.Bresenham.Line((int)prev.x, (int)prev.y, (int)next.x, (int)next.y))
+        Bresenham.Line((int)prev.x, (int)prev.y, (int)next.x, (int)next.y, (x, y) =>
         {
             particles.Add(new Particle
             {
-                position = point,
+                position = new Vector2(x, y),
                 lifetime = 4,
                 offset = Random.value,
             });
-        }
+        });
 
         prev = next;
     }
