@@ -20,8 +20,10 @@ public static class JSON
         settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
         settings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
         settings.Converters.Add(new Vector2Converter());
+        settings.Converters.Add(new RectConverter());
         settings.Converters.Add(new ColorConverter());
         settings.Converters.Add(new ByteSetConverter());
+        settings.Converters.Add(new PointConverter());
         settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
         settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     }
@@ -74,6 +76,76 @@ public class Vector2Converter : JsonConverter
         writer.WriteStartArray();
         writer.WriteValue(vector.x);
         writer.WriteValue(vector.y);
+        writer.WriteEndArray();
+    }
+}
+
+public class RectConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(Rect);
+    }
+
+    public override object ReadJson(JsonReader reader,
+                                    Type objectType,
+                                    object existingValue,
+                                    JsonSerializer serializer)
+    {
+        Rect rect = new Rect();
+
+        rect.xMin = (float) reader.ReadAsDecimal().GetValueOrDefault();
+        rect.yMin = (float) reader.ReadAsDecimal().GetValueOrDefault();
+        rect.xMax = (float) reader.ReadAsDecimal().GetValueOrDefault();
+        rect.yMax = (float) reader.ReadAsDecimal().GetValueOrDefault();
+        reader.Read();
+
+        return rect;
+    }
+
+    public override void WriteJson(JsonWriter writer,
+                                   object value,
+                                   JsonSerializer serializer)
+    {
+        Rect rect = (Rect) value;
+
+        writer.WriteStartArray();
+        writer.WriteValue(rect.xMin);
+        writer.WriteValue(rect.yMin);
+        writer.WriteValue(rect.xMax);
+        writer.WriteValue(rect.yMax);
+        writer.WriteEndArray();
+    }
+}
+
+public class PointConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(Point);
+    }
+
+    public override object ReadJson(JsonReader reader,
+                                    Type objectType,
+                                    object existingValue,
+                                    JsonSerializer serializer)
+    {
+        int x = (int) reader.ReadAsDecimal().GetValueOrDefault();
+        int y = (int) reader.ReadAsDecimal().GetValueOrDefault();
+        reader.Read();
+
+        return new Point(x, y);
+    }
+
+    public override void WriteJson(JsonWriter writer,
+                                   object value,
+                                   JsonSerializer serializer)
+    {
+        Point point = (Point) value;
+
+        writer.WriteStartArray();
+        writer.WriteValue(point.x);
+        writer.WriteValue(point.y);
         writer.WriteEndArray();
     }
 }

@@ -33,6 +33,145 @@ public class Copier : Dictionary<object, object>
     }
 }
 
+public class TextureResource : IResource
+{
+    public string id;
+    [JsonIgnore]
+    public Texture2D texture;
+
+    [JsonIgnore]
+    public string path
+    {
+        get
+        {
+            return Application.persistentDataPath + "/texture" + id + ".png";
+        }
+    }
+
+    bool IResource.LoadFinalisable(Project project)
+    {
+        return true;
+    }
+
+    void IResource.LoadFinalise(Project project)
+    {
+        texture = Texture2DExtensions.Blank(1, 1, Color.clear);
+        texture.LoadImage(System.IO.File.ReadAllBytes(path));
+    }
+
+    void IResource.SaveFinalise(Project project)
+    {
+        id = Guid.NewGuid().ToString();
+
+        System.IO.File.WriteAllBytes(path, texture.EncodeToPNG());
+    }
+
+    public TextureResource() { }
+
+    public TextureResource(Texture2D texture)
+    {
+        this.texture = texture;
+    }
+
+    public static implicit operator Texture2D(TextureResource resource)
+    {
+        return resource.texture;
+    }
+}
+
+public class SpriteResource : IResource
+{
+    public TextureResource texture;
+    public Vector2 pivot;
+    public Rect rect;
+
+    [JsonIgnore]
+    public Sprite sprite;
+
+    bool IResource.LoadFinalisable(Project project)
+    {
+        return project.LoadFinalised(texture);
+    }
+
+    void IResource.LoadFinalise(Project project)
+    {
+        sprite = Sprite.Create(texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+    }
+
+    void IResource.SaveFinalise(Project project)
+    {
+    }
+
+    public SpriteResource()
+    {
+    }
+
+    public SpriteResource(TextureResource texture, Sprite sprite)
+    {
+        this.sprite = sprite;
+        this.texture = texture;
+
+        pivot = sprite.pivot;
+        rect = sprite.textureRect;
+    }
+
+    public static implicit operator Sprite(SpriteResource resource)
+    {
+        return resource.sprite;
+    }
+}
+
+public class Project
+{
+    public HashSet<IResource> resources = new HashSet<IResource>();
+    public World world;
+
+    private HashSet<IResource> unfinalised = new HashSet<IResource>();
+
+    public void SaveFinalise()
+    {
+        foreach (IResource resource in resources)
+        {
+            resource.SaveFinalise(this);
+        }
+    }
+
+    public void LoadFinalise()
+    {
+        unfinalised.UnionWith(resources);
+
+        var ready = new List<IResource>();
+
+        do
+        {
+            ready.Clear();
+            ready.AddRange(unfinalised.Where(resource => resource.LoadFinalisable(this)));
+
+            foreach (var resource in ready)
+            {
+                resource.LoadFinalise(this);
+            }
+
+            unfinalised.ExceptWith(ready);
+        }
+        while (ready.Any());
+
+        Assert.IsFalse(unfinalised.Any(), "Didn't finalise all IResources!");
+    }
+
+    public bool LoadFinalised(params IResource[] dependencies)
+    {
+        return !dependencies.Intersect(unfinalised).Any();
+    }
+}
+
+public interface IResource
+{
+    bool LoadFinalisable(Project project);
+    void LoadFinalise(Project project);
+    void SaveFinalise(Project project);
+}
+
 public class World : ICopyable<World>
 {
     public Color[] palette = new Color[16];
@@ -135,7 +274,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             if (!before.TryGetValue(point, out original))
             {
-                before[point] = grid.cells[point].GetPixels();
+                before[point] = grid.cells[point].sprite.GetPixels();
             }
         }
 
@@ -143,17 +282,17 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var cell in added)
             {
-                var texture = Texture2DExtensions.Blank(grid.cellSize, grid.cellSize, Color.clear);
-                var sprite = texture.FullSprite(pixelsPerUnit: 1);
+                var texture = new TextureResource(Texture2DExtensions.Blank(grid.cellSize, grid.cellSize, Color.clear));
+                var sprite = new SpriteResource(texture, texture.texture.FullSprite(pixelsPerUnit: 1));
 
                 grid.cells.Add(cell, sprite);
             }
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].GetPixels();
-                grid.cells[pair.Key].SetPixels(after[pair.Key]);
-                grid.cells[pair.Key].Apply();
+                before[pair.Key] = grid.cells[pair.Key].sprite.GetPixels();
+                grid.cells[pair.Key].sprite.SetPixels(after[pair.Key]);
+                grid.cells[pair.Key].sprite.Apply();
             }
         }
 
@@ -161,9 +300,9 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].GetPixels();
-                grid.cells[pair.Key].SetPixels(before[pair.Key]);
-                grid.cells[pair.Key].Apply();
+                after[pair.Key] = grid.cells[pair.Key].sprite.GetPixels();
+                grid.cells[pair.Key].sprite.SetPixels(before[pair.Key]);
+                grid.cells[pair.Key].sprite.Apply();
             }
 
             foreach (var cell in added)
@@ -173,20 +312,29 @@ public class ImageGrid : ICopyable<ImageGrid>
         }
     }
 
+    public Project project;
+
+    [JsonArray]
+    public class GridDict : Dictionary<Point, SpriteResource>
+    {
+        public GridDict() : base() { }
+        public GridDict(Dictionary<Point, SpriteResource> dict) : base(dict) { }
+    };
+
     public int cellSize;
-    public Dictionary<Point, Sprite> cells = new Dictionary<Point, Sprite>();
+    public GridDict cells = new GridDict();
 
     public void Copy(Copier copier, ImageGrid copy)
     {
         copy.cellSize = cellSize;
-        copy.cells = new Dictionary<Point, Sprite>(cells);
+        copy.cells = new GridDict(cells);
     }
 
     public void Brush(Changes changes, Brush brush)
     {
         Vector2 cellMin, cellMax, cell;
         Vector2 local;
-        Sprite sprite;
+        SpriteResource sprite;
 
         // find the rectangle of cells that contains the brush
         Vector2 brushMin = brush.position - brush.sprite.pivot;
@@ -212,8 +360,11 @@ public class ImageGrid : ICopyable<ImageGrid>
                 { 
                     chang.Added(cell);
 
-                    var texture = Texture2DExtensions.Blank(cellSize, cellSize, Color.clear);
-                    sprite = texture.FullSprite(pixelsPerUnit: 1);
+                    var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear));
+                    sprite = new SpriteResource(texture, texture.texture.FullSprite(pixelsPerUnit: 1));
+
+                    project.resources.Add((TextureResource) texture);
+                    project.resources.Add(sprite);
 
                     cells[cell] = sprite;
 
@@ -222,7 +373,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                 chang.Changed(cell);
 
-                sprite.Brush(brush, cell * cellSize);
+                sprite.sprite.Brush(brush, cell * cellSize);
 
                 changes.sprites.Add(sprite);
             }
@@ -232,18 +383,13 @@ public class ImageGrid : ICopyable<ImageGrid>
     public Color GetPixel(Vector2 position)
     {
         Vector2 cell, local;
-        Sprite sprite;
+        SpriteResource sprite;
 
         position.GridCoords(cellSize, out cell, out local);
 
         return cells.TryGetValue(cell, out sprite)
-             ? sprite.GetPixel(local)
+             ? sprite.sprite.GetPixel(local)
              : Color.clear;
-    }
-
-    public void Apply()
-    {
-        foreach (var thing in cells.Values) thing.Apply();
     }
 }
 
@@ -251,6 +397,7 @@ public class Costume
 {
     public World world;
 
+    [JsonIgnore]
     public Sprite up, down, left, right;
 
     public Sprite this[Position.Direction direction]

@@ -41,7 +41,7 @@ public class PalettePanel : MonoBehaviour
         {
             inside = false;
 
-            main.RecordPaletteHistory(selected, original, main.world.palette[selected]);
+            main.RecordPaletteHistory(selected, original, main.project.world.palette[selected]);
         });
     }
 
@@ -55,7 +55,7 @@ public class PalettePanel : MonoBehaviour
         if (!inside)
         {
             inside = true;
-            original = main.world.palette[selected];
+            original = main.project.world.palette[selected];
         }
 
         main.EditPalette(selected, Color.HSVToRGB(hueSaturationSlider.value.x, 

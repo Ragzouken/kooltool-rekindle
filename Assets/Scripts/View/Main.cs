@@ -10,8 +10,20 @@ using InControl;
 
 using UnityEngine.EventSystems;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 public class Main : MonoBehaviour
 {
+#if UNITY_EDITOR
+    [MenuItem("Tools/Delete Prefs")]
+    public static void DeletePrefs()
+    {
+        PlayerPrefs.DeleteAll();
+    }
+#endif
+
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
@@ -24,7 +36,6 @@ public class Main : MonoBehaviour
 
     [SerializeField] private ToggleAnimatorBool toggler;
     [SerializeField] private RectTransform cursor;
-    [SerializeField] private SpriteRenderer testDraw;
 
     [SerializeField] private Image brightImage;
     [SerializeField] private Slider brightSlider;
@@ -33,12 +44,12 @@ public class Main : MonoBehaviour
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
 
-    public World world { get; private set; }
+    public Project project { get; private set; }
     private World saved;
 
     private Actor possessed;
 
-    public Texture2D test;
+    private Texture2D test;
 
     public static bool mouseOverUI
     {
@@ -167,6 +178,7 @@ public class Main : MonoBehaviour
             up = sprites[3],
         };
 
+        var p = new Project();
         var w = new World();
         
         for (int i = 1; i < 16; ++i)
@@ -174,17 +186,19 @@ public class Main : MonoBehaviour
             w.palette[i] = new Color(Random.value, Random.value, Random.value, 1f);
         }
 
+        p.world = w;
+        w.background.project = p;
         w.background.cellSize = 256;
-        SetWorld(w);
+        SetProject(p);
 
         for (int i = 0; i < 16; ++i)
         {
             var next = Vector2.right * Random.Range(-8, 8) * 32
                      + Vector2.up    * Random.Range(-8, 8) * 32;
 
-            world.actors.Add(new Actor
+            project.world.actors.Add(new Actor
             {
-                world = world,
+                world = project.world,
                 costume = costume,
                 script = script,
                 state = new State { fragment = "start", line = 0 },
@@ -197,7 +211,7 @@ public class Main : MonoBehaviour
             });
         }
 
-        saved = world.Copy();
+        saved = project.world.Copy();
 
         Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
 
@@ -386,12 +400,22 @@ public class Main : MonoBehaviour
             change = true;
         }
 
-        if (Input.GetKeyDown(KeyCode.Y))
+        string path = Application.persistentDataPath + "/test.json.txt";
+
+        if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
-            if (redos.Count > 0)
-            {
-                
-            }
+            var p = JSON.Deserialise<Project>(File.ReadAllText(path));
+
+            p.LoadFinalise();
+
+            SetProject(p);
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightBracket))
+        {
+            project.SaveFinalise();
+
+            File.WriteAllText(path, JSON.Serialise(project));
         }
 
         if (possessed != null)
@@ -478,12 +502,12 @@ public class Main : MonoBehaviour
         }
     }
 
-    private void SetWorld(World world)
+    private void SetProject(Project project)
     {
-        this.world = world;
+        this.project = project;
 
-        worldView.Setup(world);
-        palettePanel.SetWorld(world);
+        worldView.Setup(project.world);
+        palettePanel.SetWorld(project.world);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -500,7 +524,7 @@ public class Main : MonoBehaviour
 
     public void EditPalette(int i, Color color)
     {
-        world.palette[i] = color;
+        project.world.palette[i] = color;
 
         RefreshPalette(i);
     }
@@ -536,8 +560,8 @@ public class Main : MonoBehaviour
     {
         string name = string.Format("_Palette{0:D2}", i);
 
-        material1.SetColor(name, world.palette[i]);
-        material2.SetColor(name, world.palette[i]);
+        material1.SetColor(name, project.world.palette[i]);
+        material2.SetColor(name, project.world.palette[i]);
     }
 
     private GameObject hovering;
@@ -559,13 +583,13 @@ public class Main : MonoBehaviour
         nextCursor = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
 
-        worldView.actors.SetActive(world.actors);
+        worldView.actors.SetActive(project.world.actors);
 
         CheckHotkeys();
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            foreach (Actor actor in world.actors)
+            foreach (Actor actor in project.world.actors)
             {
                 actor.state.fragment = "bump";
                 actor.state.line = 0;
@@ -574,13 +598,13 @@ public class Main : MonoBehaviour
 
         float interval = 0.1f;
 
-        world.timer += Time.deltaTime;
+        project.world.timer += Time.deltaTime;
 
-        while (world.timer > interval)
+        while (project.world.timer > interval)
         {
-            world.timer -= interval;
+            project.world.timer -= interval;
 
-            foreach (Actor actor in world.actors)
+            foreach (Actor actor in project.world.actors)
             {
                 if (actor.position.moving) continue;
 
@@ -620,7 +644,7 @@ public class Main : MonoBehaviour
             }
         }
 
-        foreach (Actor actor in world.actors)
+        foreach (Actor actor in project.world.actors)
         {
             if (!actor.position.moving) continue;
 
@@ -641,15 +665,6 @@ public class Main : MonoBehaviour
 
         clickingOnWorld = clickedOnWorld
                        || (clickingOnWorld && Input.GetMouseButton(0));
-
-        if (Input.GetKeyDown(KeyCode.LeftBracket))
-        {
-            saved = world.Copy();
-        }
-        else if (Input.GetKeyDown(KeyCode.RightBracket) && saved != null)
-        {
-            SetWorld(saved.Copy());
-        }
 
         var plane = new Plane(Vector3.forward, Vector3.zero);
         var ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -672,7 +687,7 @@ public class Main : MonoBehaviour
                 {
                     if (possessed == actor) possessed = null;
 
-                    world.actors.Remove(actor);
+                    project.world.actors.Remove(actor);
                 }
             }
             else if (plane.Raycast(ray, out t))
@@ -682,10 +697,10 @@ public class Main : MonoBehaviour
                     point.x = Mathf.RoundToInt(point.x / 32);
                     point.y = Mathf.RoundToInt(point.y / 32);
 
-                    world.actors.Add(new Actor
+                    project.world.actors.Add(new Actor
                     {
                         position = new Position { next = point * 32, prev = point * 32 },
-                        world = world,
+                        world = project.world,
                     });
                 }
             }
@@ -808,11 +823,11 @@ public class Main : MonoBehaviour
         next.x = (int)next.x;
         next.y = (int)next.y;
 
-        if ((Input.GetMouseButtonUp(0) || input.click.WasPressed) 
+        if ((Input.GetMouseButton(0) || input.click.WasPressed) 
          && !mouseOverUI
          && palettePanel.mode == PalettePanel.Mode.Colors)
         {
-            int index = (int) (world.background.GetPixel(next).r * 15);
+            int index = (int) (project.world.background.GetPixel(next).r * 15);
 
             palettePanel.SelectPaletteIndex(index);
         }
@@ -833,7 +848,7 @@ public class Main : MonoBehaviour
                     Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
 
                     var line = Brush.Sweep(stamp.brush, prev, next);
-                    world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
+                    project.world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
 
                     changes.ApplyTextures();
                 }
@@ -849,7 +864,7 @@ public class Main : MonoBehaviour
 
                         Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
 
-                        world.background.Brush(changes, new Brush { sprite = stamp.brush, position = next, blend = blend });
+                        project.world.background.Brush(changes, new Brush { sprite = stamp.brush, position = next, blend = blend });
 
                         changes.ApplyTextures();
                     }
