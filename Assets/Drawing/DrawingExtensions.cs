@@ -110,6 +110,7 @@ public static partial class Texture2DExtensions
     {
         var texture = new Texture2D(width, height, TextureFormat.ARGB32, false);
         texture.filterMode = FilterMode.Point;
+        texture.wrapMode = TextureWrapMode.Clamp;
 
         var pixels = new byte[width * height * 4];
 
