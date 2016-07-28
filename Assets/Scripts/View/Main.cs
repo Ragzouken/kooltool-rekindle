@@ -140,8 +140,8 @@ public class Main : MonoBehaviour
 
         test = Texture2DExtensions.Blank(128, 32, Color.white);
 
-        string path = Application.streamingAssetsPath + @"\test.txt";
-        var script = ScriptFromCSV(File.ReadAllText(path));
+        //string path = Application.streamingAssetsPath + @"\test.txt";
+        //var script = ScriptFromCSV(File.ReadAllText(path));
 
         for (int i = 0; i < 4; ++i)
         {
@@ -200,7 +200,7 @@ public class Main : MonoBehaviour
             {
                 world = project.world,
                 costume = costume,
-                script = script,
+                //script = script,
                 state = new State { fragment = "start", line = 0 },
                 position = new Position
                 {
@@ -213,8 +213,9 @@ public class Main : MonoBehaviour
 
         saved = project.world.Copy();
 
-        Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
+        //Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
 
+        /*
         var watcher = new FileSystemWatcher(Application.streamingAssetsPath);
 
         watcher.Changed += (source, args) =>
@@ -235,6 +236,7 @@ public class Main : MonoBehaviour
         };
 
         watcher.EnableRaisingEvents = true;
+        */
 
         //Application.OpenURL(path);
 
@@ -598,7 +600,7 @@ public class Main : MonoBehaviour
 
         project.world.timer += Time.deltaTime;
 
-        while (project.world.timer > interval)
+        while (project.world.timer > interval && false)
         {
             project.world.timer -= interval;
 
