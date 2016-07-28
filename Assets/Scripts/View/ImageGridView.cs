@@ -35,5 +35,6 @@ public class ImageGridView : ViewComponent<ImageGrid>
     public void Refresh()
     {
         cells.SetActive(model.cells.Keys);
+        cells.MapActive(InitCell);
     }
 }
