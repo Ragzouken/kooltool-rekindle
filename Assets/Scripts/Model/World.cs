@@ -31,11 +31,24 @@ public class Copier : Dictionary<object, object>
 
         return (T) copy;
     }
+
+    public T CopyFake<T>(T original)
+    {
+        object copy;
+
+        if (!TryGetValue(original, out copy))
+        {
+            Debug.LogError("Don't know how to create copy of abstract type!");
+        }
+
+        return (T) copy;
+    }
 }
 
-public class TextureResource : IResource
+public class TextureResource : IResource, ICopyable<TextureResource>
 {
-    public string id;
+    public string id = "";
+    public bool dirty = false;
     [JsonIgnore]
     public Texture2D texture;
 
@@ -61,7 +74,9 @@ public class TextureResource : IResource
 
     void IResource.SaveFinalise(Project project)
     {
-        id = Guid.NewGuid().ToString();
+        if (!dirty) return;
+
+        id = id == "" ? Guid.NewGuid().ToString() : id;
 
         System.IO.File.WriteAllBytes(path, texture.EncodeToPNG());
     }
@@ -77,9 +92,17 @@ public class TextureResource : IResource
     {
         return resource.texture;
     }
+
+    public void Copy(Copier copier, TextureResource copy)
+    {
+        copy.texture = Texture2DExtensions.Blank(texture.width, texture.height, Color.clear);
+        copy.texture.SetPixels32(texture.GetPixels32());
+
+        copy.id = id;
+    }
 }
 
-public class SpriteResource : IResource
+public class SpriteResource : IResource, ICopyable<SpriteResource>
 {
     public TextureResource texture;
     public Vector2 pivot;
@@ -119,9 +142,17 @@ public class SpriteResource : IResource
     {
         return resource.sprite;
     }
+
+    public void Copy(Copier copier, SpriteResource copy)
+    {
+        copy.texture = copier.Copy(texture);
+        copy.pivot = pivot;
+        copy.rect = rect;
+        copy.sprite = Sprite.Create(copy.texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+    }
 }
 
-public class Project
+public class Project : ICopyable<Project>
 {
     public HashSet<IResource> resources = new HashSet<IResource>();
     public World world;
@@ -162,6 +193,14 @@ public class Project
     public bool LoadFinalised(params IResource[] dependencies)
     {
         return !dependencies.Intersect(unfinalised).Any();
+    }
+
+    public void Copy(Copier copier, Project copy)
+    {
+        copy.world = copier.Copy(world);
+        // every resource should have already been copied, if not then it
+        // doesn't matter that we can't copy it anyway...
+        copy.resources = new HashSet<IResource>(resources.Select(resource => copier.CopyFake(resource)));
     }
 }
 
@@ -327,7 +366,8 @@ public class ImageGrid : ICopyable<ImageGrid>
     public void Copy(Copier copier, ImageGrid copy)
     {
         copy.cellSize = cellSize;
-        copy.cells = new GridDict(cells);
+        copy.cells = new GridDict(cells.ToDictionary(pair => pair.Key,
+                                                     pair => copier.Copy(pair.Value)));
     }
 
     public void Brush(Changes changes, Brush brush)
