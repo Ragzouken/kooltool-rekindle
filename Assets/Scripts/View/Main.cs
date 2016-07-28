@@ -14,6 +14,8 @@ using UnityEngine.EventSystems;
 using UnityEditor;
 #endif
 
+using Stopwatch = System.Diagnostics.Stopwatch;
+
 public class Main : MonoBehaviour
 {
 #if UNITY_EDITOR
@@ -404,18 +406,33 @@ public class Main : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
+            var timer = Stopwatch.StartNew();
+
             var p = JSON.Deserialise<Project>(File.ReadAllText(path));
 
             p.LoadFinalise();
 
+            timer.Stop();
+            Debug.Log("Loaded in " + timer.Elapsed.TotalSeconds);
+
+            timer = Stopwatch.StartNew();
+
             SetProject(p);
+
+            timer.Stop();
+            Debug.Log("Refreshed in " + timer.Elapsed.TotalSeconds);
         }
 
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
+            var timer = Stopwatch.StartNew();
+            
             project.SaveFinalise();
 
             File.WriteAllText(path, JSON.Serialise(project));
+
+            timer.Stop();
+            Debug.Log("Saved in " + timer.Elapsed.TotalSeconds);
         }
 
         if (possessed != null)
@@ -500,6 +517,39 @@ public class Main : MonoBehaviour
         {
             Redo();
         }
+
+        if (Input.GetKeyDown(KeyCode.P))
+        {
+            TestCopy();
+        }
+    }
+
+    private void TestCopy()
+    {
+        List<object> memory = new List<object>();
+
+        var timer = Stopwatch.StartNew();
+
+        for (int i = 0; i < 512; ++i)
+        {
+            var copier = new Copier();
+            memory.Add(copier.Copy(project));
+        }
+
+        timer.Stop();
+
+        Debug.Log("Copies in " + timer.Elapsed.TotalSeconds);
+
+        timer = Stopwatch.StartNew();
+
+        for (int i = 0; i < 512; ++i)
+        {
+            memory.Add(JSON.Serialise(project));
+        }
+
+        timer.Stop();
+
+        Debug.Log("Encodes in " + timer.Elapsed.TotalSeconds);
     }
 
     private void SetProject(Project project)
