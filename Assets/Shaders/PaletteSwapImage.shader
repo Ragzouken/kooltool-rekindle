@@ -91,7 +91,22 @@
 
 		sampler2D _MainTex;
 
-		fixed4 _Palette[16];
+			fixed4 _Palette00;
+			fixed4 _Palette01;
+			fixed4 _Palette02;
+			fixed4 _Palette03;
+			fixed4 _Palette04;
+			fixed4 _Palette05;
+			fixed4 _Palette06;
+			fixed4 _Palette07;
+			fixed4 _Palette08;
+			fixed4 _Palette09;
+			fixed4 _Palette10;
+			fixed4 _Palette11;
+			fixed4 _Palette12;
+			fixed4 _Palette13;
+			fixed4 _Palette14;
+			fixed4 _Palette15;
 
 			fixed4 frag (v2f IN) : SV_Target
 			{
@@ -102,7 +117,22 @@
 
 				int c = col.r * 15;
 
-				col = _Palette[col.r * 15];
+				if (c ==  0) col = _Palette00;
+				if (c ==  1) col = _Palette01;
+				if (c ==  2) col = _Palette02;
+				if (c ==  3) col = _Palette03;
+				if (c ==  4) col = _Palette04;
+				if (c ==  5) col = _Palette05;
+				if (c ==  6) col = _Palette06;
+				if (c ==  7) col = _Palette07;
+				if (c ==  8) col = _Palette08;
+				if (c ==  9) col = _Palette09;
+				if (c == 10) col = _Palette10;
+				if (c == 11) col = _Palette11;
+				if (c == 12) col = _Palette12;
+				if (c == 13) col = _Palette13;
+				if (c == 14) col = _Palette14;
+				if (c == 15) col = _Palette15;
 
 				col.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
 

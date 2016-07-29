@@ -610,8 +610,10 @@ public class Main : MonoBehaviour
 
     private void RefreshPalette(int i)
     {
-        material1.SetColorArray("_Palette", project.world.palette);
-        material2.SetColorArray("_Palette", project.world.palette);
+        string name = string.Format("_Palette{0:D2}", i);
+
+        material1.SetColor(name, project.world.palette[i]);
+        material2.SetColor(name, project.world.palette[i]);
     }
 
     private GameObject hovering;
