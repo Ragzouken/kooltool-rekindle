@@ -142,6 +142,12 @@ public class Main : MonoBehaviour
 
         test = Texture2DExtensions.Blank(128, 32, Color.white);
 
+        var brushtext = Texture2DExtensions.Blank(16, 16, Color.clear);
+        brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
+
+        var blanktext = Texture2DExtensions.Blank(16, 16, Color.clear);
+        blankSprite = blanktext.FullSprite();
+
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
 
@@ -625,8 +631,14 @@ public class Main : MonoBehaviour
     private Vector2 nextCursor, nextMouse;
     private Vector2 prevCursor, prevMouse;
 
+    private Sprite blankSprite;
+    private Sprite brushSprite;
+    [SerializeField] private SpriteRenderer brushRenderer;
+
     private void Update()
     {
+        if (locked) return;
+
         var color = Color.white * brightSlider.value;
         color.a = 1;
 
@@ -875,7 +887,19 @@ public class Main : MonoBehaviour
         next.x = (int)next.x;
         next.y = (int)next.y;
 
-        if ((Input.GetMouseButton(0) || input.click.WasPressed) 
+        var adj = new Color(palettePanel.selected / 15f, 0, 0);
+        Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
+        Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
+
+
+        brushRenderer.sprite = brushSprite;
+        brushRenderer.transform.position = next;
+
+        //brushSprite.Brush(blankSprite.AsBrush(Vector2.zero * -8, Blend.replace));
+        brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
+        brushSprite.Apply();
+
+        if ((Input.GetMouseButtonDown(0) || input.click.WasPressed) 
          && !mouseOverUI
          && palettePanel.mode == PalettePanel.Mode.Colors)
         {
@@ -895,10 +919,6 @@ public class Main : MonoBehaviour
             {
                 if (freeToggle.isOn)
                 {
-                    var adj = new Color(palettePanel.selected / 15f, 0, 0);
-
-                    Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
-
                     var line = Brush.Sweep(stamp.brush, prev, next);
                     project.world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
 
@@ -906,15 +926,11 @@ public class Main : MonoBehaviour
                 }
                 else if (stampToggle.isOn)
                 {
-                    stampTimer -= Time.deltaTime;
+                    stampTimer -= (next - prev).magnitude;
 
                     if (stampTimer <= 0f)
                     {
-                        stampTimer += mouse ? 0.1f : 0.2f;
-
-                        var adj = new Color(palettePanel.selected / 15f, 0, 0);
-
-                        Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
+                        stampTimer += 16;
 
                         project.world.background.Brush(changes, new Brush { sprite = stamp.brush, position = next, blend = blend });
 
@@ -942,4 +958,16 @@ public class Main : MonoBehaviour
     private Changes changes;
     private bool dragging_;
     private float stampTimer;
+
+    public bool locked { get; private set; }
+
+    public void Lock()
+    {
+        locked = true;
+    }
+
+    public void Unlock()
+    {
+        locked = false;
+    }
 }

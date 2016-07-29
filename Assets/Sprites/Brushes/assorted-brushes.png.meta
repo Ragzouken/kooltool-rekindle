@@ -76,13 +76,16 @@ TextureImporter:
   alignment: 9
   spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 1
   alphaIsTransparency: 1
+  spriteTessellationDetail: -1
   textureType: 5
   buildTargetSettings: []
   spriteSheet:
+    serializedVersion: 2
     sprites:
-    - name: assorted-brushes_0
+    - serializedVersion: 2
+      name: assorted-brushes_0
       rect:
         serializedVersion: 2
         x: 0
@@ -93,7 +96,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_1
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_1
       rect:
         serializedVersion: 2
         x: 16
@@ -104,7 +109,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_2
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_2
       rect:
         serializedVersion: 2
         x: 32
@@ -115,7 +122,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_3
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_3
       rect:
         serializedVersion: 2
         x: 48
@@ -126,7 +135,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_4
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_4
       rect:
         serializedVersion: 2
         x: 64
@@ -137,7 +148,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_5
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_5
       rect:
         serializedVersion: 2
         x: 80
@@ -148,7 +161,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_6
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_6
       rect:
         serializedVersion: 2
         x: 96
@@ -159,7 +174,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_7
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_7
       rect:
         serializedVersion: 2
         x: 112
@@ -170,7 +187,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_8
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_8
       rect:
         serializedVersion: 2
         x: 0
@@ -181,7 +200,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_9
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_9
       rect:
         serializedVersion: 2
         x: 16
@@ -192,7 +213,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_10
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_10
       rect:
         serializedVersion: 2
         x: 32
@@ -203,7 +226,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_11
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_11
       rect:
         serializedVersion: 2
         x: 48
@@ -214,7 +239,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_12
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_12
       rect:
         serializedVersion: 2
         x: 64
@@ -225,7 +252,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_13
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_13
       rect:
         serializedVersion: 2
         x: 80
@@ -236,7 +265,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_14
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_14
       rect:
         serializedVersion: 2
         x: 96
@@ -247,7 +278,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_15
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_15
       rect:
         serializedVersion: 2
         x: 112
@@ -258,7 +291,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_16
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_16
       rect:
         serializedVersion: 2
         x: 0
@@ -269,7 +304,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_17
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_17
       rect:
         serializedVersion: 2
         x: 16
@@ -280,7 +317,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_18
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_18
       rect:
         serializedVersion: 2
         x: 32
@@ -291,7 +330,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_19
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_19
       rect:
         serializedVersion: 2
         x: 48
@@ -302,7 +343,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_20
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_20
       rect:
         serializedVersion: 2
         x: 64
@@ -313,7 +356,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_21
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_21
       rect:
         serializedVersion: 2
         x: 80
@@ -324,7 +369,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_22
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_22
       rect:
         serializedVersion: 2
         x: 96
@@ -335,7 +382,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_23
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_23
       rect:
         serializedVersion: 2
         x: 112
@@ -346,7 +395,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_24
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_24
       rect:
         serializedVersion: 2
         x: 0
@@ -357,7 +408,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_25
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_25
       rect:
         serializedVersion: 2
         x: 16
@@ -368,7 +421,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_26
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_26
       rect:
         serializedVersion: 2
         x: 32
@@ -379,7 +434,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_27
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_27
       rect:
         serializedVersion: 2
         x: 48
@@ -390,7 +447,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_28
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_28
       rect:
         serializedVersion: 2
         x: 64
@@ -401,7 +460,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_29
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_29
       rect:
         serializedVersion: 2
         x: 48
@@ -412,7 +473,9 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
-    - name: assorted-brushes_30
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: assorted-brushes_30
       rect:
         serializedVersion: 2
         x: 64
@@ -423,6 +486,7 @@ TextureImporter:
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       outline: []
+      tessellationDetail: -1
     outline: []
   spritePackingTag: brush
   userData: 
