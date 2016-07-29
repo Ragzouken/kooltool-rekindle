@@ -145,9 +145,6 @@ public class Main : MonoBehaviour
         var brushtext = Texture2DExtensions.Blank(16, 16, Color.clear);
         brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
 
-        var blanktext = Texture2DExtensions.Blank(16, 16, Color.clear);
-        blankSprite = blanktext.FullSprite();
-
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
 
@@ -631,7 +628,6 @@ public class Main : MonoBehaviour
     private Vector2 nextCursor, nextMouse;
     private Vector2 prevCursor, prevMouse;
 
-    private Sprite blankSprite;
     private Sprite brushSprite;
     [SerializeField] private SpriteRenderer brushRenderer;
 
@@ -894,8 +890,6 @@ public class Main : MonoBehaviour
 
         brushRenderer.sprite = brushSprite;
         brushRenderer.transform.position = next;
-
-        //brushSprite.Brush(blankSprite.AsBrush(Vector2.zero * -8, Blend.replace));
         brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
         brushSprite.Apply();
 

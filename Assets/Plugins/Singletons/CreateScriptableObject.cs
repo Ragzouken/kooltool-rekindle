@@ -36,9 +36,13 @@ namespace CreateScriptableObject
         {
             query = EditorGUILayout.TextField("Search", query);
 
-            EditorGUILayout.BeginScrollView(scroll);
+            scroll = EditorGUILayout.BeginScrollView(scroll);
 
-            var types = Assembly.GetExecutingAssembly().GetTypes();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var types = assemblies.Where(assembly => assembly.FullName.Contains("Assembly-CSharp")).SelectMany(assembly => assembly.GetTypes());
+
+            Debug.Log(string.Join("\n", assemblies.Select(a => a.ToString()).ToArray()));
+
             var valid = types.Where(type => type.IsSubclassOf(typeof(ScriptableObject)))
                              .Where(type => !type.IsGenericTypeDefinition);
 
@@ -49,7 +53,7 @@ namespace CreateScriptableObject
                 {
                     Close();
 
-                    var obj = ScriptableObject.CreateInstance(type);
+                    var obj = CreateInstance(type);
 
                     string path = AssetDatabase.GenerateUniqueAssetPath(folder + "/" + type.Name + ".asset");
 
