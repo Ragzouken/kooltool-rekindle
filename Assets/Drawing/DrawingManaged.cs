@@ -9,26 +9,26 @@ using System.Collections.Generic;
 public class DrawingTexture
 {
     public Texture2D texture;
-    public Color32[] colors;
+    public Color[] colors;
 
     public DrawingTexture(Texture2D texture)
     {
         this.texture = texture;
 
-        colors = texture.GetPixels32();
+        colors = texture.GetPixels();
     }
 
     public void Apply()
     {
-        texture.SetPixels32(colors);
+        texture.SetPixels(colors);
         texture.Apply();
     }
 
     public static void Brush(DrawingTexture canvas, Rect canvasRect,
                              DrawingTexture brush, Rect brushRect,
-                             Blend32.Function blend)
+                             Blend.Function blend)
     {
-        var data = new Blend32.Data();
+        var data = new Blend.Data();
 
         int dx = (int) brushRect.xMin - (int) canvasRect.xMin;
         int dy = (int) brushRect.yMin - (int) canvasRect.yMin;
@@ -84,7 +84,7 @@ public class DrawingSprite
     }
 
     public DrawingBrush AsBrush(Vector2 position,
-                                Blend32.Function blend)
+                                Blend.Function blend)
     {
         return new DrawingBrush
         {
@@ -137,31 +137,11 @@ public class DrawingSprite
     }
 }
 
-public static class Blend32
-{
-    public struct Data
-    {
-        public Color32 canvas;
-        public Color32 brush;
-    }
-
-    public delegate Color32 Function(Data data);
-
-    public static Function alpha = data => data.brush.a > 0 ? data.brush : data.canvas;
-    //public static Function add = data => data.canvas + data.brush;
-    //public static Function subtract = data => data.canvas - data.brush;
-    //public static Function multiply = data => data.canvas * data.brush;
-    public static Function replace = data => data.brush;
-
-    public static Function stencilKeep = data => Color32.Lerp(Color.clear, data.canvas, data.brush.a);
-    public static Function stencilCut = data => Color32.Lerp(data.canvas, Color.clear, data.brush.a);
-}
-
 public struct DrawingBrush
 {
     public DrawingSprite sprite;
     public Vector2 position;
-    public Blend32.Function blend;
+    public Blend.Function blend;
 
     public static DrawingSprite Circle(int diameter, Color color)
     {
@@ -270,7 +250,7 @@ public struct DrawingBrush
         var dSprite = new DrawingSprite(dTexture, brush);
 
         {
-            var brush_ = new DrawingBrush { sprite = sprite, blend = Blend32.alpha };
+            var brush_ = new DrawingBrush { sprite = sprite, blend = Blend.alpha };
 
             Bresenham.PlotFunction plot = delegate (int x, int y)
             {
@@ -316,7 +296,7 @@ public struct DrawingBrush
 
         DrawingSprite circle = Circle(thickness, color);
         {
-            var brush_ = new DrawingBrush { sprite = circle, blend = Blend32.alpha };
+            var brush_ = new DrawingBrush { sprite = circle, blend = Blend.alpha };
 
             Bresenham.PlotFunction plot = delegate (int x, int y)
             {
