@@ -45,6 +45,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
+    [SerializeField] private GameObject saveBlocker;
 
     public Project project { get; private set; }
     private World saved;
@@ -411,33 +412,12 @@ public class Main : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
-            var timer = Stopwatch.StartNew();
-
-            var p = JSON.Deserialise<Project>(File.ReadAllText(path));
-
-            p.LoadFinalise();
-
-            timer.Stop();
-            Debug.Log("Loaded in " + timer.Elapsed.TotalSeconds);
-
-            timer = Stopwatch.StartNew();
-
-            SetProject(p);
-
-            timer.Stop();
-            Debug.Log("Refreshed in " + timer.Elapsed.TotalSeconds);
+            StartCoroutine(LoadProject());
         }
 
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
-            var timer = Stopwatch.StartNew();
-            
-            project.SaveFinalise();
-
-            File.WriteAllText(path, JSON.Serialise(project));
-
-            timer.Stop();
-            Debug.Log("Saved in " + timer.Elapsed.TotalSeconds);
+            StartCoroutine(SaveProject());
         }
 
         if (possessed != null)
@@ -887,7 +867,7 @@ public class Main : MonoBehaviour
         Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
         Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
 
-
+        brushRenderer.gameObject.SetActive(!mouseOverUI);
         brushRenderer.sprite = brushSprite;
         brushRenderer.transform.position = next;
         brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
@@ -958,10 +938,57 @@ public class Main : MonoBehaviour
     public void Lock()
     {
         locked = true;
+        saveBlocker.SetActive(true);
     }
 
     public void Unlock()
     {
         locked = false;
+        saveBlocker.SetActive(false);
+    }
+
+    public IEnumerator LoadProject()
+    {
+        Lock();
+
+        string path = Application.persistentDataPath + "/test.json.txt";
+   
+        var timer = Stopwatch.StartNew();
+
+        var p = JSON.Deserialise<Project>(File.ReadAllText(path));
+
+        yield return StartCoroutine(p.LoadFinalise());
+
+        timer.Stop();
+        Debug.Log("Loaded in " + timer.Elapsed.TotalSeconds);
+
+        timer = Stopwatch.StartNew();
+
+        yield return null;
+
+        SetProject(p);
+
+        timer.Stop();
+        Debug.Log("Refreshed in " + timer.Elapsed.TotalSeconds);
+
+        Unlock();
+    }
+
+    public IEnumerator SaveProject()
+    {
+        Lock();
+
+        string path = Application.persistentDataPath + "/test.json.txt";
+
+        var timer = Stopwatch.StartNew();
+            
+        yield return StartCoroutine(project.SaveFinalise());
+
+        File.WriteAllText(path, JSON.Serialise(project));
+
+        timer.Stop();
+        Debug.Log("Saved in " + timer.Elapsed.TotalSeconds);
+
+        Unlock();
     }
 }

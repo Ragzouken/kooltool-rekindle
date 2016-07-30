@@ -48,6 +48,7 @@ public class Copier : Dictionary<object, object>
 public class TextureResource : IResource, ICopyable<TextureResource>
 {
     public string id = "";
+    [JsonIgnore]
     public bool dirty = false;
     [JsonIgnore]
     public Texture2D texture;
@@ -74,6 +75,9 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     void IResource.SaveFinalise(Project project)
     {
+        if (!dirty)
+            Debug.Log("Ignoring texture not direty");
+
         if (!dirty) return;
 
         id = id == "" ? Guid.NewGuid().ToString() : id;
@@ -159,15 +163,17 @@ public class Project : ICopyable<Project>
 
     private HashSet<IResource> unfinalised = new HashSet<IResource>();
 
-    public void SaveFinalise()
+    public IEnumerator SaveFinalise()
     {
         foreach (IResource resource in resources)
         {
             resource.SaveFinalise(this);
+
+            yield return null;
         }
     }
 
-    public void LoadFinalise()
+    public IEnumerator LoadFinalise()
     {
         unfinalised.UnionWith(resources);
 
@@ -181,6 +187,8 @@ public class Project : ICopyable<Project>
             foreach (var resource in ready)
             {
                 resource.LoadFinalise(this);
+
+                yield return null;
             }
 
             unfinalised.ExceptWith(ready);
@@ -403,13 +411,15 @@ public class ImageGrid : ICopyable<ImageGrid>
                     var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear));
                     sprite = new SpriteResource(texture, texture.texture.FullSprite(pixelsPerUnit: 1));
 
-                    project.resources.Add((TextureResource) texture);
+                    project.resources.Add(texture);
                     project.resources.Add(sprite);
 
                     cells[cell] = sprite;
 
                     changes.sprites.Add(sprite);
                 }
+
+                sprite.texture.dirty = true;
 
                 chang.Changed(cell);
 
