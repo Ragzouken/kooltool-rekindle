@@ -61,6 +61,8 @@ public static partial class SpriteExtensions
                              Brush brush,
                              Vector2 canvasPosition=default(Vector2))
     {
+        brush.colors = brush.colors ?? brush.sprite.GetPixels();
+
         var b_offset = brush.position - brush.sprite.pivot;
         var c_offset = canvasPosition - canvas.pivot;
 
@@ -171,7 +173,7 @@ public static partial class Texture2DExtensions
         Color[] canvasColors = canvas.GetPixels(canvasRect);
         Color[] brushColors  = brush.GetPixels(brushRect);
 
-        Assert.IsTrue(canvasColors.Length == brushColors.Length, string.Format("Mismatched texture rects! {0} vs {1}", canvasRect, brushRect));
+        //Assert.IsTrue(canvasColors.Length == brushColors.Length, string.Format("Mismatched texture rects! {0} vs {1}", canvasRect, brushRect));
 
         var data = new Blend.Data();
 
@@ -212,6 +214,7 @@ public struct Brush
     public Sprite sprite;
     public Vector2 position;
     public Blend.Function blend;
+    public Color[] colors;
 
     public static Sprite Circle(int diameter, Color color)
     {

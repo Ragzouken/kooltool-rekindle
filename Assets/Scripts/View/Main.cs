@@ -46,6 +46,11 @@ public class Main : MonoBehaviour
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
 
+    [SerializeField] private RectTransform mouseCursorTransform;
+    [SerializeField] private Image mouseCursorImage;
+    [SerializeField] private Sprite normalCursor;
+    [SerializeField] private Sprite pickCursor;
+
     public Project project { get; private set; }
     private World saved;
 
@@ -139,6 +144,8 @@ public class Main : MonoBehaviour
     private void Start()
     {
         freeToggle.isOn = true;
+
+        Cursor.visible = false;
 
         test = Texture2DExtensions.Blank(128, 32, Color.white);
 
@@ -733,6 +740,10 @@ public class Main : MonoBehaviour
         Vector2 point = ray.GetPoint(t);
         RaycastHit hit;
 
+        Vector2 screenMouse;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(mouseCursorTransform.parent as RectTransform, Input.mousePosition, null, out screenMouse);
+        mouseCursorTransform.localPosition = screenMouse;
+
         if (clickedOnWorld)
         {
             if (Physics.Raycast(ray, out hit))
@@ -893,13 +904,21 @@ public class Main : MonoBehaviour
         brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
         brushSprite.Apply();
 
-        if ((Input.GetMouseButtonDown(0) || input.click.WasPressed) 
-         && !mouseOverUI
+        if (!mouseOverUI
          && palettePanel.mode == PalettePanel.Mode.Colors)
         {
-            int index = (int) (project.world.background.GetPixel(next).r * 15);
+            SetCursorSprite(pickCursor);
 
-            palettePanel.SelectPaletteIndex(index);
+            if ((Input.GetMouseButtonDown(0) || input.click.WasPressed))
+            {
+                int index = (int)(project.world.background.GetPixel(next).r * 15);
+
+                palettePanel.SelectPaletteIndex(index);
+            }
+        }
+        else
+        {
+            SetCursorSprite(normalCursor);
         }
 
         if ((mouse || gamep) && palettePanel.mode == PalettePanel.Mode.Paint)
@@ -963,5 +982,17 @@ public class Main : MonoBehaviour
     public void Unlock()
     {
         locked = false;
+    }
+
+    public void SetCursorSprite(Sprite sprite)
+    {
+        Vector2 offset = sprite.pivot;
+        offset.y *= -1;
+
+        var rtrans = mouseCursorImage.transform as RectTransform;
+
+        mouseCursorImage.sprite = sprite;
+        mouseCursorImage.SetNativeSize();
+        rtrans.anchoredPosition = offset;
     }
 }

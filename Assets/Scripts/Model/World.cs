@@ -298,8 +298,8 @@ public class ImageGrid : ICopyable<ImageGrid>
     public class Change : IChange
     {
         public ImageGrid grid;
-        public Dictionary<Point, Color[]> before = new Dictionary<Point, Color[]>();
-        public Dictionary<Point, Color[]> after = new Dictionary<Point, Color[]>();
+        public Dictionary<Point, Color32[]> before = new Dictionary<Point, Color32[]>();
+        public Dictionary<Point, Color32[]> after = new Dictionary<Point, Color32[]>();
         public HashSet<Point> added = new HashSet<Point>();
 
         public void Added(Point point)
@@ -309,11 +309,11 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         public void Changed(Point point)
         {
-            Color[] original;
+            Color32[] original;
 
             if (!before.TryGetValue(point, out original))
             {
-                before[point] = grid.cells[point].sprite.GetPixels();
+                before[point] = grid.cells[point].sprite.texture.GetPixels32();
             }
         }
 
@@ -329,8 +329,8 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].sprite.GetPixels();
-                grid.cells[pair.Key].sprite.SetPixels(after[pair.Key]);
+                before[pair.Key] = grid.cells[pair.Key].sprite.texture.GetPixels32();
+                grid.cells[pair.Key].sprite.texture.SetPixels32(after[pair.Key]);
                 grid.cells[pair.Key].sprite.Apply();
             }
         }
@@ -339,8 +339,8 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].sprite.GetPixels();
-                grid.cells[pair.Key].sprite.SetPixels(before[pair.Key]);
+                after[pair.Key] = grid.cells[pair.Key].sprite.texture.GetPixels32();
+                grid.cells[pair.Key].sprite.texture.SetPixels32(before[pair.Key]);
                 grid.cells[pair.Key].sprite.Apply();
             }
 
