@@ -61,8 +61,6 @@ public static partial class SpriteExtensions
                              Brush brush,
                              Vector2 canvasPosition=default(Vector2))
     {
-        brush.colors = brush.colors ?? brush.sprite.GetPixels();
-
         var b_offset = brush.position - brush.sprite.pivot;
         var c_offset = canvasPosition - canvas.pivot;
 
@@ -214,7 +212,6 @@ public struct Brush
     public Sprite sprite;
     public Vector2 position;
     public Blend.Function blend;
-    public Color[] colors;
 
     public static Sprite Circle(int diameter, Color color)
     {
