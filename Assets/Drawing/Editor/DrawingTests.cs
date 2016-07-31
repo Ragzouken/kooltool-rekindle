@@ -134,32 +134,32 @@ public class DrawingTests
         var circle16 = DrawingBrush.Circle(16, Color.black);
 
         var generated = DrawingBrush.Rectangle(64, 64, Color.white);
-        generated.Brush(circle3.AsBrush(Vector2.one * 4, Blend32.alpha));
+        generated.Brush(circle3.AsBrush(Vector2.one * 4, Blend.alpha));
 
         generated.texture.Apply();
         Assert.AreNotEqual(Difference(reference, generated.texture.texture), 0, "Generated image should be different to reference at this point!");
 
         var line1 = DrawingBrush.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
-        generated.Brush(line1.AsBrush(Vector2.zero, Blend32.alpha));
+        generated.Brush(line1.AsBrush(Vector2.zero, Blend.alpha));
 
         var line2 = DrawingBrush.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
-        generated.Brush(line2.AsBrush(Vector2.zero, Blend32.alpha));
+        generated.Brush(line2.AsBrush(Vector2.zero, Blend.alpha));
 
-        generated.Brush(circle4.AsBrush(new Vector2(6, 18), Blend32.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(6, 26), Blend32.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(14, 18), Blend32.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(14, 26), Blend32.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(6, 18), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(6, 26), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(14, 18), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(14, 26), Blend.alpha));
 
-        generated.Brush(circle16.AsBrush(new Vector2(24, 12), Blend32.alpha));
+        generated.Brush(circle16.AsBrush(new Vector2(24, 12), Blend.alpha));
 
         var lineR = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.red, 6);
-        generated.Brush(lineR.AsBrush(Vector2.zero, Blend32.alpha));
+        generated.Brush(lineR.AsBrush(Vector2.zero, Blend.alpha));
 
         var lineB = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.blue, 4);
-        generated.Brush(lineB.AsBrush(Vector2.zero, Blend32.alpha));
+        generated.Brush(lineB.AsBrush(Vector2.zero, Blend.alpha));
 
         var lineG = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.green, 2);
-        generated.Brush(lineG.AsBrush(Vector2.zero, Blend32.alpha));
+        generated.Brush(lineG.AsBrush(Vector2.zero, Blend.alpha));
 
         generated.texture.Apply();
         int difference = Difference(reference, generated.texture.texture);
