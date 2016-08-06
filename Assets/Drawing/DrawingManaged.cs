@@ -22,12 +22,12 @@ public class DrawingTexture
         colors = texture.GetPixels();
     }
 
-    public void SetPixels(Color[] colors)
+    public void SetPixels(Color[] colors, bool apply=true)
     {
         Array.Copy(colors, this.colors, this.colors.Length);
 
         texture.SetPixels(colors);
-        Apply(force: true);
+        if (apply) Apply(force: true);
     }
 
     public Color[] GetPixels()
@@ -79,6 +79,23 @@ public class DrawingTexture
                 canvas.colors[ci] = blend(data);
             }
         }
+    }
+
+    public void Clear(Rect rect, Color color)
+    {
+        int stride = texture.width;
+
+        for (int y = (int) rect.yMin; y < (int) rect.yMax; ++y)
+        {
+            for (int x = (int) rect.xMin; x < (int) rect.xMax; ++x)
+            {
+                int i = y * stride + x;
+                
+                colors[i] = color;
+            }
+        }
+
+        dirty = true;
     }
 }
 
@@ -170,6 +187,11 @@ public class DrawingSprite : IDisposable
                              brush.blend);
 
         return true;
+    }
+
+    public void Clear(Color color)
+    {
+        dTexture.Clear(rect, color);
     }
 
     void IDisposable.Dispose()
@@ -285,6 +307,7 @@ public struct DrawingBrush
 
         var dTexture = DrawingTexturePooler.GetTexture(width, height);
         var dSprite = new DrawingSprite(dTexture, rect, pivot);
+        dSprite.Clear(Color.clear);
 
         {
             var brush_ = new DrawingBrush { sprite = sprite, blend = Blend.alpha };
@@ -325,6 +348,7 @@ public struct DrawingBrush
 
         var dTexture = DrawingTexturePooler.GetTexture((int) size.x, (int) size.y);
         var dSprite = new DrawingSprite(dTexture, rect, pivot);
+        dSprite.Clear(Color.clear);
 
         DrawingSprite circle = Circle(thickness, color);
         {
@@ -373,8 +397,6 @@ public static class DrawingTexturePooler
 
             dTexture = new DrawingTexture(tex);
         }
-
-        dTexture.SetPixels(blank);
 
         return dTexture;
     }
