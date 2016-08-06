@@ -122,6 +122,36 @@ public class DrawingTests
         Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
     }
 
+
+    [Test]
+    public void LineSweep_Managed()
+    {
+        var generated1 = DrawingBrush.Rectangle(64, 64, Color.white);
+        var generated2 = DrawingBrush.Rectangle(64, 64, Color.white);
+
+        Vector2 start = new Vector2(4, 4);
+        Vector2 end = new Vector2(60, 60);
+
+        var circle5 = DrawingBrush.Circle(5, Color.magenta);
+
+        var line = DrawingBrush.Line(start, end, Color.magenta, 5);
+        generated1.Brush(line.AsBrush(Vector2.zero, Blend.alpha));
+
+        var sweep = DrawingBrush.Sweep(circle5, start, end);
+        generated2.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
+
+        generated1.dTexture.Apply();
+        generated2.dTexture.Apply();
+
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Line-Managed.png", generated1.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Sweep-Managed.png", generated2.texture.EncodeToPNG());
+        AssetDatabase.Refresh();
+
+        int difference = Difference(generated1.texture, generated2.texture);
+
+        Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
+    }
+
     [Test]
     public void Reference01_Managed()
     {

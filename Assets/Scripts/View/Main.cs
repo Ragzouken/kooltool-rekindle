@@ -384,6 +384,8 @@ public class Main : MonoBehaviour
         return data;
     }
 
+    private List<RaycastResult> raycasts = new List<RaycastResult>();
+
     private void CheckHotkeys()
     {
         if (input.expand.WasPressed)
@@ -452,7 +454,7 @@ public class Main : MonoBehaviour
 
         var system = EventSystem.current;
         var pointer = new PointerEventData(system);
-        var raycasts = new List<RaycastResult>();
+        raycasts.Clear();
 
         pointer.position = new Vector3((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                        (cursor.localPosition.y / 256f + 0.5f) * Screen.height);

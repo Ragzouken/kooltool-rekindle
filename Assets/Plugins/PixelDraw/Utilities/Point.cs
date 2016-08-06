@@ -3,7 +3,7 @@
 using Newtonsoft.Json;
 
 [JsonObject(IsReference=false, MemberSerialization=MemberSerialization.OptIn)]
-public struct Point
+public struct Point : System.IEquatable<Point>
 {
     [JsonProperty]
     public readonly int x;

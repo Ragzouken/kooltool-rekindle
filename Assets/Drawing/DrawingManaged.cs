@@ -6,9 +6,12 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using DebuggerDisplay = System.Diagnostics.DebuggerDisplayAttribute;
 
+[DebuggerDisplay("DrawingTexture {texture.name} ({texture.width} x {texture.height})")]
 public class DrawingTexture
 {
+    public bool dirty;
     public Texture2D texture;
     public Color[] colors;
 
@@ -24,12 +27,17 @@ public class DrawingTexture
         Array.Copy(colors, this.colors, this.colors.Length);
 
         texture.SetPixels(colors);
+        Apply(force: true);
     }
 
-    public void Apply()
+    public void Apply(bool force=false)
     {
-        texture.SetPixels(colors);
-        texture.Apply();
+        if (dirty || force)
+        {
+            texture.SetPixels(colors);
+            texture.Apply();
+            dirty = false;
+        }
     }
 
     public static void Brush(DrawingTexture canvas, Rect canvasRect,
@@ -43,6 +51,8 @@ public class DrawingTexture
 
         int cstride = canvas.texture.width;
         int bstride =  brush.texture.width;
+
+        canvas.dirty = true;
 
         for (int cy = (int) canvasRect.yMin; cy < (int) canvasRect.yMax; ++cy)
         {
@@ -63,12 +73,21 @@ public class DrawingTexture
     }
 }
 
+[DebuggerDisplay("DrawingSprite {sprite.name} ({rect}, {pivot})")]
 public class DrawingSprite : IDisposable
 {
     public DrawingTexture dTexture;
     public Rect rect;
     public Vector2 pivot;
     public Sprite sprite;
+
+    public Texture2D texture
+    {
+        get
+        {
+            return dTexture.texture;
+        }
+    }
 
     public DrawingSprite(DrawingTexture dTexture,
                          Rect rect,
@@ -78,7 +97,7 @@ public class DrawingSprite : IDisposable
         this.rect = rect;
         this.pivot = pivot;
 
-        sprite = Sprite.Create(dTexture.texture, rect, pivot, 1);
+        sprite = Sprite.Create(dTexture.texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
     }
 
     public DrawingSprite(DrawingTexture texture,
@@ -242,7 +261,6 @@ public struct DrawingBrush
         return dSprite;
     }
 
-    // TODO: not necessary to create a real texture for this...
     public static DrawingSprite Sweep(DrawingSprite sprite,
                                       Vector2 start,
                                       Vector2 end)
@@ -250,15 +268,14 @@ public struct DrawingBrush
         var tl = new Vector2(Mathf.Min(start.x, end.x),
                              Mathf.Min(start.y, end.y));
 
-        Vector2 size = new Vector2(Mathf.Abs(end.x - start.x) + sprite.rect.width,
-                                   Mathf.Abs(end.y - start.y) + sprite.rect.height);
+        int width  = (int) Mathf.Abs(end.x - start.x) + (int) sprite.rect.width;
+        int height = (int) Mathf.Abs(end.y - start.y) + (int) sprite.rect.height;
 
         var pivot = tl * -1 + sprite.pivot;
-        var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
-        var rect = new Rect(0, 0, size.x, size.y);
+        var rect = new Rect(0, 0, width, height);
 
-        var dTexture = DrawingTexturePooler.GetTexture((int)size.x, (int)size.y);
-        var dSprite = new DrawingSprite(dTexture, rect, anchor);
+        var dTexture = DrawingTexturePooler.GetTexture(width, height);
+        var dSprite = new DrawingSprite(dTexture, rect, pivot);
 
         {
             var brush_ = new DrawingBrush { sprite = sprite, blend = Blend.alpha };
@@ -295,15 +312,10 @@ public struct DrawingBrush
                                    Mathf.Abs(end.y - start.y) + thickness);
 
         var pivot = tl * -1 + Vector2.one * left;
-        var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
         var rect = new Rect(0, 0, size.x, size.y);
 
-        Texture2D image = Texture2DExtensions.Blank((int)size.x, (int)size.y, Color.clear);
-        Sprite brush = Sprite.Create(image, rect, anchor, 1);
-        brush.name = "Line (Brush)";
-
-        var dTexture = new DrawingTexture(image);
-        var dSprite = new DrawingSprite(dTexture, brush);
+        var dTexture = DrawingTexturePooler.GetTexture((int) size.x, (int) size.y);
+        var dSprite = new DrawingSprite(dTexture, rect, pivot);
 
         DrawingSprite circle = Circle(thickness, color);
         {
@@ -346,16 +358,13 @@ public static class DrawingTexturePooler
     {
         DrawingTexture dTexture;
 
-        /*
         if (textures.Count > 0)
         {
             dTexture = textures.Pop();
         }
         else
-        */
         {
-            var tex = Texture2DExtensions.Blank(width, height, Color.clear);
-            //var tex = Texture2DExtensions.Blank(512, 512, Color.clear);
+            var tex = Texture2DExtensions.Blank(512, 512, Color.clear);
 
             dTexture = new DrawingTexture(tex);
 

@@ -273,7 +273,7 @@ public interface IChange
 
 public class Changes
 {
-    public List<Sprite> sprites = new List<Sprite>();
+    public List<DrawingSprite> sprites = new List<DrawingSprite>();
 
     public Dictionary<object, IChange> changes = new Dictionary<object, IChange>();
 
@@ -298,9 +298,9 @@ public class Changes
 
     public void ApplyTextures()
     {
-        foreach (var texture in sprites.Select(sprite => sprite.texture).Distinct())
+        for (int i = 0; i < sprites.Count; ++i)
         {
-            texture.Apply();
+            sprites[i].dTexture.Apply();
         }
     }
 
@@ -422,8 +422,6 @@ public class ImageGrid : ICopyable<ImageGrid>
                 cell.x = x;
                 cell.y = y;
 
-                // TODO: track changes
-
                 if (!cells.TryGetValue(cell, out sprite))
                 { 
                     chang.Added(cell);
@@ -435,8 +433,6 @@ public class ImageGrid : ICopyable<ImageGrid>
                     project.resources.Add(sprite);
 
                     cells[cell] = sprite;
-
-                    changes.sprites.Add(sprite);
                 }
 
                 chang.Changed(cell);
@@ -446,7 +442,7 @@ public class ImageGrid : ICopyable<ImageGrid>
                 sprite.texture.dTexture.Apply();
                 sprite.texture.dirty = true;
 
-                changes.sprites.Add(sprite);
+                changes.sprites.Add(sprite.dSprite);
             }
         }
     }
