@@ -326,8 +326,8 @@ public class ImageGrid : ICopyable<ImageGrid>
     public class Change : IChange
     {
         public ImageGrid grid;
-        public Dictionary<Point, Color32[]> before = new Dictionary<Point, Color32[]>();
-        public Dictionary<Point, Color32[]> after = new Dictionary<Point, Color32[]>();
+        public Dictionary<Point, Color[]> before = new Dictionary<Point, Color[]>();
+        public Dictionary<Point, Color[]> after = new Dictionary<Point, Color[]>();
         public HashSet<Point> added = new HashSet<Point>();
 
         public void Added(Point point)
@@ -337,11 +337,11 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         public void Changed(Point point)
         {
-            Color32[] original;
+            Color[] original;
 
             if (!before.TryGetValue(point, out original))
             {
-                before[point] = grid.cells[point].dSprite.dTexture.texture.GetPixels32();
+                before[point] = grid.cells[point].dSprite.dTexture.GetPixels();
             }
         }
 
@@ -357,19 +357,19 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.texture.GetPixels32();
-                grid.cells[pair.Key].dSprite.dTexture.texture.SetPixels32(after[pair.Key]);
-                grid.cells[pair.Key].dSprite.dTexture.Apply();
+                before[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.GetPixels();
+                grid.cells[pair.Key].dSprite.dTexture.SetPixels(after[pair.Key]);
             }
+
+
         }
 
         void IChange.Undo(Changes changes)
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.texture.GetPixels32();
-                grid.cells[pair.Key].dSprite.dTexture.texture.SetPixels32(before[pair.Key]);
-                grid.cells[pair.Key].dSprite.dTexture.Apply();
+                after[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.GetPixels();
+                grid.cells[pair.Key].dSprite.dTexture.SetPixels(before[pair.Key]);
             }
 
             foreach (var cell in added)
@@ -438,8 +438,6 @@ public class ImageGrid : ICopyable<ImageGrid>
                 chang.Changed(cell);
 
                 sprite.dSprite.Brush(brush, cell * cellSize);
-
-                sprite.texture.dTexture.Apply();
                 sprite.texture.dirty = true;
 
                 changes.sprites.Add(sprite.dSprite);

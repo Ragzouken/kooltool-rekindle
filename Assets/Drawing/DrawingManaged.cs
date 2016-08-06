@@ -30,6 +30,15 @@ public class DrawingTexture
         Apply(force: true);
     }
 
+    public Color[] GetPixels()
+    {
+        var colors = new Color[this.colors.Length];
+
+        Array.Copy(this.colors, colors, this.colors.Length);
+
+        return colors;
+    }
+
     public void Apply(bool force=false)
     {
         if (dirty || force)
@@ -335,8 +344,6 @@ public struct DrawingBrush
                            (int)end.y,
                            plot);
         }
-        //UnityEngine.Object.DestroyImmediate(circle.texture);
-        //UnityEngine.Object.DestroyImmediate(circle);
 
         return dSprite;
     }
@@ -344,8 +351,6 @@ public struct DrawingBrush
 
 public static class DrawingTexturePooler
 {
-    public static List<DrawingTexture> debugs = new List<DrawingTexture>();
-
     private static Stack<DrawingTexture> textures = new Stack<DrawingTexture>();
     private static Color[] blank;
 
@@ -367,8 +372,6 @@ public static class DrawingTexturePooler
             var tex = Texture2DExtensions.Blank(512, 512, Color.clear);
 
             dTexture = new DrawingTexture(tex);
-
-            debugs.Add(dTexture);
         }
 
         dTexture.SetPixels(blank);
