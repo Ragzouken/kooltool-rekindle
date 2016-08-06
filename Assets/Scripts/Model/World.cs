@@ -51,7 +51,16 @@ public class TextureResource : IResource, ICopyable<TextureResource>
     [JsonIgnore]
     public bool dirty = false;
     [JsonIgnore]
-    public Texture2D texture;
+    public DrawingTexture dTexture;
+
+    [JsonIgnore]
+    public Texture2D uTexture
+    {
+        get
+        {
+            return dTexture.texture;
+        }
+    }
 
     [JsonIgnore]
     public string path
@@ -69,8 +78,10 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     void IResource.LoadFinalise(Project project)
     {
-        texture = Texture2DExtensions.Blank(1, 1, Color.clear);
-        texture.LoadImage(System.IO.File.ReadAllBytes(path));
+        var tex = Texture2DExtensions.Blank(1, 1, Color.clear);
+        tex.LoadImage(System.IO.File.ReadAllBytes(path));
+
+        dTexture = new DrawingTexture(tex);
     }
 
     void IResource.SaveFinalise(Project project)
@@ -82,25 +93,27 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
         id = id == "" ? Guid.NewGuid().ToString() : id;
 
-        System.IO.File.WriteAllBytes(path, texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(path, dTexture.texture.EncodeToPNG());
     }
 
     public TextureResource() { }
 
     public TextureResource(Texture2D texture)
     {
-        this.texture = texture;
+        this.dTexture = new DrawingTexture(texture);
     }
 
     public static implicit operator Texture2D(TextureResource resource)
     {
-        return resource.texture;
+        return resource.uTexture;
     }
 
     public void Copy(Copier copier, TextureResource copy)
     {
-        copy.texture = Texture2DExtensions.Blank(texture.width, texture.height, Color.clear);
-        copy.texture.SetPixels32(texture.GetPixels32());
+        var tex = Texture2DExtensions.Blank(dTexture.texture.width, dTexture.texture.height, Color.clear);
+        tex.SetPixels32(dTexture.texture.GetPixels32());
+
+        copy.dTexture = new DrawingTexture(tex);
 
         copy.id = id;
     }
@@ -113,7 +126,16 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
     public Rect rect;
 
     [JsonIgnore]
-    public Sprite sprite;
+    public DrawingSprite dSprite;
+
+    [JsonIgnore]
+    public Sprite uSprite
+    {
+        get
+        {
+            return dSprite.sprite;
+        }
+    }
 
     bool IResource.LoadFinalisable(Project project)
     {
@@ -122,20 +144,18 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
     void IResource.LoadFinalise(Project project)
     {
-        sprite = Sprite.Create(texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+        dSprite = new DrawingSprite(texture.dTexture, rect, pivot);
     }
 
     void IResource.SaveFinalise(Project project)
     {
     }
 
-    public SpriteResource()
-    {
-    }
+    public SpriteResource() { }
 
     public SpriteResource(TextureResource texture, Sprite sprite)
     {
-        this.sprite = sprite;
+        this.dSprite = new DrawingSprite(texture.dTexture, sprite);
         this.texture = texture;
 
         pivot = sprite.pivot;
@@ -144,7 +164,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
     public static implicit operator Sprite(SpriteResource resource)
     {
-        return resource.sprite;
+        return resource.dSprite.sprite;
     }
 
     public void Copy(Copier copier, SpriteResource copy)
@@ -152,7 +172,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
         copy.texture = copier.Copy(texture);
         copy.pivot = pivot;
         copy.rect = rect;
-        copy.sprite = Sprite.Create(copy.texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+        copy.dSprite = new DrawingSprite(copy.texture.dTexture, rect, pivot);
     }
 }
 
@@ -321,7 +341,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             if (!before.TryGetValue(point, out original))
             {
-                before[point] = grid.cells[point].sprite.texture.GetPixels32();
+                before[point] = grid.cells[point].dSprite.dTexture.texture.GetPixels32();
             }
         }
 
@@ -329,17 +349,17 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var cell in added)
             {
-                var texture = new TextureResource(Texture2DExtensions.Blank(grid.cellSize, grid.cellSize, Color.clear));
-                var sprite = new SpriteResource(texture, texture.texture.FullSprite(pixelsPerUnit: 1));
+                var rTexture = new TextureResource(Texture2DExtensions.Blank(grid.cellSize, grid.cellSize, Color.clear));
+                var sprite = new SpriteResource(rTexture, rTexture.uTexture.FullSprite(pixelsPerUnit: 1));
 
                 grid.cells.Add(cell, sprite);
             }
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].sprite.texture.GetPixels32();
-                grid.cells[pair.Key].sprite.texture.SetPixels32(after[pair.Key]);
-                grid.cells[pair.Key].sprite.Apply();
+                before[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.texture.GetPixels32();
+                grid.cells[pair.Key].dSprite.dTexture.texture.SetPixels32(after[pair.Key]);
+                grid.cells[pair.Key].dSprite.dTexture.Apply();
             }
         }
 
@@ -347,9 +367,9 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].sprite.texture.GetPixels32();
-                grid.cells[pair.Key].sprite.texture.SetPixels32(before[pair.Key]);
-                grid.cells[pair.Key].sprite.Apply();
+                after[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.texture.GetPixels32();
+                grid.cells[pair.Key].dSprite.dTexture.texture.SetPixels32(before[pair.Key]);
+                grid.cells[pair.Key].dSprite.dTexture.Apply();
             }
 
             foreach (var cell in added)
@@ -378,7 +398,7 @@ public class ImageGrid : ICopyable<ImageGrid>
                                                      pair => copier.Copy(pair.Value)));
     }
 
-    public void Brush(Changes changes, Brush brush)
+    public void Brush(Changes changes, DrawingBrush brush)
     {
         Vector2 cellMin, cellMax, cell;
         Vector2 local;
@@ -409,7 +429,7 @@ public class ImageGrid : ICopyable<ImageGrid>
                     chang.Added(cell);
 
                     var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear));
-                    sprite = new SpriteResource(texture, texture.texture.FullSprite(pixelsPerUnit: 1));
+                    sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
 
                     project.resources.Add(texture);
                     project.resources.Add(sprite);
@@ -419,11 +439,12 @@ public class ImageGrid : ICopyable<ImageGrid>
                     changes.sprites.Add(sprite);
                 }
 
-                sprite.texture.dirty = true;
-
                 chang.Changed(cell);
 
-                sprite.sprite.Brush(brush, cell * cellSize);
+                sprite.dSprite.Brush(brush, cell * cellSize);
+
+                sprite.texture.dTexture.Apply();
+                sprite.texture.dirty = true;
 
                 changes.sprites.Add(sprite);
             }
@@ -438,7 +459,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         position.GridCoords(cellSize, out cell, out local);
 
         return cells.TryGetValue(cell, out sprite)
-             ? sprite.sprite.GetPixel(local)
+             ? sprite.dSprite.sprite.GetPixel(local)
              : Color.clear;
     }
 }

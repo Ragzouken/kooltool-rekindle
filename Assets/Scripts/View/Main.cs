@@ -50,7 +50,7 @@ public class Main : MonoBehaviour
     [SerializeField] private RectTransform mouseCursorTransform;
     [SerializeField] private Image mouseCursorImage;
     [SerializeField] private Sprite normalCursor;
-    [SerializeField] private Sprite pickCursor;
+    [SerializeField] private Sprite pickCursor, stampCursor;
 
     public Project project { get; private set; }
     private World saved;
@@ -127,7 +127,7 @@ public class Main : MonoBehaviour
     public class Stamp
     {
         public Sprite thumbnail;
-        public Sprite brush;
+        public DrawingSprite brush;
     }
 
     [Header("Stamps")]
@@ -173,15 +173,20 @@ public class Main : MonoBehaviour
 
         foreach (var sprite in testbrushes)
         {
+            var tex = new DrawingTexture(sprite.texture);
+
             stamps.Add(new Stamp
             {
-                brush = sprite,
+                brush = new DrawingSprite(tex, sprite),
                 thumbnail = sprite,
             });
         }
 
         stampsp.SetActive(stamps);
-        { stamp = stamps[0]; }
+
+        SetStamp(stamps[0]);
+
+        palettePanel.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
         var costume = new Costume
         {
@@ -415,8 +420,6 @@ public class Main : MonoBehaviour
             change = true;
         }
 
-        string path = Application.persistentDataPath + "/test.json.txt";
-
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(LoadProject());
@@ -562,6 +565,8 @@ public class Main : MonoBehaviour
     public void SetStamp(Stamp stamp)
     {
         this.stamp = stamp;
+
+        RefreshBrushCursor();
     }
 
     public void EditPalette(int i, Color color)
@@ -874,15 +879,15 @@ public class Main : MonoBehaviour
         next.x = (int)next.x;
         next.y = (int)next.y;
 
-        var adj = new Color(palettePanel.selected / 15f, 0, 0);
+        Color clear = Color.clear;
+
+        Color adj = new Color(palettePanel.selected / 15f, 0, 0);
         Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
-        Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
+        Blend.Function blend2 = data => data.brush.a > 0 ? adj : clear;
 
         brushRenderer.gameObject.SetActive(!mouseOverUI);
         brushRenderer.sprite = brushSprite;
         brushRenderer.transform.position = next;
-        brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
-        brushSprite.Apply();
 
         if (!mouseOverUI
          && palettePanel.mode == PalettePanel.Mode.Colors)
@@ -898,7 +903,18 @@ public class Main : MonoBehaviour
         }
         else
         {
-            SetCursorSprite(normalCursor);
+            if (mouseOverUI)
+            {
+                SetCursorSprite(normalCursor);
+            }
+            else if (stampToggle.isOn)
+            {
+                SetCursorSprite(stampCursor);
+            }
+            else
+            { 
+                SetCursorSprite(normalCursor);
+            }
         }
 
         if ((mouse || gamep) && palettePanel.mode == PalettePanel.Mode.Paint)
@@ -912,8 +928,10 @@ public class Main : MonoBehaviour
             {
                 if (freeToggle.isOn)
                 {
-                    var line = Brush.Sweep(stamp.brush, prev, next);
-                    project.world.background.Brush(changes, new Brush { sprite = line, position = Vector2.zero, blend = blend });
+                    using (var line = DrawingBrush.Sweep(stamp.brush, prev, next))
+                    {
+                        project.world.background.Brush(changes, new DrawingBrush { sprite = line, position = Vector2.zero, blend = blend });
+                    }
 
                     changes.ApplyTextures();
                 }
@@ -925,7 +943,7 @@ public class Main : MonoBehaviour
                     {
                         stampTimer += 16;
 
-                        project.world.background.Brush(changes, new Brush { sprite = stamp.brush, position = next, blend = blend });
+                        project.world.background.Brush(changes, new DrawingBrush { sprite = stamp.brush, position = next, blend = blend });
 
                         changes.ApplyTextures();
                     }
@@ -946,6 +964,15 @@ public class Main : MonoBehaviour
 
         prevMouse = nextMouse;
         prevCursor = nextCursor;
+    }
+
+    private void RefreshBrushCursor()
+    {
+        var adj = new Color(palettePanel.selected / 15f, 0, 0);
+        Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
+
+        //brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
+        brushSprite.Apply();
     }
 
     private Changes changes;
@@ -1014,12 +1041,11 @@ public class Main : MonoBehaviour
     public void SetCursorSprite(Sprite sprite)
     {
         Vector2 offset = sprite.pivot;
-        offset.y *= -1;
 
         var rtrans = mouseCursorImage.transform as RectTransform;
 
         mouseCursorImage.sprite = sprite;
         mouseCursorImage.SetNativeSize();
-        rtrans.anchoredPosition = offset;
+        rtrans.anchoredPosition = -offset;
     }
 }

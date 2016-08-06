@@ -136,8 +136,8 @@ public class DrawingTests
         var generated = DrawingBrush.Rectangle(64, 64, Color.white);
         generated.Brush(circle3.AsBrush(Vector2.one * 4, Blend.alpha));
 
-        generated.texture.Apply();
-        Assert.AreNotEqual(Difference(reference, generated.texture.texture), 0, "Generated image should be different to reference at this point!");
+        generated.dTexture.Apply();
+        Assert.AreNotEqual(Difference(reference, generated.dTexture.texture), 0, "Generated image should be different to reference at this point!");
 
         var line1 = DrawingBrush.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
         generated.Brush(line1.AsBrush(Vector2.zero, Blend.alpha));
@@ -161,10 +161,10 @@ public class DrawingTests
         var lineG = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.green, 2);
         generated.Brush(lineG.AsBrush(Vector2.zero, Blend.alpha));
 
-        generated.texture.Apply();
-        int difference = Difference(reference, generated.texture.texture);
+        generated.dTexture.Apply();
+        int difference = Difference(reference, generated.dTexture.texture);
 
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-Reference-01-Managed.png", generated.texture.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-Reference-01-Managed.png", generated.dTexture.texture.EncodeToPNG());
         AssetDatabase.Refresh();
 
         Assert.AreEqual(difference, 0, string.Format("Generated image doesn't match reference! ({0} difference)", difference));

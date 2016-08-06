@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Assertions;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -16,6 +17,13 @@ public class DrawingTexture
         this.texture = texture;
 
         colors = texture.GetPixels();
+    }
+
+    public void SetPixels(Color[] colors)
+    {
+        Array.Copy(colors, this.colors, this.colors.Length);
+
+        texture.SetPixels(colors);
     }
 
     public void Apply()
@@ -55,28 +63,28 @@ public class DrawingTexture
     }
 }
 
-public class DrawingSprite
+public class DrawingSprite : IDisposable
 {
-    public DrawingTexture texture;
+    public DrawingTexture dTexture;
     public Rect rect;
     public Vector2 pivot;
     public Sprite sprite;
 
-    public DrawingSprite(DrawingTexture texture,
+    public DrawingSprite(DrawingTexture dTexture,
                          Rect rect,
                          Vector2 pivot)
     {
-        this.texture = texture;
+        this.dTexture = dTexture;
         this.rect = rect;
         this.pivot = pivot;
 
-        sprite = Sprite.Create(texture.texture, rect, pivot, 1);
+        sprite = Sprite.Create(dTexture.texture, rect, pivot, 1);
     }
 
     public DrawingSprite(DrawingTexture texture,
                          Sprite sprite)
     {
-        this.texture = texture;
+        this.dTexture = texture;
         this.sprite = sprite;
 
         rect = sprite.textureRect;
@@ -129,11 +137,17 @@ public class DrawingSprite
                                          activeRect.width,
                                          activeRect.height);
 
-        DrawingTexture.Brush(canvas.texture, local_rect_canvas,
-                             brush.sprite.texture, local_rect_brush,
+        DrawingTexture.Brush(canvas.dTexture, local_rect_canvas,
+                             brush.sprite.dTexture, local_rect_brush,
                              brush.blend);
 
         return true;
+    }
+
+    void IDisposable.Dispose()
+    {
+        UnityEngine.Object.DestroyImmediate(sprite);
+        DrawingTexturePooler.FreeTexture(dTexture);
     }
 }
 
@@ -228,6 +242,7 @@ public struct DrawingBrush
         return dSprite;
     }
 
+    // TODO: not necessary to create a real texture for this...
     public static DrawingSprite Sweep(DrawingSprite sprite,
                                       Vector2 start,
                                       Vector2 end)
@@ -242,12 +257,8 @@ public struct DrawingBrush
         var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
         var rect = new Rect(0, 0, size.x, size.y);
 
-        Texture2D image = Texture2DExtensions.Blank((int)size.x, (int)size.y, Color.clear);
-        Sprite brush = Sprite.Create(image, rect, anchor, 1);
-        brush.name = "Line (Brush)";
-
-        var dTexture = new DrawingTexture(image);
-        var dSprite = new DrawingSprite(dTexture, brush);
+        var dTexture = DrawingTexturePooler.GetTexture((int)size.x, (int)size.y);
+        var dSprite = new DrawingSprite(dTexture, rect, anchor);
 
         {
             var brush_ = new DrawingBrush { sprite = sprite, blend = Blend.alpha };
@@ -316,5 +327,48 @@ public struct DrawingBrush
         //UnityEngine.Object.DestroyImmediate(circle);
 
         return dSprite;
+    }
+}
+
+public static class DrawingTexturePooler
+{
+    public static List<DrawingTexture> debugs = new List<DrawingTexture>();
+
+    private static Stack<DrawingTexture> textures = new Stack<DrawingTexture>();
+    private static Color[] blank;
+
+    static DrawingTexturePooler()
+    {
+        blank = new Color[512 * 512];
+    }
+
+    public static DrawingTexture GetTexture(int width, int height)
+    {
+        DrawingTexture dTexture;
+
+        /*
+        if (textures.Count > 0)
+        {
+            dTexture = textures.Pop();
+        }
+        else
+        */
+        {
+            var tex = Texture2DExtensions.Blank(width, height, Color.clear);
+            //var tex = Texture2DExtensions.Blank(512, 512, Color.clear);
+
+            dTexture = new DrawingTexture(tex);
+
+            debugs.Add(dTexture);
+        }
+
+        dTexture.SetPixels(blank);
+
+        return dTexture;
+    }
+
+    public static void FreeTexture(DrawingTexture texture)
+    {
+        textures.Push(texture);
     }
 }
