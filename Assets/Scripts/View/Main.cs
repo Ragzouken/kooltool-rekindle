@@ -885,7 +885,13 @@ public class Main : MonoBehaviour
 
         Color adj = new Color(palettePanel.selected / 15f, 0, 0);
         Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
-        Blend.Function blend2 = data => data.brush.a > 0 ? adj : clear;
+
+        /*
+        Blend.Function blend = data =>
+        {
+            return Color.Lerp(data.canvas, adj, data.brush.a);
+        };
+        */
 
         brushRenderer.gameObject.SetActive(!mouseOverUI);
         brushRenderer.sprite = brushSprite;

@@ -3,6 +3,7 @@
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
+		_Color("Tint", Color) = (1,1,1,1)
 	}
 	SubShader
 	{
@@ -39,7 +40,8 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			
+			float4 _Color;
+
 			fixed4 _Palette00;
 			fixed4 _Palette01;
 			fixed4 _Palette02;
@@ -72,6 +74,8 @@
 				fixed4 col = tex2D(_MainTex, i.uv);
 			 
 				int c = col.r * 15;
+
+				if (col.g > _Color.a) return fixed4(0, 0, 0, 0);
 
 				if (c ==  0) return _Palette00;
 				if (c ==  1) return _Palette01;
