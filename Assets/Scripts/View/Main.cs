@@ -141,6 +141,7 @@ public class Main : MonoBehaviour
     private MonoBehaviourPooler<Stamp, BrushToggle> stampsp;
 
     public Sprite[] testbrushes;
+    private DrawingSprite brushSpriteD;
 
     private void Start()
     {
@@ -152,6 +153,7 @@ public class Main : MonoBehaviour
 
         var brushtext = Texture2DExtensions.Blank(16, 16, Color.clear);
         brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
+        brushSpriteD = new DrawingSprite(new DrawingTexture(brushtext), brushSprite);
 
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
@@ -886,12 +888,16 @@ public class Main : MonoBehaviour
         Color adj = new Color(palettePanel.selected / 15f, 0, 0);
         Blend.Function blend = data => Color.Lerp(data.canvas, adj, data.brush.a);
 
-        /*
-        Blend.Function blend = data =>
+        ///*
+        blend = data =>
         {
-            return Color.Lerp(data.canvas, adj, data.brush.a);
+            var a = Color.Lerp(data.canvas, adj, data.brush.a);
+            a.g = data.canvas.g;
+            a.b = data.canvas.b;
+
+            return a;
         };
-        */
+        //*/
 
         brushRenderer.gameObject.SetActive(!mouseOverUI);
         brushRenderer.sprite = brushSprite;
@@ -979,8 +985,8 @@ public class Main : MonoBehaviour
         var adj = new Color(palettePanel.selected / 15f, 0, 0);
         Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
 
-        //brushSprite.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
-        brushSprite.Apply();
+        brushSpriteD.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
+        brushSpriteD.dTexture.Apply();
     }
 
     private Changes changes;

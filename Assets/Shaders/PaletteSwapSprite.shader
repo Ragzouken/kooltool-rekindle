@@ -3,7 +3,7 @@
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
-		_Color("Tint", Color) = (1,1,1,1)
+		_Cutout("Cutout", Range(0, 1)) = 1
 	}
 	SubShader
 	{
@@ -40,7 +40,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			float4 _Color;
+			half _Cutout;
 
 			fixed4 _Palette00;
 			fixed4 _Palette01;
@@ -72,27 +72,28 @@
 			{
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
-			 
-				int c = col.r * 15;
+				
+				half c = col.r * 15;
+				half cut = col.g;
 
-				if (col.g > _Color.a) return fixed4(0, 0, 0, 0);
+				if (c ==  0) col = _Palette00;
+				if (c ==  1) col = _Palette01;
+				if (c ==  2) col = _Palette02;
+				if (c ==  3) col = _Palette03;
+				if (c ==  4) col = _Palette04;
+				if (c ==  5) col = _Palette05;
+				if (c ==  6) col = _Palette06;
+				if (c ==  7) col = _Palette07;
+				if (c ==  8) col = _Palette08;
+				if (c ==  9) col = _Palette09;
+				if (c == 10) col = _Palette10;
+				if (c == 11) col = _Palette11;
+				if (c == 12) col = _Palette12;
+				if (c == 13) col = _Palette13;
+				if (c == 14) col = _Palette14;
+				if (c == 15) col = _Palette15;
 
-				if (c ==  0) return _Palette00;
-				if (c ==  1) return _Palette01;
-				if (c ==  2) return _Palette02;
-				if (c ==  3) return _Palette03;
-				if (c ==  4) return _Palette04;
-				if (c ==  5) return _Palette05;
-				if (c ==  6) return _Palette06;
-				if (c ==  7) return _Palette07;
-				if (c ==  8) return _Palette08;
-				if (c ==  9) return _Palette09;
-				if (c == 10) return _Palette10;
-				if (c == 11) return _Palette11;
-				if (c == 12) return _Palette12;
-				if (c == 13) return _Palette13;
-				if (c == 14) return _Palette14;
-				if (c == 15) return _Palette15;
+				col.a *= step(cut, _Cutout);
 
 				return col;
 			}
