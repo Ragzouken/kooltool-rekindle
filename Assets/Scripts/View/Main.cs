@@ -144,33 +144,7 @@ public class Main : MonoBehaviour
     private DrawingSprite brushSpriteD;
 
     private void Start()
-    {
-        Color a = Color.red, b = Color.blue;
-        Color32 c = Color.red, d = Color.blue;
-        Color32 t = Color.clear;
-
-        var timer = Stopwatch.StartNew();
-
-        for (int i = 0; i < 512 * 512 * 512; ++i)
-        {
-            var e = Color.Lerp(a, b, 0.5f);
-        }
-
-        timer.Stop();
-
-        Debug.Log("Color.Lerp " + timer.Elapsed.TotalSeconds);
-
-        timer = Stopwatch.StartNew();
-
-        for (int i = 0; i < 512 * 512 * 512; ++i)
-        {
-            var e = Blend.Lerp32(c, d, 128);
-        }
-
-        timer.Stop();
-
-        Debug.Log("Color32.Lerp " + timer.Elapsed.TotalSeconds);
-
+    { 
         freeToggle.isOn = true;
 
         Cursor.visible = false;
