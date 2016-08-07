@@ -197,14 +197,25 @@ public static class Blend
 
     public delegate Color Function(Data data);
 
-    public static Function alpha    = data => Color.Lerp(data.canvas, data.brush, data.brush.a);
+    public static Color Lerp(Color a, Color b, float u)
+    {
+        a.r = a.r * (1 - u) + b.r * u;
+        a.g = a.g * (1 - u) + b.g * u;
+        a.b = a.b * (1 - u) + b.b * u;
+        a.a = a.a * (1 - u) + b.a * u;
+
+        return a;
+    }
+
+    public static Function mask     = data => data.brush.a > 0 ? data.brush : data.canvas;
+    public static Function alpha    = data => Lerp(data.canvas, data.brush, data.brush.a);
     public static Function add      = data => data.canvas + data.brush;
     public static Function subtract = data => data.canvas - data.brush;
     public static Function multiply = data => data.canvas * data.brush;
     public static Function replace  = data => data.brush;
 
-    public static Function stencilKeep = data => Color.Lerp(Color.clear, data.canvas, data.brush.a);
-    public static Function stencilCut  = data => Color.Lerp(data.canvas, Color.clear, data.brush.a);
+    public static Function stencilKeep = data => Lerp(Color.clear, data.canvas, data.brush.a);
+    public static Function stencilCut  = data => Lerp(data.canvas, Color.clear, data.brush.a);
 }
 
 public struct Brush

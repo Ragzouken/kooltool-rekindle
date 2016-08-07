@@ -986,7 +986,7 @@ public class Main : MonoBehaviour
         Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
 
         brushSpriteD.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
-        brushSpriteD.dTexture.Apply();
+        //brushSpriteD.dTexture.Apply();
     }
 
     private Changes changes;

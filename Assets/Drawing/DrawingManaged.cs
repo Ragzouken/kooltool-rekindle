@@ -50,7 +50,7 @@ public class DrawingTexture
     }
 
     public static void Brush(DrawingTexture canvas, Rect canvasRect,
-                             DrawingTexture brush, Rect brushRect,
+                             DrawingTexture brush,  Rect brushRect,
                              Blend.Function blend)
     {
         var data = new Blend.Data();
@@ -63,9 +63,14 @@ public class DrawingTexture
 
         canvas.dirty = true;
 
-        for (int cy = (int) canvasRect.yMin; cy < (int) canvasRect.yMax; ++cy)
+        int xmin = (int) canvasRect.xMin;
+        int ymin = (int) canvasRect.yMin;
+        int xmax = (int) canvasRect.xMax;
+        int ymax = (int) canvasRect.yMax;
+
+        for (int cy = ymin; cy < ymax; ++cy)
         {
-            for (int cx = (int) canvasRect.xMin; cx < (int) canvasRect.xMax; ++cx)
+            for (int cx = xmin; cx < xmax; ++cx)
             {
                 int bx = cx + dx;
                 int by = cy + dy;
@@ -393,7 +398,7 @@ public static class DrawingTexturePooler
         }
         else
         {
-            var tex = Texture2DExtensions.Blank(512, 512, Color.clear);
+            var tex = Texture2DExtensions.Blank(256, 256, Color.clear);
 
             dTexture = new DrawingTexture(tex);
         }
