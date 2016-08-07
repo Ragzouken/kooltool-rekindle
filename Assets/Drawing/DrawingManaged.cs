@@ -381,12 +381,6 @@ public struct DrawingBrush
 public static class DrawingTexturePooler
 {
     private static Stack<DrawingTexture> textures = new Stack<DrawingTexture>();
-    private static Color[] blank;
-
-    static DrawingTexturePooler()
-    {
-        blank = new Color[512 * 512];
-    }
 
     public static DrawingTexture GetTexture(int width, int height)
     {

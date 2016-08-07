@@ -199,10 +199,10 @@ public static class Blend
 
     public static Color Lerp(Color a, Color b, float u)
     {
+        a.a = a.a * (1 - u) + b.a * u;
         a.r = a.r * (1 - u) + b.r * u;
         a.g = a.g * (1 - u) + b.g * u;
         a.b = a.b * (1 - u) + b.b * u;
-        a.a = a.a * (1 - u) + b.a * u;
 
         return a;
     }
@@ -212,6 +212,37 @@ public static class Blend
     public static Function add      = data => data.canvas + data.brush;
     public static Function subtract = data => data.canvas - data.brush;
     public static Function multiply = data => data.canvas * data.brush;
+    public static Function replace  = data => data.brush;
+
+    public static Function stencilKeep = data => Lerp(Color.clear, data.canvas, data.brush.a);
+    public static Function stencilCut  = data => Lerp(data.canvas, Color.clear, data.brush.a);
+}
+
+public static class Blend32
+{
+    public struct Data
+    {
+        public Color32 canvas;
+        public Color32 brush;
+    }
+
+    public delegate Color32 Function(Data data);
+
+    public static Color32 Lerp(Color32 a, Color32 b, byte u)
+    {
+        a.a = (byte)(a.a + ((u * (b.a - a.a)) >> 8));
+        a.r = (byte)(a.r + ((u * (b.r - a.r)) >> 8));
+        a.g = (byte)(a.g + ((u * (b.g - a.g)) >> 8));
+        a.b = (byte)(a.b + ((u * (b.b - a.b)) >> 8));
+
+        return a;
+    }
+
+    public static Function mask     = data => data.brush.a > 0 ? data.brush : data.canvas;
+    public static Function alpha    = data => Lerp(data.canvas, data.brush, data.brush.a);
+    //public static Function add      = data => data.canvas + data.brush;
+    //public static Function subtract = data => data.canvas - data.brush;
+    //public static Function multiply = data => data.canvas * data.brush;
     public static Function replace  = data => data.brush;
 
     public static Function stencilKeep = data => Lerp(Color.clear, data.canvas, data.brush.a);
