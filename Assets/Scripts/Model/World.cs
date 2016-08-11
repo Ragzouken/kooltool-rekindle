@@ -398,6 +398,25 @@ public class ImageGrid : ICopyable<ImageGrid>
                                                      pair => copier.Copy(pair.Value)));
     }
 
+    public SpriteResource AddCell(Point cell)
+    {
+        var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear));
+        var sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
+
+        for (int i = 0; i < texture.dTexture.colors.Length; ++i)
+        {
+            texture.dTexture.colors[i] = new Color(0, Mathf.Min((i % 7) / 7f + 0.01f, 1), 0, 0);
+            texture.dTexture.dirty = true;
+        }
+
+        project.resources.Add(texture);
+        project.resources.Add(sprite);
+
+        cells[cell] = sprite;
+
+        return sprite;
+    }
+
     public void Brush(Changes changes, DrawingBrush brush)
     {
         Vector2 cellMin, cellMax, cell;
@@ -425,20 +444,7 @@ public class ImageGrid : ICopyable<ImageGrid>
                 if (!cells.TryGetValue(cell, out sprite))
                 { 
                     chang.Added(cell);
-
-                    var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear));
-                    sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
-
-                    for (int i = 0; i < texture.dTexture.colors.Length; ++i)
-                    {
-                        texture.dTexture.colors[i] = new Color(0, Mathf.Min((i % 7) / 7f + 0.01f, 1), 0, 0);
-                        texture.dTexture.dirty = true;
-                    }
-
-                    project.resources.Add(texture);
-                    project.resources.Add(sprite);
-
-                    cells[cell] = sprite;
+                    sprite = AddCell(cell);
                 }
 
                 chang.Changed(cell);

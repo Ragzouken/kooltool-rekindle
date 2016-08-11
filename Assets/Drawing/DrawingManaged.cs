@@ -22,6 +22,13 @@ public class DrawingTexture
         colors = texture.GetPixels();
     }
 
+    public void DecodeFromPNG(byte[] data)
+    {
+        texture.LoadImage(data);
+        
+        colors = texture.GetPixels();
+    }
+
     public void SetPixels(Color[] colors, bool apply=true)
     {
         Array.Copy(colors, this.colors, this.colors.Length);

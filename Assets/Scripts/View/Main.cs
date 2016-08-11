@@ -52,6 +52,8 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite normalCursor;
     [SerializeField] private Sprite pickCursor, stampCursor;
 
+    [SerializeField] private InputField gistInput;
+
     public Project project { get; private set; }
     private World saved;
 
@@ -210,6 +212,8 @@ public class Main : MonoBehaviour
         w.background.project = p;
         w.background.cellSize = 256;
         SetProject(p);
+
+        p.world.background.AddCell(Point.Zero);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -388,6 +392,9 @@ public class Main : MonoBehaviour
 
     private List<RaycastResult> raycasts = new List<RaycastResult>();
 
+    [System.Runtime.InteropServices.DllImport("__Internal")]
+    private static extern void UpdateGistID(string id);
+
     private void CheckHotkeys()
     {
         if (input.expand.WasPressed)
@@ -424,6 +431,7 @@ public class Main : MonoBehaviour
             change = true;
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(LoadProject());
@@ -432,6 +440,40 @@ public class Main : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
             StartCoroutine(SaveProject());
+        }
+        */
+
+        if (Input.GetKeyDown(KeyCode.LeftBracket))
+        {
+            StartCoroutine(Gist.Create("test gist",
+                project.world.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
+                                                            p => System.Convert.ToBase64String(p.Value.texture.uTexture.EncodeToPNG())),
+                id =>
+                {
+                    gistInput.text = id;
+
+#if UNITY_WEBGL
+                    UpdateGistID(id);
+#endif
+                }));
+        }
+
+        if (Input.GetKeyDown(KeyCode.RightBracket))
+        {
+            StartCoroutine(Gist.Download(gistInput.text, dict =>
+            {
+                foreach (var pair in dict)
+                {
+                    string[] coords = pair.Key.Split(',');
+                    int x = int.Parse(coords[0]);
+                    int y = int.Parse(coords[1]);
+
+                    byte[] data = System.Convert.FromBase64String(pair.Value);
+
+                    var c = project.world.background.AddCell(new Point(x, y));
+                    c.texture.dTexture.DecodeFromPNG(data);
+                }
+            }));
         }
 
         if (possessed != null)
@@ -517,10 +559,12 @@ public class Main : MonoBehaviour
             Redo();
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.P))
         {
             TestCopy();
         }
+        */
     }
 
     private void TestCopy()
