@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: PaletteSwapSprite
-  m_Shader: {fileID: 4800000, guid: 873aa5863ed7f2548900c1ef14e7e236, type: 3}
+  m_Name: PaletteSwapImage
+  m_Shader: {fileID: 4800000, guid: b1c91f7bf48a7ef49a8cdd7669c12549, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -74,11 +74,11 @@ Material:
         name: _BumpScale
       second: 1
     - first:
+        name: _ColorMask
+      second: 15
+    - first:
         name: _Cutoff
       second: 0.5
-    - first:
-        name: _Cutout
-      second: 1
     - first:
         name: _DetailNormalMapScale
       second: 1
@@ -104,7 +104,25 @@ Material:
         name: _SrcBlend
       second: 1
     - first:
+        name: _Stencil
+      second: 0
+    - first:
+        name: _StencilComp
+      second: 8
+    - first:
+        name: _StencilOp
+      second: 0
+    - first:
+        name: _StencilReadMask
+      second: 255
+    - first:
+        name: _StencilWriteMask
+      second: 255
+    - first:
         name: _UVSec
+      second: 0
+    - first:
+        name: _UseUIAlphaClip
       second: 0
     - first:
         name: _ZWrite
@@ -121,46 +139,46 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 0}
     - first:
         name: _Palette01
-      second: {r: 0.5124685, g: 0.14945664, b: 0.9466014, a: 1}
+      second: {r: 0.3679475, g: 0.9690567, b: 0.7393984, a: 1}
     - first:
         name: _Palette02
-      second: {r: 0.8101435, g: 0.57184726, b: 0.74766153, a: 1}
+      second: {r: 0.9094367, g: 0.31432942, b: 0.23731247, a: 1}
     - first:
         name: _Palette03
-      second: {r: 0.8859918, g: 0.16461541, b: 0.032986168, a: 1}
+      second: {r: 0.32349077, g: 0.8122649, b: 0.4940222, a: 1}
     - first:
         name: _Palette04
-      second: {r: 0.38465697, g: 0.012475373, b: 0.39439863, a: 1}
+      second: {r: 0.28337863, g: 0.49171847, b: 0.788759, a: 1}
     - first:
         name: _Palette05
-      second: {r: 0.0361954, g: 0.9628947, b: 0.16254868, a: 1}
+      second: {r: 0.35526887, g: 0.8532872, b: 0.4642629, a: 1}
     - first:
         name: _Palette06
-      second: {r: 0.96041155, g: 0.34510747, b: 0.5471849, a: 1}
+      second: {r: 0.35293236, g: 0.65410477, b: 0.32915846, a: 1}
     - first:
         name: _Palette07
-      second: {r: 0.7933823, g: 0.73367375, b: 0.6468088, a: 1}
+      second: {r: 0.9502635, g: 0.5998177, b: 0.5099096, a: 1}
     - first:
         name: _Palette08
-      second: {r: 0.5385626, g: 0.1605214, b: 0.36926475, a: 1}
+      second: {r: 0.8334384, g: 0.23614588, b: 0.3445827, a: 1}
     - first:
         name: _Palette09
-      second: {r: 0.49705786, g: 0.2554933, b: 0.1778623, a: 1}
+      second: {r: 0.9926691, g: 0.02275336, b: 0.14951517, a: 1}
     - first:
         name: _Palette10
-      second: {r: 0.15627266, g: 0.5894447, b: 0.076512344, a: 1}
+      second: {r: 0.77818024, g: 0.5874143, b: 0.282941, a: 1}
     - first:
         name: _Palette11
-      second: {r: 0.39249855, g: 0.41212803, b: 0.19190076, a: 1}
+      second: {r: 0.7310007, g: 0.17529751, b: 0.50942427, a: 1}
     - first:
         name: _Palette12
-      second: {r: 0.87389433, g: 0.5198689, b: 0.29692128, a: 1}
+      second: {r: 0.18980959, g: 0.4212497, b: 0.9156555, a: 1}
     - first:
         name: _Palette13
-      second: {r: 0.9470278, g: 0.1516862, b: 0.59742707, a: 1}
+      second: {r: 0.7530967, g: 0.70335406, b: 0.7033219, a: 1}
     - first:
         name: _Palette14
-      second: {r: 0.6555311, g: 0.75994396, b: 0.26767412, a: 1}
+      second: {r: 0.42554647, g: 0.23093286, b: 0.436616, a: 1}
     - first:
         name: _Palette15
-      second: {r: 0.15041877, g: 0.90805435, b: 0.6532034, a: 1}
+      second: {r: 0.9616952, g: 0.89050615, b: 0.657481, a: 1}

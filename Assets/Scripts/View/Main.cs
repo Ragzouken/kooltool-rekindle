@@ -448,7 +448,7 @@ public class Main : MonoBehaviour
         }
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
-        cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
+        cameraController.scaleTarget = zoomSlider.value * 1f;//(Screen.width / 256);
 
         float mult = input.click.IsPressed ? 32 : 64;
 
@@ -986,7 +986,7 @@ public class Main : MonoBehaviour
         Blend.Function blend2 = data => Color.Lerp(Color.clear, adj, data.brush.a);
 
         brushSpriteD.Brush(stamp.brush.AsBrush(Vector2.zero, blend2));
-        //brushSpriteD.dTexture.Apply();
+        brushSpriteD.dTexture.Apply();
     }
 
     private Changes changes;
