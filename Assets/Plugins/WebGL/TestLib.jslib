@@ -26,6 +26,14 @@
     {
     	document.getElementById("gistid").value = Pointer_stringify(id);
     },
+
+    GetGistID: function()
+    {
+		var returnStr = document.getElementById("gistid").value;
+        var buffer = _malloc(lengthBytesUTF8(returnStr) + 1);
+        writeStringToMemory(returnStr, buffer);
+        return buffer;
+    },
 };
 
 mergeInto(LibraryManager.library, MyPlugin);
