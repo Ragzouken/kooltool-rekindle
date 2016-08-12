@@ -323,6 +323,7 @@ public class Main : MonoBehaviour
         input = new TestInputSet();
 
 #if UNITY_WEBGL
+        /*
         Debug.Log("Location: " + GetWindowSearch());
 
         try
@@ -336,6 +337,7 @@ public class Main : MonoBehaviour
         {
             Debug.Log(e);
         }
+        */
 #endif
     }
 
@@ -545,7 +547,7 @@ public class Main : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Slash))
         {
-            PerfTest();
+            //PerfTest();
         }
 
         /*
