@@ -252,29 +252,6 @@ public static class Blend32
     public static Function stencilCut  = data => Lerp(data.canvas, Color.clear, data.brush.a);
 }
 
-public static class Blend8
-{
-    public struct Data
-    {
-        public byte canvas;
-        public byte brush;
-    }
-
-    public delegate byte Function(Data data);
-
-    public static byte Lerp(byte a, byte b, byte u)
-    {
-        return (byte) (a + ((u * (b - a)) >> 8));
-    }
-
-    public static Function mask     = data => data.brush > 0 ? data.brush : data.canvas;
-    public static Function alpha    = mask;
-    //public static Function add      = data => data.canvas + data.brush;
-    //public static Function subtract = data => data.canvas - data.brush;
-    //public static Function multiply = data => data.canvas * data.brush;
-    public static Function replace  = data => data.brush;
-}
-
 public struct Brush
 {
     public Sprite sprite;

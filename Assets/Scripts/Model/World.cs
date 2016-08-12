@@ -51,14 +51,14 @@ public class TextureResource : IResource, ICopyable<TextureResource>
     [JsonIgnore]
     public bool dirty = false;
     [JsonIgnore]
-    public DrawingTexture dTexture;
+    public Texture8 texture8;
 
     [JsonIgnore]
     public Texture2D uTexture
     {
         get
         {
-            return dTexture.texture;
+            return texture8.texture;
         }
     }
 
@@ -87,7 +87,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
         Debug.Log(real.format.ToString());
 
-        dTexture = new DrawingTexture(real);
+        texture8 = new Texture8(real);
     }
 
     void IResource.SaveFinalise(Project project)
@@ -99,14 +99,14 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
         id = id == "" ? Guid.NewGuid().ToString() : id;
 
-        System.IO.File.WriteAllBytes(path, dTexture.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(path, texture8.texture.EncodeToPNG());
     }
 
     public TextureResource() { }
 
     public TextureResource(Texture2D texture)
     {
-        this.dTexture = new DrawingTexture(texture);
+        texture8 = new Texture8(texture);
     }
 
     public static implicit operator Texture2D(TextureResource resource)
@@ -116,10 +116,10 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     public void Copy(Copier copier, TextureResource copy)
     {
-        var tex = Texture2DExtensions.Blank(dTexture.texture.width, dTexture.texture.height, Color.clear);
-        tex.SetPixels32(dTexture.texture.GetPixels32());
+        var tex = Texture2DExtensions.Blank(texture8.texture.width, texture8.texture.height, Color.clear, TextureFormat.Alpha8);
+        tex.SetPixels32(texture8.texture.GetPixels32());
 
-        copy.dTexture = new DrawingTexture(tex);
+        copy.texture8 = new Texture8(tex);
 
         copy.id = id;
     }
@@ -132,14 +132,14 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
     public Rect rect;
 
     [JsonIgnore]
-    public DrawingSprite dSprite;
+    public Sprite8 sprite8;
 
     [JsonIgnore]
     public Sprite uSprite
     {
         get
         {
-            return dSprite.sprite;
+            return sprite8.sprite;
         }
     }
 
@@ -150,7 +150,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
     void IResource.LoadFinalise(Project project)
     {
-        dSprite = new DrawingSprite(texture.dTexture, rect, pivot);
+        sprite8 = new Sprite8(texture.texture8, rect, pivot);
     }
 
     void IResource.SaveFinalise(Project project)
@@ -161,7 +161,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
     public SpriteResource(TextureResource texture, Sprite sprite)
     {
-        this.dSprite = new DrawingSprite(texture.dTexture, sprite);
+        this.sprite8 = new Sprite8(texture.texture8, sprite);
         this.texture = texture;
 
         pivot = sprite.pivot;
@@ -170,7 +170,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
     public static implicit operator Sprite(SpriteResource resource)
     {
-        return resource.dSprite.sprite;
+        return resource.sprite8.sprite;
     }
 
     public void Copy(Copier copier, SpriteResource copy)
@@ -178,7 +178,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
         copy.texture = copier.Copy(texture);
         copy.pivot = pivot;
         copy.rect = rect;
-        copy.dSprite = new DrawingSprite(copy.texture.dTexture, rect, pivot);
+        copy.sprite8 = new Sprite8(copy.texture.texture8, rect, pivot);
     }
 }
 
@@ -279,7 +279,7 @@ public interface IChange
 
 public class Changes
 {
-    public List<DrawingSprite> sprites = new List<DrawingSprite>();
+    public List<Sprite8> sprites = new List<Sprite8>();
 
     public Dictionary<object, IChange> changes = new Dictionary<object, IChange>();
 
@@ -306,7 +306,7 @@ public class Changes
     {
         for (int i = 0; i < sprites.Count; ++i)
         {
-            sprites[i].dTexture.Apply();
+            sprites[i].texture8.Apply();
         }
     }
 
@@ -332,8 +332,8 @@ public class ImageGrid : ICopyable<ImageGrid>
     public class Change : IChange
     {
         public ImageGrid grid;
-        public Dictionary<Point, Color[]> before = new Dictionary<Point, Color[]>();
-        public Dictionary<Point, Color[]> after = new Dictionary<Point, Color[]>();
+        public Dictionary<Point, byte[]> before = new Dictionary<Point, byte[]>();
+        public Dictionary<Point, byte[]> after  = new Dictionary<Point, byte[]>();
         public HashSet<Point> added = new HashSet<Point>();
 
         public void Added(Point point)
@@ -343,11 +343,11 @@ public class ImageGrid : ICopyable<ImageGrid>
 
         public void Changed(Point point)
         {
-            Color[] original;
+            byte[] original;
 
             if (!before.TryGetValue(point, out original))
             {
-                before[point] = grid.cells[point].dSprite.dTexture.GetPixels();
+                before[point] = grid.cells[point].sprite8.texture8.GetBytes();
             }
         }
 
@@ -363,8 +363,8 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.GetPixels();
-                grid.cells[pair.Key].dSprite.dTexture.SetPixels(after[pair.Key]);
+                before[pair.Key] = grid.cells[pair.Key].sprite8.texture8.GetBytes();
+                grid.cells[pair.Key].sprite8.texture8.SetBytes(after[pair.Key]);
             }
 
 
@@ -374,8 +374,8 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].dSprite.dTexture.GetPixels();
-                grid.cells[pair.Key].dSprite.dTexture.SetPixels(before[pair.Key]);
+                after[pair.Key] = grid.cells[pair.Key].sprite8.texture8.GetBytes();
+                grid.cells[pair.Key].sprite8.texture8.SetBytes(after[pair.Key]);
             }
 
             foreach (var cell in added)
@@ -409,12 +409,6 @@ public class ImageGrid : ICopyable<ImageGrid>
         var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear, TextureFormat.Alpha8));
         var sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
 
-        for (int i = 0; i < texture.dTexture.colors.Length; ++i)
-        {
-            texture.dTexture.colors[i] = new Color(0, Mathf.Min((i % 7) / 7f + 0.01f, 1), 0, 0);
-            texture.dTexture.dirty = true;
-        }
-
         project.resources.Add(texture);
         project.resources.Add(sprite);
 
@@ -423,7 +417,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         return sprite;
     }
 
-    public void Brush(Changes changes, DrawingBrush brush)
+    public void Brush(Changes changes, Brush8 brush)
     {
         Vector2 cellMin, cellMax, cell;
         Vector2 local;
@@ -455,10 +449,10 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                 chang.Changed(cell);
 
-                sprite.dSprite.Brush(brush, cell * cellSize);
+                sprite.sprite8.Brush(brush, cell * cellSize);
                 sprite.texture.dirty = true;
 
-                changes.sprites.Add(sprite.dSprite);
+                changes.sprites.Add(sprite.sprite8);
             }
         }
     }
@@ -471,7 +465,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         position.GridCoords(cellSize, out cell, out local);
 
         return cells.TryGetValue(cell, out sprite)
-             ? sprite.dSprite.sprite.GetPixel(local)
+             ? sprite.sprite8.sprite.GetPixel(local)
              : Color.clear;
     }
 }
