@@ -34,6 +34,14 @@
         writeStringToMemory(returnStr, buffer);
         return buffer;
     },
+
+    GetWindowSearch: function()
+    {
+        var str = window.location.search.replace("?", "");
+        var buffer = _malloc(lengthBytesUTF8(str) + 1);
+        writeStringToMemory(str, buffer);
+        return buffer;
+    },
 };
 
 mergeInto(LibraryManager.library, MyPlugin);

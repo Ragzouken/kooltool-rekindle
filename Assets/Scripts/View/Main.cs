@@ -304,6 +304,22 @@ public class Main : MonoBehaviour
         //Application.OpenURL(path);
 
         input = new TestInputSet();
+
+#if UNITY_WEBGL
+        Debug.Log("Location: " + GetWindowSearch());
+
+        try
+        {
+            string id = GetWindowSearch().Split('=')[1];
+
+            FromGist(id);
+
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e);
+        }
+#endif
     }
 
     private class TestInputSet : PlayerActionSet
@@ -434,6 +450,34 @@ public class Main : MonoBehaviour
     [System.Runtime.InteropServices.DllImport("__Internal")]
     private static extern void UpdateGistID(string id);
 
+    [System.Runtime.InteropServices.DllImport("__Internal")]
+    private static extern string GetGistID();
+
+    [System.Runtime.InteropServices.DllImport("__Internal")]
+    private static extern string GetWindowSearch();
+
+    private void FromGist(string id)
+    {
+        StartCoroutine(Gist.Download(id, dict =>
+        {
+            //project.world.palette = JSON.Deserialise<Color[]>(dict["palette"]);
+
+            dict.Remove("palette");
+
+            foreach (var pair in dict)
+            {
+                string[] coords = pair.Key.Split(',');
+                int x = int.Parse(coords[0]);
+                int y = int.Parse(coords[1]);
+
+                byte[] data = System.Convert.FromBase64String(pair.Value);
+
+                var c = project.world.background.AddCell(new Point(x, y));
+                c.texture.dTexture.DecodeFromPNG(data);
+            }
+        }));
+    }
+
     private void CheckHotkeys()
     {
         if (input.expand.WasPressed)
@@ -490,9 +534,13 @@ public class Main : MonoBehaviour
         /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
+            var background = project.world.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
+                                                                         p => System.Convert.ToBase64String(p.Value.texture.uTexture.EncodeToPNG()));
+
+            //background["palette"] = JSON.Serialise(project.world.palette);
+
             StartCoroutine(Gist.Create("test gist",
-                project.world.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
-                                                            p => System.Convert.ToBase64String(p.Value.texture.uTexture.EncodeToPNG())),
+                background,
                 id =>
                 {
                     gistInput.text = id;
@@ -505,20 +553,13 @@ public class Main : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
-            StartCoroutine(Gist.Download(gistInput.text, dict =>
-            {
-                foreach (var pair in dict)
-                {
-                    string[] coords = pair.Key.Split(',');
-                    int x = int.Parse(coords[0]);
-                    int y = int.Parse(coords[1]);
+            string id = gistInput.text;
 
-                    byte[] data = System.Convert.FromBase64String(pair.Value);
+#if UNITY_WEBGL
+            id = GetGistID();
+#endif
 
-                    var c = project.world.background.AddCell(new Point(x, y));
-                    c.texture.dTexture.DecodeFromPNG(data);
-                }
-            }));
+            FromGist(id);
         }
         */
 
