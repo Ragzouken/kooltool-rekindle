@@ -81,7 +81,13 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         var tex = Texture2DExtensions.Blank(1, 1, Color.clear);
         tex.LoadImage(System.IO.File.ReadAllBytes(path));
 
-        dTexture = new DrawingTexture(tex);
+        var real = Texture2DExtensions.Blank(tex.width, tex.height, Color.clear, TextureFormat.Alpha8);
+        real.SetPixels32(tex.GetPixels32());
+        real.Apply();
+
+        Debug.Log(real.format.ToString());
+
+        dTexture = new DrawingTexture(real);
     }
 
     void IResource.SaveFinalise(Project project)
@@ -400,7 +406,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
     public SpriteResource AddCell(Point cell)
     {
-        var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear));
+        var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear, TextureFormat.Alpha8));
         var sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
 
         for (int i = 0; i < texture.dTexture.colors.Length; ++i)

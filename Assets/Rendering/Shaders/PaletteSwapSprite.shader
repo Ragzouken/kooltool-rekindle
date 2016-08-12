@@ -3,7 +3,7 @@
 	Properties
 	{
 		_MainTex("Texture", 2D) = "white" {}
-		_Cutout("Cutout", Range(0, 1)) = 1
+		[PerRendererData] _Cutout("Cutout", Range(0, 1)) = 1
 	}
 	SubShader
 	{
@@ -40,7 +40,7 @@
 
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
-			half _Cutout;
+			float _Cutout;
 
 			fixed4 _Palette00;
 			fixed4 _Palette01;
@@ -73,8 +73,8 @@
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
 				
-				half c = col.r * 15;
-				half cut = col.g;
+				half c = col.a * 15;
+				//half cut = col.g;
 
 				if (c ==  0) col = _Palette00;
 				if (c ==  1) col = _Palette01;
@@ -93,7 +93,7 @@
 				if (c == 14) col = _Palette14;
 				if (c == 15) col = _Palette15;
 
-				col.a *= step(cut, _Cutout);
+				//col.a *= step(cut, _Cutout);
 
 				return col;
 			}

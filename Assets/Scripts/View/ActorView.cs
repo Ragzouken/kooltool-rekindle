@@ -14,11 +14,21 @@ public class ActorView : MonoBehaviour
     public void SetActor(Actor actor)
     {
         this.actor = actor;
+
+        offset = Random.value;
+        block = new MaterialPropertyBlock();
     }
+
+    private MaterialPropertyBlock block;
+    private float offset;
 
     public void Refresh()
     {
         transform.position = actor.position.current;
         renderer.sprite = actor.costume[actor.position.direction];
+
+        renderer.GetPropertyBlock(block);
+        block.SetFloat("_Cutout", (Time.timeSinceLevelLoad + offset) % 1);
+        renderer.SetPropertyBlock(block);
     }
 }

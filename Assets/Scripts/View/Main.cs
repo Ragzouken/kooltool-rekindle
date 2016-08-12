@@ -69,6 +69,36 @@ public class Main : MonoBehaviour
         }
     }
 
+    private void PerfTest()
+    {
+        var alpha = Texture2DExtensions.Blank(256, 256, Color.clear, TextureFormat.Alpha8);
+        var fully = Texture2DExtensions.Blank(256, 256, Color.clear, TextureFormat.ARGB32);
+
+        byte[] binary = new byte[256 * 256];
+        Color[] colors = new Color[256 * 256];
+        int count = 4096;
+
+        var timer1 = Stopwatch.StartNew();
+
+        for (int i = 0; i < count; ++i)
+        {
+            alpha.LoadRawTextureData(binary);
+        }
+
+        timer1.Stop();
+
+        var timer2 = Stopwatch.StartNew();
+
+        for (int i = 0; i < count; ++i)
+        {
+            fully.SetPixels(colors);
+        }
+
+        timer2.Stop();
+
+        Debug.LogFormat("Alpha: {0}s vs Full: {1}s", timer1.Elapsed.TotalSeconds, timer2.Elapsed.TotalSeconds);
+    }
+
     private Script ScriptFromCSV(string csv)
     {
         string[] lines = csv.Split('\n');
@@ -168,6 +198,15 @@ public class Main : MonoBehaviour
                                       sprites[i].texture, sprites[i].textureRect,
                                       Blend.replace);
 
+            var px = sprites[i].GetPixels();
+
+            for (int j = 0; j < px.Length; ++j)
+            {
+                px[j].g = Random.value;
+            }
+
+            sprites[i].SetPixels(px);
+
             sprites[i] = Sprite.Create(test, rect, Vector2.one * 0.5f, 1);
         }
 
@@ -217,8 +256,8 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < 16; ++i)
         {
-            var next = Vector2.right * Random.Range(-8, 8) * 32
-                     + Vector2.up    * Random.Range(-8, 8) * 32;
+            var next = Vector2.right * Random.Range(-4, 4) * 32
+                     + Vector2.up    * Random.Range(-4, 4) * 32;
 
             project.world.actors.Add(new Actor
             {
@@ -431,7 +470,7 @@ public class Main : MonoBehaviour
             change = true;
         }
 
-        /*
+        ///*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(LoadProject());
@@ -441,8 +480,14 @@ public class Main : MonoBehaviour
         {
             StartCoroutine(SaveProject());
         }
-        */
+        //*/
 
+        if (Input.GetKeyDown(KeyCode.Slash))
+        {
+            PerfTest();
+        }
+
+        /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(Gist.Create("test gist",
@@ -475,6 +520,7 @@ public class Main : MonoBehaviour
                 }
             }));
         }
+        */
 
         if (possessed != null)
         {
@@ -490,7 +536,7 @@ public class Main : MonoBehaviour
         }
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
-        cameraController.scaleTarget = zoomSlider.value * 1f;//(Screen.width / 256);
+        cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
 
         float mult = input.click.IsPressed ? 32 : 64;
 
@@ -938,6 +984,8 @@ public class Main : MonoBehaviour
             var a = Color.Lerp(data.canvas, adj, data.brush.a);
             a.g = data.canvas.g;
             a.b = data.canvas.b;
+
+            a.a = a.r;
 
             return a;
         };
