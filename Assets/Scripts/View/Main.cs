@@ -52,8 +52,6 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite normalCursor;
     [SerializeField] private Sprite pickCursor, stampCursor;
 
-    [SerializeField] private InputField gistInput;
-
     public Project project { get; private set; }
     private World saved;
 
@@ -323,7 +321,6 @@ public class Main : MonoBehaviour
         input = new TestInputSet();
 
 #if UNITY_WEBGL
-        /*
         Debug.Log("Location: " + GetWindowSearch());
 
         try
@@ -337,7 +334,6 @@ public class Main : MonoBehaviour
         {
             Debug.Log(e);
         }
-        */
 #endif
     }
 
@@ -479,7 +475,7 @@ public class Main : MonoBehaviour
     {
         StartCoroutine(Gist.Download(id, dict =>
         {
-            //project.world.palette = JSON.Deserialise<Color[]>(dict["palette"]);
+            project.world.palette = BytesToColors(FromBase64(dict["palette"]));
 
             dict.Remove("palette");
 
@@ -492,9 +488,74 @@ public class Main : MonoBehaviour
                 byte[] data = System.Convert.FromBase64String(pair.Value);
 
                 var c = project.world.background.AddCell(new Point(x, y));
-                //c.texture.texture8.DecodeFromPNG(data);
+                c.texture.texture8.DecodeFromPNG(data);
             }
+
+            SetProject(project);
         }));
+    }
+
+    private string ToBase64(byte[] bytes)
+    {
+        return System.Convert.ToBase64String(bytes);
+    }
+
+    private byte[] FromBase64(string data)
+    {
+        return System.Convert.FromBase64String(data);
+    }
+
+    private byte[] ColorsToBytes(Color[] colors)
+    {
+        var bytes = new byte[colors.Length * 4];
+
+        for (int i = 0; i < colors.Length; ++i)
+        {
+            var color = (Color32) colors[i];
+
+            bytes[i * 4 + 0] = color.a;
+            bytes[i * 4 + 1] = color.r;
+            bytes[i * 4 + 2] = color.g;
+            bytes[i * 4 + 3] = color.b;
+        }
+
+        return bytes;
+    }
+
+    private Color[] BytesToColors(byte[] bytes)
+    {
+        var colors = new Color[bytes.Length / 4];
+
+        for (int i = 0; i < colors.Length; ++i)
+        {
+            var color = new Color32(bytes[i * 4 + 1],
+                                    bytes[i * 4 + 2],
+                                    bytes[i * 4 + 3],
+                                    bytes[i * 4 + 0]);
+
+            colors[i] = color;
+        }
+
+        return colors;
+    }
+
+    public void GISTSAVE()
+    {
+        var background = project.world.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
+                                                                     p => ToBase64(p.Value.texture.uTexture.EncodeToPNG()));
+
+        background["palette"] = ToBase64(ColorsToBytes(project.world.palette));
+
+        StartCoroutine(Gist.Create("test gist",
+            background,
+            id =>
+            {
+                Debug.Log(id);
+
+#if UNITY_WEBGL
+                    UpdateGistID(id);
+#endif
+            }));
     }
 
     private void CheckHotkeys()
@@ -533,7 +594,7 @@ public class Main : MonoBehaviour
             change = true;
         }
 
-        ///*
+        /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(LoadProject());
@@ -549,38 +610,6 @@ public class Main : MonoBehaviour
         {
             //PerfTest();
         }
-
-        /*
-        if (Input.GetKeyDown(KeyCode.LeftBracket))
-        {
-            var background = project.world.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
-                                                                         p => System.Convert.ToBase64String(p.Value.texture.uTexture.EncodeToPNG()));
-
-            //background["palette"] = JSON.Serialise(project.world.palette);
-
-            StartCoroutine(Gist.Create("test gist",
-                background,
-                id =>
-                {
-                    gistInput.text = id;
-
-#if UNITY_WEBGL
-                    UpdateGistID(id);
-#endif
-                }));
-        }
-
-        if (Input.GetKeyDown(KeyCode.RightBracket))
-        {
-            string id = gistInput.text;
-
-#if UNITY_WEBGL
-            id = GetGistID();
-#endif
-
-            FromGist(id);
-        }
-        */
 
         if (possessed != null)
         {

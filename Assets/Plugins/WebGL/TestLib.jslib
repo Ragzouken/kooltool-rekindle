@@ -24,7 +24,9 @@
 
     UpdateGistID: function (id)
     {
-    	document.getElementById("gistid").value = Pointer_stringify(id);
+        var str = Pointer_stringify(id);
+    	//document.getElementById("gistid").value = str;
+        window.location.assign(window.location.href.split("?")[0] + "?id=" + str);
     },
 
     GetGistID: function()

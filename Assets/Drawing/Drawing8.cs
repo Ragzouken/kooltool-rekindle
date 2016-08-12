@@ -41,6 +41,7 @@ public class Texture8
     public Texture8(Texture2D texture)
     {
         this.texture = texture;
+        texture.name = "Texture8";
 
         Color32[] pixels;
         
@@ -77,6 +78,23 @@ public class Texture8
         Array.Copy(bytes, this.bytes, this.bytes.Length);
 
         dirty = true;
+    }
+
+    public void DecodeFromPNG(byte[] data)
+    {
+        var tex = Texture2DExtensions.Blank(1, 1, Color.clear, TextureFormat.Alpha8);
+        tex.LoadImage(data);
+
+        Color32[] pixels;
+
+        pixels = tex.GetPixels32();
+
+        for (int i = 0; i < bytes.Length; ++i)
+        {
+            bytes[i] = pixels[i].a;
+        }
+
+        Apply(true);
     }
 
     public static void Brush(Texture8 canvas, Rect canvasRect,

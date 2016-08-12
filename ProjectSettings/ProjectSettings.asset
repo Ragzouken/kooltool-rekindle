@@ -423,7 +423,7 @@ PlayerSettings:
   WebGL::ScriptingBackend: 1
   WebGL::audioCompressionFormat: 4
   WebGL::exceptionSupport: 1
-  WebGL::memorySize: 512
+  WebGL::memorySize: 768
   WebPlayer::ScriptingBackend: 0
   boolPropertyNames:
   - Android::VR::enable

@@ -1,14 +1,8 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Assertions;
 using System;
-using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-using DebuggerDisplay = System.Diagnostics.DebuggerDisplayAttribute;
-
-[DebuggerDisplay("DrawingTexture {texture.name} ({texture.width} x {texture.height})")]
 public class DrawingTexture
 {
     public bool dirty;
@@ -111,7 +105,6 @@ public class DrawingTexture
     }
 }
 
-[DebuggerDisplay("DrawingSprite {sprite.name} ({rect}, {pivot})")]
 public class DrawingSprite : IDisposable
 {
     public DrawingTexture dTexture;
