@@ -73,7 +73,7 @@
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
 				
-				half c = col.r * 15;
+				int c = floor(col.r * 15);
 				half cut = col.g;
 
 				if (c ==  0) col = _Palette00;
