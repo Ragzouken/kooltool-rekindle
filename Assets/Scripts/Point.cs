@@ -6,9 +6,9 @@ using Newtonsoft.Json;
 public struct Point : System.IEquatable<Point>
 {
     [JsonProperty]
-    public readonly int x;
+    public int x;
     [JsonProperty]
-    public readonly int y;
+    public int y;
 
     public static Point Zero = new Point(0, 0);
     public static Point One = new Point(1, 1);

@@ -26,9 +26,5 @@ public class ActorView : MonoBehaviour
     {
         transform.position = actor.position.current;
         renderer.sprite = actor.costume[actor.position.direction];
-
-        renderer.GetPropertyBlock(block);
-        block.SetFloat("_Cutout", (Time.timeSinceLevelLoad + offset) % 1);
-        renderer.SetPropertyBlock(block);
     }
 }

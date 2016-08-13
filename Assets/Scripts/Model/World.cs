@@ -78,10 +78,10 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     void IResource.LoadFinalise(Project project)
     {
-        var tex = Texture2DExtensions.Blank(1, 1, Color.clear);
+        var tex = Texture2DExtensions.Blank(1, 1);
         tex.LoadImage(System.IO.File.ReadAllBytes(path));
 
-        var real = Texture2DExtensions.Blank(tex.width, tex.height, Color.clear, TextureFormat.Alpha8);
+        var real = Texture2DExtensions.Blank(tex.width, tex.height, TextureFormat.Alpha8);
         real.SetPixels32(tex.GetPixels32());
         real.Apply();
 
@@ -109,6 +109,11 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         texture8 = new Texture8(texture);
     }
 
+    public TextureResource(Texture8 texture8)
+    {
+        this.texture8 = texture8;
+    }
+
     public static implicit operator Texture2D(TextureResource resource)
     {
         return resource.uTexture;
@@ -116,7 +121,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     public void Copy(Copier copier, TextureResource copy)
     {
-        var tex = Texture2DExtensions.Blank(texture8.texture.width, texture8.texture.height, Color.clear, TextureFormat.Alpha8);
+        var tex = Texture2DExtensions.Blank(texture8.texture.width, texture8.texture.height, TextureFormat.Alpha8);
         tex.SetPixels32(texture8.texture.GetPixels32());
 
         copy.texture8 = new Texture8(tex);
@@ -166,6 +171,15 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
         pivot = sprite.pivot;
         rect = sprite.textureRect;
+    }
+
+    public SpriteResource(TextureResource texture, Sprite8 sprite8)
+    {
+        this.sprite8 = sprite8;
+        this.texture = texture;
+
+        pivot = sprite8.pivot;
+        rect = sprite8.rect;
     }
 
     public static implicit operator Sprite(SpriteResource resource)
@@ -279,7 +293,7 @@ public interface IChange
 
 public class Changes
 {
-    public List<Sprite8> sprites = new List<Sprite8>();
+    public HashSet<Sprite8> sprites = new HashSet<Sprite8>();
 
     public Dictionary<object, IChange> changes = new Dictionary<object, IChange>();
 
@@ -304,9 +318,9 @@ public class Changes
 
     public void ApplyTextures()
     {
-        for (int i = 0; i < sprites.Count; ++i)
+        foreach (var sprite in sprites)
         {
-            sprites[i].texture8.Apply();
+            sprite.texture8.Apply();
         }
     }
 
@@ -355,7 +369,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var cell in added)
             {
-                var rTexture = new TextureResource(Texture2DExtensions.Blank(grid.cellSize, grid.cellSize, Color.clear));
+                var rTexture = new TextureResource(Texture2DExtensions.Blank(grid.cellSize, grid.cellSize));
                 var sprite = new SpriteResource(rTexture, rTexture.uTexture.FullSprite(pixelsPerUnit: 1));
 
                 grid.cells.Add(cell, sprite);
@@ -406,8 +420,10 @@ public class ImageGrid : ICopyable<ImageGrid>
 
     public SpriteResource AddCell(Point cell)
     {
-        var texture = new TextureResource(Texture2DExtensions.Blank(cellSize, cellSize, Color.clear, TextureFormat.Alpha8));
+        var texture = new TextureResource(new Texture8(cellSize, cellSize));
         var sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
+
+        texture.texture8.Apply();
 
         project.resources.Add(texture);
         project.resources.Add(sprite);
@@ -419,8 +435,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
     public void Brush(Changes changes, Brush8 brush)
     {
-        Vector2 cellMin, cellMax, cell;
-        Vector2 local;
+        Vector2 cell;
         SpriteResource sprite;
 
         // find the rectangle of cells that contains the brush
@@ -428,8 +443,8 @@ public class ImageGrid : ICopyable<ImageGrid>
         Vector2 brushMax = brushMin + new Vector2(brush.sprite.rect.width,
                                                   brush.sprite.rect.height);
 
-        brushMin.GridCoords(cellSize, out cellMin, out local);
-        brushMax.GridCoords(cellSize, out cellMax, out local);
+        Vector2 cellMin = brushMin.CellCoords(cellSize);
+        Vector2 cellMax = brushMax.CellCoords(cellSize);
 
         var chang = changes.GetChange(this, () => new Change { grid = this });
 
@@ -473,9 +488,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 public class Costume
 {
     public World world;
-
-    [JsonIgnore]
-    public Sprite up, down, left, right;
+    public SpriteResource up, down, left, right;
 
     public Sprite this[Position.Direction direction]
     {

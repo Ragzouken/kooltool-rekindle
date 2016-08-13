@@ -16,10 +16,12 @@ public static partial class DrawingExtensions
 {
     public static Rect Intersect(this Rect a, Rect b)
     {
-        return Rect.MinMaxRect(Mathf.Max(a.min.x, b.min.x),
-                               Mathf.Max(a.min.y, b.min.y),
-                               Mathf.Min(a.max.x, b.max.x),
-                               Mathf.Min(a.max.y, b.max.y));
+        a.xMin = Mathf.Max(a.xMin, b.xMin);
+        a.yMin = Mathf.Max(a.yMin, b.yMin);
+        a.xMax = Mathf.Min(a.xMax, b.xMax);
+        a.yMax = Mathf.Min(a.yMax, b.yMax);
+
+        return a;
     }
 }
 
@@ -107,26 +109,12 @@ public static partial class SpriteExtensions
 public static partial class Texture2DExtensions
 {
     public static Texture2D Blank(int width, 
-                                  int height, 
-                                  Color32 color,
+                                  int height,
                                   TextureFormat format=TextureFormat.ARGB32)
     {
         var texture = new Texture2D(width, height, format, false);
         texture.filterMode = FilterMode.Point;
         texture.wrapMode = TextureWrapMode.Clamp;
-
-        var pixels = new byte[width * height * 4];
-
-        for (int i = 0; i < pixels.Length; i += 4)
-        {
-            pixels[i + 0] = color.a;
-            pixels[i + 1] = color.r;
-            pixels[i + 2] = color.g;
-            pixels[i + 3] = color.b;
-        }
-
-        texture.LoadRawTextureData(pixels);
-        texture.Apply();
 
         return texture;
     }
@@ -263,7 +251,7 @@ public struct Brush
         int left = Mathf.FloorToInt(diameter / 2f);
         float piv = left / (float) diameter;
 
-        Texture2D image = Texture2DExtensions.Blank(diameter, diameter, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank(diameter, diameter);
 
         Sprite brush = Sprite.Create(image, 
                                      new Rect(0, 0, diameter, diameter),
@@ -326,7 +314,7 @@ public struct Brush
                                    Color color,
                                    float pivotX = 0, float pivotY = 0)
     {
-        Texture2D image = Texture2DExtensions.Blank(width, height, color);
+        Texture2D image = Texture2DExtensions.Blank(width, height);
 
         Sprite brush = Sprite.Create(image, 
                                      new Rect(0, 0, width, height),
@@ -351,7 +339,7 @@ public struct Brush
         var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
         var rect = new Rect(0, 0, size.x, size.y);
 
-        Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y);
         Sprite brush = Sprite.Create(image, rect, anchor, 1);
         brush.name = "Line (Brush)";
 
@@ -393,7 +381,7 @@ public struct Brush
         var anchor = new Vector2(pivot.x / size.x, pivot.y / size.y);
         var rect   = new Rect(0, 0, size.x, size.y);
 
-        Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y);
         Sprite brush = Sprite.Create(image, rect, anchor, 1);
         brush.name = "Line (Brush)";
 

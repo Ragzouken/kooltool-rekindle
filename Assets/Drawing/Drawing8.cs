@@ -38,6 +38,19 @@ public class Texture8
     public Texture2D texture;
     public byte[] bytes;
 
+    public Texture8(int width, int height, byte value=0)
+    {
+        texture = Texture2DExtensions.Blank(width, height, TextureFormat.Alpha8);
+        bytes = new byte[width * height];
+     
+        for (int i = 0; i < bytes.Length; ++i)
+        {
+            bytes[i] = value;
+        }
+
+        dirty = true;
+    }
+
     public Texture8(Texture2D texture)
     {
         this.texture = texture;
@@ -82,7 +95,7 @@ public class Texture8
 
     public void DecodeFromPNG(byte[] data)
     {
-        var tex = Texture2DExtensions.Blank(1, 1, Color.clear, TextureFormat.Alpha8);
+        var tex = Texture2DExtensions.Blank(1, 1, TextureFormat.Alpha8);
         tex.LoadImage(data);
 
         Color32[] pixels;
@@ -208,16 +221,12 @@ public class Sprite8 : IDisposable
         var b_offset = brush.position - brush.sprite.pivot;
         var c_offset = canvasPosition - canvas.pivot;
 
-        var world_rect_brush = new Rect(b_offset.x,
-                                        b_offset.y,
-                                        brush.sprite.rect.width,
-                                        brush.sprite.rect.height);
+        Rect world_rect_brush = brush.sprite.rect;
+        world_rect_brush.position = b_offset;
 
-        var world_rect_canvas = new Rect(c_offset.x,
-                                         c_offset.y,
-                                         canvas.rect.width,
-                                         canvas.rect.height);
-
+        Rect world_rect_canvas = canvas.rect;
+        world_rect_canvas.position = c_offset;
+        
         var activeRect = DrawingExtensions.Intersect(world_rect_brush, world_rect_canvas);
 
         if (activeRect.width < 1 || activeRect.height < 1)
@@ -225,15 +234,13 @@ public class Sprite8 : IDisposable
             return false;
         }
 
-        var local_rect_brush = new Rect(activeRect.x - world_rect_brush.x + brush.sprite.rect.x,
-                                        activeRect.y - world_rect_brush.y + brush.sprite.rect.y,
-                                        activeRect.width,
-                                        activeRect.height);
+        Rect local_rect_brush = activeRect;
+        local_rect_brush.x = activeRect.x - world_rect_brush.x + brush.sprite.rect.x;
+        local_rect_brush.y = activeRect.y - world_rect_brush.y + brush.sprite.rect.y;
 
-        var local_rect_canvas = new Rect(activeRect.x - world_rect_canvas.x + canvas.rect.x,
-                                         activeRect.y - world_rect_canvas.y + canvas.rect.y,
-                                         activeRect.width,
-                                         activeRect.height);
+        Rect local_rect_canvas = activeRect;
+        local_rect_canvas.x = activeRect.x - world_rect_canvas.x + canvas.rect.x;
+        local_rect_canvas.y = activeRect.y - world_rect_canvas.y + canvas.rect.y;
 
         Texture8.Brush(canvas.texture8,       local_rect_canvas,
                        brush.sprite.texture8, local_rect_brush,
@@ -269,12 +276,11 @@ public struct Brush8
 
         int width  = (int) Mathf.Abs(end.x - start.x) + (int) sprite.rect.width;
         int height = (int) Mathf.Abs(end.y - start.y) + (int) sprite.rect.height;
-
-        var pivot = tl * -1 + sprite.pivot;
+        
         var rect = new Rect(0, 0, width, height);
 
         var texture8 = Texture8Pooler.GetTexture(width, height);
-        var sprite8 = new Sprite8(texture8, rect, pivot);
+        var sprite8 = new Sprite8(texture8, rect, sprite.pivot - tl);
         sprite8.Clear(0);
 
         {
@@ -316,7 +322,7 @@ public static class Texture8Pooler
         }
         else
         {
-            var tex = Texture2DExtensions.Blank(256, 256, Color.clear, TextureFormat.Alpha8);
+            var tex = Texture2DExtensions.Blank(256, 256, TextureFormat.Alpha8);
 
             texture8 = new Texture8(tex);
         }

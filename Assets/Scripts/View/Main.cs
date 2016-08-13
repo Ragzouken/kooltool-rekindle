@@ -34,7 +34,8 @@ public class Main : MonoBehaviour
     [SerializeField] private Toggle freeToggle, stampToggle;
 
     [SerializeField] private Slider zoomSlider;
-    [SerializeField] private Sprite[] sprites;
+    [SerializeField] private Texture2D costumeTexture;
+    [SerializeField] private Sprite8[] sprites;
 
     [SerializeField] private ToggleAnimatorBool toggler;
     [SerializeField] private RectTransform cursor;
@@ -57,7 +58,7 @@ public class Main : MonoBehaviour
 
     private Actor possessed;
 
-    private Texture2D test;
+    private Texture8 test;
 
     public static bool mouseOverUI
     {
@@ -65,53 +66,6 @@ public class Main : MonoBehaviour
         {
             return EventSystem.current.IsPointerOverGameObject();
         }
-    }
-
-    private void PerfTest()
-    {
-        var alpha = Texture2DExtensions.Blank(256, 256, Color.clear, TextureFormat.Alpha8);
-        var fully = Texture2DExtensions.Blank(256, 256, Color.clear, TextureFormat.ARGB32);
-
-        int size = 256;
-        byte[] binary = new byte[size * size];
-        Color[] colors = new Color[size * size];
-        int count = 512;
-
-        var timer1 = Stopwatch.StartNew();
-
-        for (int i = 0; i < count; ++i)
-        {
-            timer1.Stop();
-            for (int j = 0; j < size * size; ++j)
-            {
-                binary[j] = (byte) Random.Range(0, 256);
-            }
-            timer1.Start();
-
-            alpha.LoadRawTextureData(binary);
-            alpha.Apply();
-        }
-
-        timer1.Stop();
-
-        var timer2 = Stopwatch.StartNew();
-
-        for (int i = 0; i < count; ++i)
-        {
-            timer2.Stop();
-            for (int j = 0; j < size * size; ++j)
-            {
-                colors[j] = new Color(Random.value, Random.value, Random.value, Random.value);
-            }
-            timer2.Start();
-
-            fully.SetPixels(colors);
-            fully.Apply();
-        }
-
-        timer2.Stop();
-
-        Debug.LogFormat("Alpha: {0}s vs Full: {1}s", timer1.Elapsed.TotalSeconds, timer2.Elapsed.TotalSeconds);
     }
 
     private Script ScriptFromCSV(string csv)
@@ -196,36 +150,38 @@ public class Main : MonoBehaviour
 
         Cursor.visible = false;
 
-        test = Texture2DExtensions.Blank(128, 32, Color.white);
+        {
+            test = new Texture8(128, 128);
 
-        var brushtext = Texture2DExtensions.Blank(16, 16, Color.clear, TextureFormat.Alpha8);
+            var pixels = costumeTexture.GetPixels32();
+            for (int i = 0; i < pixels.Length; ++i)
+            {
+                byte value = 0;
+
+                if (pixels[i] == Color.white) value = 1;
+                if (pixels[i] == Color.black) value = 2;
+
+                test.bytes[i] = value;
+            }
+
+            test.Apply();
+        }
+
+        var brushtext = Texture2DExtensions.Blank(16, 16, TextureFormat.Alpha8);
         brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
         brushSpriteD = new Sprite8(new Texture8(brushtext), brushSprite);
 
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
 
+        sprites = new Sprite8[4];
+
         for (int i = 0; i < 4; ++i)
         {
-            var rect = new Rect(32 * i, 0, 32, 32);
+            var rect = new Rect(0, 32 * (3 - i), 32, 32);
 
-            Texture2DExtensions.Brush(test, rect,
-                                      sprites[i].texture, sprites[i].textureRect,
-                                      Blend.replace);
-
-            var px = sprites[i].GetPixels();
-
-            for (int j = 0; j < px.Length; ++j)
-            {
-                px[j].g = Random.value;
-            }
-
-            sprites[i].SetPixels(px);
-
-            sprites[i] = Sprite.Create(test, rect, Vector2.one * 0.5f, 1);
+            sprites[i] = new Sprite8(test, rect, Vector2.one * 0.5f);
         }
-
-        test.Apply();
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
 
@@ -246,12 +202,14 @@ public class Main : MonoBehaviour
 
         palettePanel.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
+        var res = new TextureResource(test);
+
         var costume = new Costume
         {
-            right = sprites[0],
-            down = sprites[1],
-            left = sprites[2],
-            up = sprites[3],
+            right = new SpriteResource(res, sprites[0]),
+            down = new SpriteResource(res, sprites[1]),
+            left = new SpriteResource(res, sprites[2]),
+            up = new SpriteResource(res, sprites[3]),
         };
 
         var p = new Project();
@@ -635,8 +593,10 @@ public class Main : MonoBehaviour
         var pointer = new PointerEventData(system);
         raycasts.Clear();
 
-        pointer.position = new Vector3((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
-                                       (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
+        var temp = pointer.position;
+        temp.x = (cursor.localPosition.x / 256f + 0.5f) * Screen.width;
+        temp.y = (cursor.localPosition.y / 256f + 0.5f) * Screen.height;
+        pointer.position = temp;
 
         zoomSlider.value += input.zoom * 4 * Time.deltaTime;
 
@@ -808,6 +768,8 @@ public class Main : MonoBehaviour
 
     private void Update()
     {
+        ///System.GC.Collect();
+
         if (locked) return;
 
         var color = Color.white * brightSlider.value;

@@ -17,7 +17,7 @@ public class BasicDrawing : MonoBehaviour
 
     private void Awake()
     {
-        texture = Texture2DExtensions.Blank(512, 512, Color.clear);
+        texture = Texture2DExtensions.Blank(512, 512);
         drawing.sprite = texture.FullSprite(pixelsPerUnit: 512);
 
         collider = drawing.GetComponent<Collider>();

@@ -217,7 +217,7 @@ public struct DrawingBrush
         int left = Mathf.FloorToInt(diameter / 2f);
         float piv = left / (float)diameter;
 
-        Texture2D image = Texture2DExtensions.Blank(diameter, diameter, Color.clear);
+        Texture2D image = Texture2DExtensions.Blank(diameter, diameter);
 
         Sprite brush = Sprite.Create(image,
                                      new Rect(0, 0, diameter, diameter),
@@ -283,7 +283,7 @@ public struct DrawingBrush
                                           Color color,
                                           float pivotX = 0, float pivotY = 0)
     {
-        Texture2D image = Texture2DExtensions.Blank(width, height, color);
+        Texture2D image = Texture2DExtensions.Blank(width, height);
 
         Sprite brush = Sprite.Create(image,
                                      new Rect(0, 0, width, height),
@@ -392,7 +392,7 @@ public static class DrawingTexturePooler
         }
         else
         {
-            var tex = Texture2DExtensions.Blank(256, 256, Color.clear);
+            var tex = Texture2DExtensions.Blank(256, 256);
 
             dTexture = new DrawingTexture(tex);
         }
