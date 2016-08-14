@@ -93,6 +93,11 @@ public class Texture8
         dirty = true;
     }
 
+    public byte GetByte(int x, int y)
+    {
+        return bytes[texture.width * y + x];
+    }
+
     public void DecodeFromPNG(byte[] data)
     {
         var tex = Texture2DExtensions.Blank(1, 1, TextureFormat.Alpha8);
@@ -200,6 +205,21 @@ public class Sprite8 : IDisposable
 
         rect = sprite.textureRect;
         pivot = sprite.pivot;
+    }
+
+    public byte GetByte(int x, int y)
+    {
+        x += (int) rect.x - (int) pivot.x;
+        y += (int) rect.y - (int) pivot.y;
+
+        if (rect.Contains(new Vector2(x, y)))
+        {
+            return texture8.GetByte(x, y);
+        }
+        else
+        {
+            return 0;
+        }
     }
 
     public Brush8 AsBrush(Vector2 position,
