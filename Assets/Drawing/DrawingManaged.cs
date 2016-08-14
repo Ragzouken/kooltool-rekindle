@@ -3,49 +3,37 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-public class DrawingTexture
+public class DrawingTexture : ManagedTexture<Color>
 {
-    public bool dirty;
-    public Texture2D texture;
-    public Color[] colors;
+    //public bool dirty;
+    //public Texture2D texture;
+    //public Color[] pixels;
 
     public DrawingTexture(Texture2D texture)
     {
-        this.texture = texture;
+        this.uTexture = texture;
 
-        colors = texture.GetPixels();
+        pixels = texture.GetPixels();
     }
 
     public void DecodeFromPNG(byte[] data)
     {
-        texture.LoadImage(data);
+        uTexture.LoadImage(data);
         
-        colors = texture.GetPixels();
+        pixels = uTexture.GetPixels();
     }
 
-    public void SetPixels(Color[] colors, bool apply=true)
+    public override void Apply()
     {
-        Array.Copy(colors, this.colors, this.colors.Length);
-
-        texture.SetPixels(colors);
-        if (apply) Apply(force: true);
-    }
-
-    public Color[] GetPixels()
-    {
-        var colors = new Color[this.colors.Length];
-
-        Array.Copy(this.colors, colors, this.colors.Length);
-
-        return colors;
+        Apply(force: false);
     }
 
     public void Apply(bool force=false)
     {
         if (dirty || force)
         {
-            texture.SetPixels(colors);
-            texture.Apply();
+            uTexture.SetPixels(pixels);
+            uTexture.Apply();
             dirty = false;
         }
     }
@@ -59,8 +47,8 @@ public class DrawingTexture
         int dx = (int) brushRect.xMin - (int) canvasRect.xMin;
         int dy = (int) brushRect.yMin - (int) canvasRect.yMin;
 
-        int cstride = canvas.texture.width;
-        int bstride =  brush.texture.width;
+        int cstride = canvas.uTexture.width;
+        int bstride =  brush.uTexture.width;
 
         canvas.dirty = true;
 
@@ -79,44 +67,22 @@ public class DrawingTexture
                 int ci = cy * cstride + cx;
                 int bi = by * bstride + bx;
 
-                data.canvas = canvas.colors[ci];
-                data.brush  =  brush.colors[bi];
+                data.canvas = canvas.pixels[ci];
+                data.brush  =  brush.pixels[bi];
 
-                canvas.colors[ci] = blend(data);
+                canvas.pixels[ci] = blend(data);
             }
         }
-    }
-
-    public void Clear(Rect rect, Color color)
-    {
-        int stride = texture.width;
-
-        for (int y = (int) rect.yMin; y < (int) rect.yMax; ++y)
-        {
-            for (int x = (int) rect.xMin; x < (int) rect.xMax; ++x)
-            {
-                int i = y * stride + x;
-                
-                colors[i] = color;
-            }
-        }
-
-        dirty = true;
     }
 }
 
-public class DrawingSprite : IDisposable
+public class DrawingSprite : ManagedSprite<Color>, IDisposable
 {
-    public DrawingTexture dTexture;
-    public Rect rect;
-    public Vector2 pivot;
-    public Sprite sprite;
-
     public Texture2D texture
     {
         get
         {
-            return dTexture.texture;
+            return mTexture.uTexture;
         }
     }
 
@@ -124,18 +90,18 @@ public class DrawingSprite : IDisposable
                          Rect rect,
                          Vector2 pivot)
     {
-        this.dTexture = dTexture;
+        this.mTexture = dTexture;
         this.rect = rect;
         this.pivot = pivot;
 
-        sprite = Sprite.Create(dTexture.texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+        uSprite = Sprite.Create(dTexture.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
     }
 
     public DrawingSprite(DrawingTexture texture,
                          Sprite sprite)
     {
-        this.dTexture = texture;
-        this.sprite = sprite;
+        this.mTexture = texture;
+        this.uSprite = sprite;
 
         rect = sprite.textureRect;
         pivot = sprite.pivot;
@@ -187,8 +153,8 @@ public class DrawingSprite : IDisposable
                                          activeRect.width,
                                          activeRect.height);
 
-        DrawingTexture.Brush(canvas.dTexture, local_rect_canvas,
-                             brush.sprite.dTexture, local_rect_brush,
+        DrawingTexture.Brush(canvas.mTexture       as DrawingTexture, local_rect_canvas,
+                             brush.sprite.mTexture as DrawingTexture, local_rect_brush,
                              brush.blend);
 
         return true;
@@ -196,13 +162,13 @@ public class DrawingSprite : IDisposable
 
     public void Clear(Color color)
     {
-        dTexture.Clear(rect, color);
+        mTexture.Clear(color, rect);
     }
 
     void IDisposable.Dispose()
     {
-        UnityEngine.Object.DestroyImmediate(sprite);
-        DrawingTexturePooler.FreeTexture(dTexture);
+        UnityEngine.Object.DestroyImmediate(uSprite);
+        DrawingTexturePooler.FreeTexture(mTexture as DrawingTexture);
     }
 }
 
@@ -218,6 +184,7 @@ public struct DrawingBrush
         float piv = left / (float)diameter;
 
         Texture2D image = Texture2DExtensions.Blank(diameter, diameter);
+        image.Clear(Color.clear);
 
         Sprite brush = Sprite.Create(image,
                                      new Rect(0, 0, diameter, diameter),
@@ -284,6 +251,7 @@ public struct DrawingBrush
                                           float pivotX = 0, float pivotY = 0)
     {
         Texture2D image = Texture2DExtensions.Blank(width, height);
+        image.Clear(color);
 
         Sprite brush = Sprite.Create(image,
                                      new Rect(0, 0, width, height),

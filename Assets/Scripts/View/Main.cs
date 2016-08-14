@@ -161,7 +161,7 @@ public class Main : MonoBehaviour
                 if (pixels[i] == Color.white) value = 1;
                 if (pixels[i] == Color.black) value = 2;
 
-                test.bytes[i] = value;
+                test.pixels[i] = value;
             }
 
             test.Apply();
@@ -557,7 +557,7 @@ public class Main : MonoBehaviour
         {
             StartCoroutine(LoadProject());
         }
-
+        */
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
             StartCoroutine(SaveProject());
@@ -1114,7 +1114,7 @@ public class Main : MonoBehaviour
         Blend8.Function blend = data => data.brush == 0 ? (byte) 0 : value;
 
         brushSpriteD.Brush(stamp.brush.AsBrush(Vector2.zero, blend));
-        brushSpriteD.texture8.Apply();
+        brushSpriteD.mTexture.Apply();
     }
 
     private Changes changes;

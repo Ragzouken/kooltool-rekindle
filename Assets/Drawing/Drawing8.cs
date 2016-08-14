@@ -6,8 +6,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-using DebuggerDisplay = System.Diagnostics.DebuggerDisplayAttribute;
-
 public static class Blend8
 {
     public struct Data
@@ -31,21 +29,18 @@ public static class Blend8
     public static Function replace  = data => data.brush;
 }
 
-[DebuggerDisplay("Texture8 {texture.name} ({texture.width} x {texture.height})")]
-public class Texture8
+public class Texture8 : ManagedTexture<byte>
 {
-    public bool dirty;
-    public Texture2D texture;
-    public byte[] bytes;
+    //public Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : canvas;
 
     public Texture8(int width, int height, byte value=0)
     {
-        texture = Texture2DExtensions.Blank(width, height, TextureFormat.Alpha8);
-        bytes = new byte[width * height];
+        uTexture = Texture2DExtensions.Blank(width, height, TextureFormat.Alpha8);
+        pixels = new byte[width * height];
      
-        for (int i = 0; i < bytes.Length; ++i)
+        for (int i = 0; i < pixels.Length; ++i)
         {
-            bytes[i] = value;
+            pixels[i] = value;
         }
 
         dirty = true;
@@ -53,44 +48,35 @@ public class Texture8
 
     public Texture8(Texture2D texture)
     {
-        this.texture = texture;
+        this.uTexture = texture;
         texture.name = "Texture8";
 
-        Color32[] pixels;
-        
-        pixels = texture.GetPixels32();
-        bytes = new byte[pixels.Length];
+        pixels = new byte[texture.width * texture.height];
 
-        for (int i = 0; i < bytes.Length; ++i)
-        {
-            bytes[i] = pixels[i].a;
-        }
+        SetPixels32(texture.GetPixels32());
+    }
+
+    public override void Apply()
+    {
+        Apply(force: false);
     }
 
     public void Apply(bool force=false)
     {
         if (dirty || force)
         {
-            texture.LoadRawTextureData(bytes);
-            texture.Apply();
+            uTexture.LoadRawTextureData(pixels);
+            uTexture.Apply();
             dirty = false;
         }
     }
 
-    public byte[] GetBytes()
+    public void SetPixels32(Color32[] pixels)
     {
-        byte[] copy = new byte[bytes.Length];
-
-        Array.Copy(bytes, copy, bytes.Length);
-
-        return copy;
-    }
-
-    public void SetBytes(byte[] bytes)
-    {
-        Array.Copy(bytes, this.bytes, this.bytes.Length);
-
-        dirty = true;
+        for (int i = 0; i < this.pixels.Length; ++i)
+        {
+            this.pixels[i] = pixels[i].a;
+        }
     }
 
     public byte GetByte(int x, int y)
@@ -103,14 +89,7 @@ public class Texture8
         var tex = Texture2DExtensions.Blank(1, 1, TextureFormat.Alpha8);
         tex.LoadImage(data);
 
-        Color32[] pixels;
-
-        pixels = tex.GetPixels32();
-
-        for (int i = 0; i < bytes.Length; ++i)
-        {
-            bytes[i] = pixels[i].a;
-        }
+        SetPixels32(tex.GetPixels32());
 
         Apply(true);
     }
@@ -124,8 +103,8 @@ public class Texture8
         int dx = (int) brushRect.xMin - (int) canvasRect.xMin;
         int dy = (int) brushRect.yMin - (int) canvasRect.yMin;
 
-        int cstride = canvas.texture.width;
-        int bstride =  brush.texture.width;
+        int cstride = canvas.uTexture.width;
+        int bstride =  brush.uTexture.width;
 
         canvas.dirty = true;
 
@@ -144,45 +123,22 @@ public class Texture8
                 int ci = cy * cstride + cx;
                 int bi = by * bstride + bx;
 
-                data.canvas = canvas.bytes[ci];
-                data.brush  =  brush.bytes[bi];
+                data.canvas = canvas.pixels[ci];
+                data.brush  =  brush.pixels[bi];
 
-                canvas.bytes[ci] = blend(data);
+                canvas.pixels[ci] = blend(data);
             }
         }
-    }
-
-    public void Clear(Rect rect, byte value)
-    {
-        int stride = texture.width;
-
-        for (int y = (int) rect.yMin; y < (int) rect.yMax; ++y)
-        {
-            for (int x = (int) rect.xMin; x < (int) rect.xMax; ++x)
-            {
-                int i = y * stride + x;
-                
-                bytes[i] = value;
-            }
-        }
-
-        dirty = true;
     }
 }
 
-[DebuggerDisplay("Sprite8 {sprite.name} ({rect}, {pivot})")]
-public class Sprite8 : IDisposable
+public class Sprite8 : ManagedSprite<byte>, IDisposable //ISprite<Texture8, byte>, IDisposable
 {
-    public Texture8 texture8;
-    public Rect rect;
-    public Vector2 pivot;
-    public Sprite sprite;
-
     public Texture2D texture
     {
         get
         {
-            return texture8.texture;
+            return mTexture.uTexture;
         }
     }
 
@@ -190,18 +146,18 @@ public class Sprite8 : IDisposable
                    Rect rect,
                    Vector2 pivot)
     {
-        this.texture8 = texture8;
+        this.mTexture = texture8;
         this.rect = rect;
         this.pivot = pivot;
 
-        sprite = Sprite.Create(texture8.texture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+        uSprite = Sprite.Create(texture8.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
     }
 
     public Sprite8(Texture8 texture8,
                    Sprite sprite)
     {
-        this.texture8 = texture8;
-        this.sprite = sprite;
+        this.mTexture = texture8;
+        this.uSprite = sprite;
 
         rect = sprite.textureRect;
         pivot = sprite.pivot;
@@ -262,8 +218,8 @@ public class Sprite8 : IDisposable
         local_rect_canvas.x = activeRect.x - world_rect_canvas.x + canvas.rect.x;
         local_rect_canvas.y = activeRect.y - world_rect_canvas.y + canvas.rect.y;
 
-        Texture8.Brush(canvas.texture8,       local_rect_canvas,
-                       brush.sprite.texture8, local_rect_brush,
+        Texture8.Brush(canvas.mTexture       as Texture8, local_rect_canvas,
+                       brush.sprite.mTexture as Texture8, local_rect_brush,
                        brush.blend);
 
         return true;
@@ -271,13 +227,13 @@ public class Sprite8 : IDisposable
 
     public void Clear(byte value)
     {
-        texture8.Clear(rect, value);
+        mTexture.Clear(value, rect);
     }
 
     void IDisposable.Dispose()
     {
-        UnityEngine.Object.DestroyImmediate(sprite);
-        Texture8Pooler.FreeTexture(texture8);
+        UnityEngine.Object.DestroyImmediate(uSprite);
+        Texture8Pooler.FreeTexture(mTexture as Texture8);
     }
 }
 

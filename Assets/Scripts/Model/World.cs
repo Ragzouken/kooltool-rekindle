@@ -58,7 +58,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
     {
         get
         {
-            return texture8.texture;
+            return texture8.uTexture;
         }
     }
 
@@ -99,7 +99,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
         id = id == "" ? Guid.NewGuid().ToString() : id;
 
-        System.IO.File.WriteAllBytes(path, texture8.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(path, texture8.uTexture.EncodeToPNG());
     }
 
     public TextureResource() { }
@@ -121,8 +121,8 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     public void Copy(Copier copier, TextureResource copy)
     {
-        var tex = Texture2DExtensions.Blank(texture8.texture.width, texture8.texture.height, TextureFormat.Alpha8);
-        tex.SetPixels32(texture8.texture.GetPixels32());
+        var tex = Texture2DExtensions.Blank(texture8.uTexture.width, texture8.uTexture.height, TextureFormat.Alpha8);
+        tex.SetPixels32(texture8.uTexture.GetPixels32());
 
         copy.texture8 = new Texture8(tex);
 
@@ -144,7 +144,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
     {
         get
         {
-            return sprite8.sprite;
+            return sprite8.uSprite;
         }
     }
 
@@ -184,7 +184,7 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
 
     public static implicit operator Sprite(SpriteResource resource)
     {
-        return resource.sprite8.sprite;
+        return resource.sprite8.uSprite;
     }
 
     public void Copy(Copier copier, SpriteResource copy)
@@ -320,7 +320,7 @@ public class Changes
     {
         foreach (var sprite in sprites)
         {
-            sprite.texture8.Apply();
+            sprite.mTexture.Apply();
         }
     }
 
@@ -361,7 +361,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             if (!before.TryGetValue(point, out original))
             {
-                before[point] = grid.cells[point].sprite8.texture8.GetBytes();
+                before[point] = grid.cells[point].sprite8.mTexture.GetPixels();
             }
         }
 
@@ -377,8 +377,8 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].sprite8.texture8.GetBytes();
-                grid.cells[pair.Key].sprite8.texture8.SetBytes(after[pair.Key]);
+                before[pair.Key] = grid.cells[pair.Key].sprite8.mTexture.GetPixels();
+                grid.cells[pair.Key].sprite8.mTexture.SetPixels(after[pair.Key]);
             }
 
 
@@ -388,8 +388,8 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].sprite8.texture8.GetBytes();
-                grid.cells[pair.Key].sprite8.texture8.SetBytes(after[pair.Key]);
+                after[pair.Key] = grid.cells[pair.Key].sprite8.mTexture.GetPixels();
+                grid.cells[pair.Key].sprite8.mTexture.SetPixels(after[pair.Key]);
             }
 
             foreach (var cell in added)
@@ -480,7 +480,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         position.GridCoords(cellSize, out cell, out local);
 
         return cells.TryGetValue(cell, out sprite)
-             ? sprite.sprite8.sprite.GetPixel(local)
+             ? sprite.sprite8.uSprite.GetPixel(local)
              : Color.clear;
     }
 }
