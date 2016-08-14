@@ -132,22 +132,24 @@ public class DrawingTests
         Vector2 start = new Vector2(4, 4);
         Vector2 end = new Vector2(60, 60);
 
+        Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
+
         var circle5 = DrawingBrush.Circle(5, Color.magenta);
 
         var line = DrawingBrush.Line(start, end, Color.magenta, 5);
-        generated1.Brush(line.AsBrush(Vector2.zero, Blend.alpha));
+        generated1.Blend(line, alpha);
 
-        var sweep = DrawingBrush.Sweep(circle5, start, end);
-        generated2.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
+        var sweep = Brush8.Sweep(circle5, start, end, DrawingTexturePooler.GetSprite, alpha);
+        generated2.Blend(sweep, alpha);
 
         generated1.mTexture.Apply();
         generated2.mTexture.Apply();
 
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Line-Managed.png", generated1.texture.EncodeToPNG());
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Sweep-Managed.png", generated2.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Line-Managed.png", generated1.mTexture.uTexture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Sweep-Managed.png", generated2.mTexture.uTexture.EncodeToPNG());
         AssetDatabase.Refresh();
 
-        int difference = Difference(generated1.texture, generated2.texture);
+        int difference = Difference(generated1.mTexture.uTexture, generated2.mTexture.uTexture);
 
         Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
     }
@@ -159,37 +161,48 @@ public class DrawingTests
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3 = DrawingBrush.Circle(3, Color.black);
-        var circle4 = DrawingBrush.Circle(4, Color.black);
-        var circle16 = DrawingBrush.Circle(16, Color.black);
+        var circle3 = DrawingBrush.Rectangle(3, 3, Color.clear, 1, 1);
+        Brush8.Circle(circle3, 3, Color.black);
+
+        var circle4 = DrawingBrush.Rectangle(4, 4, Color.clear, 2, 2);
+        Brush8.Circle(circle4, 4, Color.black);
+
+        var circle16 = DrawingBrush.Rectangle(16, 16, Color.clear, 8, 8);
+        Brush8.Circle(circle16, 16, Color.black);
+
+        //var circle3 = DrawingBrush.Circle(3, Color.black);
+        //var circle4 = DrawingBrush.Circle(4, Color.black);
+        //var circle16 = DrawingBrush.Circle(16, Color.black);
+
+        Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
         var generated = DrawingBrush.Rectangle(64, 64, Color.white);
-        generated.Brush(circle3.AsBrush(Vector2.one * 4, Blend.alpha));
+        generated.Blend(circle3, alpha, brushPosition: Vector2.one * 4);
 
         generated.mTexture.Apply();
         Assert.AreNotEqual(Difference(reference, generated.mTexture.uTexture), 0, "Generated image should be different to reference at this point!");
 
         var line1 = DrawingBrush.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
-        generated.Brush(line1.AsBrush(Vector2.zero, Blend.alpha));
+        generated.Blend(line1, alpha);
 
         var line2 = DrawingBrush.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
-        generated.Brush(line2.AsBrush(Vector2.zero, Blend.alpha));
+        generated.Blend(line2, alpha);
 
-        generated.Brush(circle4.AsBrush(new Vector2(6, 18), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(6, 26), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(14, 18), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(14, 26), Blend.alpha));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2( 6, 18));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2( 6, 26));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2(14, 18));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2(14, 26));
 
-        generated.Brush(circle16.AsBrush(new Vector2(24, 12), Blend.alpha));
+        generated.Blend(circle16, alpha, brushPosition: new Vector2(24, 12));
 
         var lineR = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.red, 6);
-        generated.Brush(lineR.AsBrush(Vector2.zero, Blend.alpha));
+        generated.Blend(lineR, alpha);
 
         var lineB = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.blue, 4);
-        generated.Brush(lineB.AsBrush(Vector2.zero, Blend.alpha));
+        generated.Blend(lineB, alpha);
 
         var lineG = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.green, 2);
-        generated.Brush(lineG.AsBrush(Vector2.zero, Blend.alpha));
+        generated.Blend(lineG, alpha);
 
         generated.mTexture.Apply();
         int difference = Difference(reference, generated.mTexture.uTexture);

@@ -8,24 +8,29 @@ using System.Collections.Generic;
 
 public delegate TPixel Blend<TPixel>(TPixel canvas, TPixel brush);
 
-public interface ITexture<TTexture, TPixel>
-    where TTexture : ITexture<TTexture, TPixel>
+public interface ITexture<TPixel>
 {
-    void Blend(TTexture brushTexture, Blend<TPixel> blend, Rect canvasRect, Rect brushRect);
+    void Blend(ITexture<TPixel> brushTexture, Blend<TPixel> blend, Rect canvasRect, Rect brushRect);
+
     void Clear(TPixel value);
     void Clear(TPixel value, Rect rect);
     void Apply();
 }
 
+/*
 public interface ISprite<TTexture, TPixel>
     where TTexture : ITexture<TTexture, TPixel>
 {
     bool Blend(ISprite<TTexture, TPixel> source, Blend<TPixel> blend, int x, int y);
 }
+*/
 
-public abstract class ManagedTexture<TPixel> //: ITexture<ManagedTexture<TPixel>, TPixel>
+public abstract class ManagedTexture<TPixel>
     //where TTexture : ITexture<TTexture, TPixel>
 {
+    public int width;
+    public int height;
+
     public Texture2D uTexture;
     public TPixel[] pixels;
     public bool dirty;
@@ -38,8 +43,8 @@ public abstract class ManagedTexture<TPixel> //: ITexture<ManagedTexture<TPixel>
         int dx = (int) brushRect.x - (int) canvasRect.x;
         int dy = (int) brushRect.y - (int) canvasRect.y;
 
-        int cstride =       uTexture.width;
-        int bstride = brush.uTexture.width;
+        int cstride = width;
+        int bstride = brush.width;
 
         int xmin = (int) canvasRect.xMin;
         int ymin = (int) canvasRect.yMin;
@@ -111,15 +116,48 @@ public abstract class ManagedTexture<TPixel> //: ITexture<ManagedTexture<TPixel>
         dirty = true;
     }
 
+    public TPixel GetPixel(int x, int y, TPixel @default = default(TPixel))
+    {
+        return pixels[width * y + x];
+    }
+
+    public void SetPixel(int x, int y, TPixel value)
+    {
+        pixels[width * y + x] = value;
+
+        dirty = true;
+    }
+
     public abstract void Apply();
 }
 
-public abstract class ManagedSprite<TPixel>
+public class ManagedSprite<TPixel>
 {
     public ManagedTexture<TPixel> mTexture;
     public Sprite uSprite;
     public Rect rect;
     public Vector2 pivot;
+
+    public ManagedSprite(ManagedTexture<TPixel> mTexture,
+                         Rect rect,
+                         Vector2 pivot)
+    {
+        this.mTexture = mTexture;
+        this.rect = rect;
+        this.pivot = pivot;
+
+        uSprite = Sprite.Create(mTexture.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+    }
+
+    public ManagedSprite(ManagedTexture<TPixel> mTexture,
+                         Sprite sprite)
+    {
+        this.mTexture = mTexture;
+        rect = sprite.textureRect;
+        pivot = sprite.pivot;
+
+        uSprite = sprite;
+    }
 
     public bool Blend(ManagedSprite<TPixel> brush,
                       Blend<TPixel> blend,
@@ -161,5 +199,36 @@ public abstract class ManagedSprite<TPixel>
         canvas.mTexture.Blend(brush.mTexture, blend, local_rect_canvas, local_rect_brush);
 
         return true;
+    }
+
+    public void Clear(TPixel value)
+    {
+        mTexture.Clear(value, rect);
+    }
+
+    public TPixel GetPixel(int x, int y, TPixel @default = default(TPixel))
+    {
+        x += (int) rect.x - (int) pivot.x;
+        y += (int) rect.y - (int) pivot.y;
+
+        if (rect.Contains(new Vector2(x, y)))
+        {
+            return mTexture.GetPixel(x, y, @default);
+        }
+        else
+        {
+            return @default;
+        }
+    }
+
+    public void SetPixelAbsolute(int x, int y, TPixel value)
+    {
+        x += (int) rect.x;
+        y += (int) rect.y;
+
+        if (rect.Contains(new Vector2(x, y)))
+        {
+            mTexture.SetPixel(x, y, value);
+        }
     }
 }

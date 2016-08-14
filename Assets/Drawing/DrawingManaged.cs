@@ -5,13 +5,11 @@ using System.Collections.Generic;
 
 public class DrawingTexture : ManagedTexture<Color>
 {
-    //public bool dirty;
-    //public Texture2D texture;
-    //public Color[] pixels;
-
     public DrawingTexture(Texture2D texture)
     {
-        this.uTexture = texture;
+        width = texture.width;
+        height = texture.height;
+        uTexture = texture;
 
         pixels = texture.GetPixels();
     }
@@ -37,148 +35,15 @@ public class DrawingTexture : ManagedTexture<Color>
             dirty = false;
         }
     }
-
-    public static void Brush(DrawingTexture canvas, Rect canvasRect,
-                             DrawingTexture brush,  Rect brushRect,
-                             Blend.Function blend)
-    {
-        var data = new Blend.Data();
-
-        int dx = (int) brushRect.xMin - (int) canvasRect.xMin;
-        int dy = (int) brushRect.yMin - (int) canvasRect.yMin;
-
-        int cstride = canvas.uTexture.width;
-        int bstride =  brush.uTexture.width;
-
-        canvas.dirty = true;
-
-        int xmin = (int) canvasRect.xMin;
-        int ymin = (int) canvasRect.yMin;
-        int xmax = (int) canvasRect.xMax;
-        int ymax = (int) canvasRect.yMax;
-
-        for (int cy = ymin; cy < ymax; ++cy)
-        {
-            for (int cx = xmin; cx < xmax; ++cx)
-            {
-                int bx = cx + dx;
-                int by = cy + dy;
-
-                int ci = cy * cstride + cx;
-                int bi = by * bstride + bx;
-
-                data.canvas = canvas.pixels[ci];
-                data.brush  =  brush.pixels[bi];
-
-                canvas.pixels[ci] = blend(data);
-            }
-        }
-    }
-}
-
-public class DrawingSprite : ManagedSprite<Color>, IDisposable
-{
-    public Texture2D texture
-    {
-        get
-        {
-            return mTexture.uTexture;
-        }
-    }
-
-    public DrawingSprite(DrawingTexture dTexture,
-                         Rect rect,
-                         Vector2 pivot)
-    {
-        this.mTexture = dTexture;
-        this.rect = rect;
-        this.pivot = pivot;
-
-        uSprite = Sprite.Create(dTexture.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
-    }
-
-    public DrawingSprite(DrawingTexture texture,
-                         Sprite sprite)
-    {
-        this.mTexture = texture;
-        this.uSprite = sprite;
-
-        rect = sprite.textureRect;
-        pivot = sprite.pivot;
-    }
-
-    public DrawingBrush AsBrush(Vector2 position,
-                                Blend.Function blend)
-    {
-        return new DrawingBrush
-        {
-            sprite = this,
-            position = position,
-            blend = blend,
-        };
-    }
-
-    public bool Brush(DrawingBrush brush,
-                      Vector2 canvasPosition = default(Vector2))
-    {
-        var canvas = this;
-
-        var b_offset = brush.position - brush.sprite.pivot;
-        var c_offset = canvasPosition - canvas.pivot;
-
-        var world_rect_brush = new Rect(b_offset.x,
-                                        b_offset.y,
-                                        brush.sprite.rect.width,
-                                        brush.sprite.rect.height);
-
-        var world_rect_canvas = new Rect(c_offset.x,
-                                         c_offset.y,
-                                         canvas.rect.width,
-                                         canvas.rect.height);
-
-        var activeRect = DrawingExtensions.Intersect(world_rect_brush, world_rect_canvas);
-
-        if (activeRect.width < 1 || activeRect.height < 1)
-        {
-            return false;
-        }
-
-        var local_rect_brush = new Rect(activeRect.x - world_rect_brush.x + brush.sprite.rect.x,
-                                        activeRect.y - world_rect_brush.y + brush.sprite.rect.y,
-                                        activeRect.width,
-                                        activeRect.height);
-
-        var local_rect_canvas = new Rect(activeRect.x - world_rect_canvas.x + canvas.rect.x,
-                                         activeRect.y - world_rect_canvas.y + canvas.rect.y,
-                                         activeRect.width,
-                                         activeRect.height);
-
-        DrawingTexture.Brush(canvas.mTexture       as DrawingTexture, local_rect_canvas,
-                             brush.sprite.mTexture as DrawingTexture, local_rect_brush,
-                             brush.blend);
-
-        return true;
-    }
-
-    public void Clear(Color color)
-    {
-        mTexture.Clear(color, rect);
-    }
-
-    void IDisposable.Dispose()
-    {
-        UnityEngine.Object.DestroyImmediate(uSprite);
-        DrawingTexturePooler.FreeTexture(mTexture as DrawingTexture);
-    }
 }
 
 public struct DrawingBrush
 {
-    public DrawingSprite sprite;
+    public ManagedSprite<Color> sprite;
     public Vector2 position;
     public Blend.Function blend;
 
-    public static DrawingSprite Circle(int diameter, Color color)
+    public static ManagedSprite<Color> Circle(int diameter, Color color)
     {
         int left = Mathf.FloorToInt(diameter / 2f);
         float piv = left / (float)diameter;
@@ -241,12 +106,12 @@ public struct DrawingBrush
         }
 
         var dTexture = new DrawingTexture(image);
-        var dSprite = new DrawingSprite(dTexture, brush);
+        var dSprite = new ManagedSprite<Color>(dTexture, brush);
 
         return dSprite;
     }
 
-    public static DrawingSprite Rectangle(int width, int height,
+    public static ManagedSprite<Color> Rectangle(int width, int height,
                                           Color color,
                                           float pivotX = 0, float pivotY = 0)
     {
@@ -260,14 +125,14 @@ public struct DrawingBrush
         brush.name = "Rectangle (Brush)";
 
         var dTexture = new DrawingTexture(image);
-        var dSprite = new DrawingSprite(dTexture, brush);
+        var dSprite = new ManagedSprite<Color>(dTexture, brush);
 
         return dSprite;
     }
 
-    public static DrawingSprite Sweep(DrawingSprite sprite,
-                                      Vector2 start,
-                                      Vector2 end)
+    public static ManagedSprite<Color> Sweep(ManagedSprite<Color> sprite,
+                                             Vector2 start,
+                                             Vector2 end)
     {
         var tl = new Vector2(Mathf.Min(start.x, end.x),
                              Mathf.Min(start.y, end.y));
@@ -279,18 +144,19 @@ public struct DrawingBrush
         var rect = new Rect(0, 0, width, height);
 
         var dTexture = DrawingTexturePooler.GetTexture(width, height);
-        var dSprite = new DrawingSprite(dTexture, rect, pivot);
+        var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
         dSprite.Clear(Color.clear);
 
         {
             var brush_ = new DrawingBrush { sprite = sprite, blend = Blend.alpha };
+            Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
             Bresenham.PlotFunction plot = delegate (int x, int y)
             {
                 brush_.position.x = x;
                 brush_.position.y = y;
 
-                dSprite.Brush(brush_);
+                dSprite.Blend(sprite, alpha, brushPosition: brush_.position);
             };
 
             Bresenham.Line((int)start.x,
@@ -303,7 +169,7 @@ public struct DrawingBrush
         return dSprite;
     }
 
-    public static DrawingSprite Line(Vector2 start,
+    public static ManagedSprite<Color> Line(Vector2 start,
                                      Vector2 end,
                                      Color color,
                                      int thickness)
@@ -320,19 +186,16 @@ public struct DrawingBrush
         var rect = new Rect(0, 0, size.x, size.y);
 
         var dTexture = DrawingTexturePooler.GetTexture((int) size.x, (int) size.y);
-        var dSprite = new DrawingSprite(dTexture, rect, pivot);
+        var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
         dSprite.Clear(Color.clear);
 
-        DrawingSprite circle = Circle(thickness, color);
+        ManagedSprite<Color> circle = Circle(thickness, color);
         {
-            var brush_ = new DrawingBrush { sprite = circle, blend = Blend.alpha };
+            Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
             Bresenham.PlotFunction plot = delegate (int x, int y)
             {
-                brush_.position.x = x;
-                brush_.position.y = y;
-
-                dSprite.Brush(brush_);
+                dSprite.Blend(circle, alpha, brushPosition: new Vector2(x, y));
             };
 
             Bresenham.Line((int)start.x,
@@ -366,6 +229,13 @@ public static class DrawingTexturePooler
         }
 
         return dTexture;
+    }
+
+    public static ManagedSprite<Color> GetSprite(int width, int height, Vector2 pivot = default(Vector2))
+    {
+        var texture = GetTexture(width, height);
+
+        return new ManagedSprite<Color>(texture, new Rect(0, 0, width, height), pivot);
     }
 
     public static void FreeTexture(DrawingTexture texture)

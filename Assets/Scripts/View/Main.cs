@@ -35,7 +35,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Slider zoomSlider;
     [SerializeField] private Texture2D costumeTexture;
-    [SerializeField] private Sprite8[] sprites;
+    [SerializeField] private ManagedSprite<byte>[] sprites;
 
     [SerializeField] private ToggleAnimatorBool toggler;
     [SerializeField] private RectTransform cursor;
@@ -128,7 +128,7 @@ public class Main : MonoBehaviour
     public class Stamp
     {
         public Sprite thumbnail;
-        public Sprite8 brush;
+        public ManagedSprite<byte> brush;
     }
 
     [Header("Stamps")]
@@ -142,7 +142,7 @@ public class Main : MonoBehaviour
     private MonoBehaviourPooler<Stamp, BrushToggle> stampsp;
 
     public Sprite[] testbrushes;
-    private Sprite8 brushSpriteD;
+    private ManagedSprite<byte> brushSpriteD;
 
     private void Start()
     { 
@@ -152,6 +152,7 @@ public class Main : MonoBehaviour
 
         {
             test = new Texture8(128, 128);
+            test.Clear(0);
 
             var pixels = costumeTexture.GetPixels32();
             for (int i = 0; i < pixels.Length; ++i)
@@ -169,18 +170,18 @@ public class Main : MonoBehaviour
 
         var brushtext = Texture2DExtensions.Blank(16, 16, TextureFormat.Alpha8);
         brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
-        brushSpriteD = new Sprite8(new Texture8(brushtext), brushSprite);
+        brushSpriteD = new ManagedSprite<byte>(new Texture8(brushtext), brushSprite);
 
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
 
-        sprites = new Sprite8[4];
+        sprites = new ManagedSprite<byte>[4];
 
         for (int i = 0; i < 4; ++i)
         {
             var rect = new Rect(0, 32 * (3 - i), 32, 32);
 
-            sprites[i] = new Sprite8(test, rect, Vector2.one * 0.5f);
+            sprites[i] = new ManagedSprite<byte>(test, rect, Vector2.one * 0.5f);
         }
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
@@ -191,7 +192,7 @@ public class Main : MonoBehaviour
 
             stamps.Add(new Stamp
             {
-                brush = new Sprite8(tex, sprite),
+                brush = new ManagedSprite<byte>(tex, sprite),
                 thumbnail = sprite,
             });
         }
@@ -1025,7 +1026,7 @@ public class Main : MonoBehaviour
         next.y = (int)next.y;
 
         byte value = (byte) palettePanel.selected;
-        Blend8.Function blend = data => data.brush == 0 ? data.canvas : value;
+        Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
 
         brushRenderer.gameObject.SetActive(!mouseOverUI);
         brushRenderer.sprite = brushSprite;
@@ -1038,7 +1039,7 @@ public class Main : MonoBehaviour
 
             if ((Input.GetMouseButtonDown(0) || input.click.WasPressed))
             {
-                int index = (int)(project.world.background.GetPixel(next).r * 15);
+                int index = project.world.background.GetPixel(next);
 
                 palettePanel.SelectPaletteIndex(index);
             }
@@ -1070,10 +1071,17 @@ public class Main : MonoBehaviour
             {
                 if (freeToggle.isOn)
                 {
-                    using (var line = Brush8.Sweep(stamp.brush, prev, next))
+                    //var line = Brush8.Sweep(stamp.brush, prev, next);
+                    var line = Brush8.Sweep<byte>(stamp.brush, prev, next,
+                                                  Texture8Pooler.GetSprite,
+                                                  (canvas, brush) => brush == 0 ? canvas : brush);
+
                     {
-                        project.world.background.Brush(changes, new Brush8 { sprite = line, position = Vector2.zero, blend = blend });
+                        project.world.background.Blend(changes, line, Vector2.zero, blend_);
                     }
+
+                    Texture8Pooler.FreeTexture(line.mTexture);
+                    Destroy(line.uSprite);
 
                     changes.ApplyTextures();
                 }
@@ -1085,7 +1093,7 @@ public class Main : MonoBehaviour
                     {
                         stampTimer += 16;
 
-                        project.world.background.Brush(changes, new Brush8 { sprite = stamp.brush, position = next, blend = blend });
+                        project.world.background.Blend(changes, stamp.brush, next, blend_);
 
                         changes.ApplyTextures();
                     }
@@ -1111,9 +1119,9 @@ public class Main : MonoBehaviour
     private void RefreshBrushCursor()
     {
         byte value = (byte) palettePanel.selected;
-        Blend8.Function blend = data => data.brush == 0 ? (byte) 0 : value;
+        Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
-        brushSpriteD.Brush(stamp.brush.AsBrush(Vector2.zero, blend));
+        brushSpriteD.Blend(stamp.brush, blend_);
         brushSpriteD.mTexture.Apply();
     }
 

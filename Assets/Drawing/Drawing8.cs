@@ -8,50 +8,35 @@ using System.Collections.Generic;
 
 public static class Blend8
 {
-    public struct Data
-    {
-        public byte canvas;
-        public byte brush;
-    }
-
-    public delegate byte Function(Data data);
-
     public static byte Lerp(byte a, byte b, byte u)
     {
         return (byte) (a + ((u * (b - a)) >> 8));
     }
-
-    public static Function mask     = data => data.brush > 0 ? data.brush : data.canvas;
-    public static Function alpha    = mask;
-    //public static Function add      = data => data.canvas + data.brush;
-    //public static Function subtract = data => data.canvas - data.brush;
-    //public static Function multiply = data => data.canvas * data.brush;
-    public static Function replace  = data => data.brush;
 }
 
 public class Texture8 : ManagedTexture<byte>
 {
-    //public Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : canvas;
-
-    public Texture8(int width, int height, byte value=0)
+    public Texture8(int width, int height)
     {
-        uTexture = Texture2DExtensions.Blank(width, height, TextureFormat.Alpha8);
-        pixels = new byte[width * height];
-     
-        for (int i = 0; i < pixels.Length; ++i)
-        {
-            pixels[i] = value;
-        }
+        this.width = width;
+        this.height = height;
 
+        uTexture = Texture2DExtensions.Blank(width, height, TextureFormat.Alpha8);
+        uTexture.name = "Texture8";
+        pixels = new byte[width * height];
         dirty = true;
     }
 
+    // TODO: this isn't safe, what if the texture is the wrong format
     public Texture8(Texture2D texture)
     {
-        this.uTexture = texture;
-        texture.name = "Texture8";
+        width = texture.width;
+        height = texture.height;
 
-        pixels = new byte[texture.width * texture.height];
+        uTexture = texture;
+        uTexture.name = "Texture8";
+
+        pixels = new byte[width * height];
 
         SetPixels32(texture.GetPixels32());
     }
@@ -71,17 +56,12 @@ public class Texture8 : ManagedTexture<byte>
         }
     }
 
-    public void SetPixels32(Color32[] pixels)
+    private void SetPixels32(Color32[] pixels)
     {
         for (int i = 0; i < this.pixels.Length; ++i)
         {
             this.pixels[i] = pixels[i].a;
         }
-    }
-
-    public byte GetByte(int x, int y)
-    {
-        return bytes[texture.width * y + x];
     }
 
     public void DecodeFromPNG(byte[] data)
@@ -93,201 +73,152 @@ public class Texture8 : ManagedTexture<byte>
 
         Apply(true);
     }
+}
 
-    public static void Brush(Texture8 canvas, Rect canvasRect,
-                             Texture8 brush,  Rect brushRect,
-                             Blend8.Function blend)
+public static class Brush8
+{
+    private static void Swap<T>(ref T lhs, ref T rhs) { T temp; temp = lhs; lhs = rhs; rhs = temp; }
+
+    public static ManagedSprite<TPixel> Sweep<TPixel>(ManagedSprite<TPixel> sprite,
+                                                      Vector2 start,
+                                                      Vector2 end,
+                                                      Func<int, int, Vector2, ManagedSprite<TPixel>> GetSprite,
+                                                      Blend<TPixel> blend,
+                                                      TPixel background = default(TPixel))
     {
-        var data = new Blend8.Data();
+        int width  = (int) Mathf.Abs(end.x - start.x) + (int) sprite.rect.width;
+        int height = (int) Mathf.Abs(end.y - start.y) + (int) sprite.rect.height;
 
-        int dx = (int) brushRect.xMin - (int) canvasRect.xMin;
-        int dy = (int) brushRect.yMin - (int) canvasRect.yMin;
+        var rect = new Rect(0, 0, width, height);
 
-        int cstride = canvas.uTexture.width;
-        int bstride =  brush.uTexture.width;
+        var sweep = GetSprite(width, height, Vector2.zero);
+        sweep.Clear(background);
 
-        canvas.dirty = true;
+        Sweep(sweep, sprite, start, end, blend);
 
-        int xmin = (int) canvasRect.xMin;
-        int ymin = (int) canvasRect.yMin;
-        int xmax = (int) canvasRect.xMax;
-        int ymax = (int) canvasRect.yMax;
+        return sweep;
+    }
 
-        for (int cy = ymin; cy < ymax; ++cy)
+    public static void Circle<TPixel>(ManagedSprite<TPixel> circle,
+                                      int diameter,
+                                      TPixel value)
+    {
+        int radius = (diameter - 1) / 2;
+        int offset = (diameter % 2 == 0) ? 1 : 0;
+
+        int x0 = radius;
+        int y0 = radius;
+
+        int x = radius;
+        int y = 0;
+        int radiusError = 1 - x;
+
+        while (x >= y)
         {
-            for (int cx = xmin; cx < xmax; ++cx)
+            int yoff = (y > 0 ? 1 : 0) * offset;
+            int xoff = (x > 0 ? 1 : 0) * offset;
+
+            for (int i = -x + x0; i <= x + x0 + offset; ++i)
             {
-                int bx = cx + dx;
-                int by = cy + dy;
+                circle.SetPixelAbsolute(i,  y + y0 + yoff, value);
+                circle.SetPixelAbsolute(i, -y + y0,        value);
+            }
 
-                int ci = cy * cstride + cx;
-                int bi = by * bstride + bx;
+            for (int i = -y + y0; i <= y + y0 + offset; ++i)
+            {
+                circle.SetPixelAbsolute(i,  x + y0 + xoff, value);
+                circle.SetPixelAbsolute(i, -x + y0,        value);
+            }
 
-                data.canvas = canvas.pixels[ci];
-                data.brush  =  brush.pixels[bi];
+            y++;
 
-                canvas.pixels[ci] = blend(data);
+            if (radiusError < 0)
+            {
+                radiusError += 2 * y + 1;
+            }
+            else
+            {
+                x--;
+                radiusError += 2 * (y - x) + 1;
+            }
+        }
+
+        if (offset > 0)
+        {
+            for (int i = 0; i < diameter; ++i)
+            {
+                circle.SetPixelAbsolute(i, y0 + 1, value);
+            }
+        }
+    }
+
+    public static void Sweep<TPixel>(ManagedSprite<TPixel> sweep,
+                                     ManagedSprite<TPixel> sprite,
+                                     Vector2 start,
+                                     Vector2 end,
+                                     Blend<TPixel> blend)
+    {
+        var tl = new Vector2(Mathf.Min(start.x, end.x),
+                             Mathf.Min(start.y, end.y));
+
+        sweep.pivot = sprite.pivot - tl;
+
+        {
+            Vector2 position;
+
+            int x0 = (int) start.x;
+            int y0 = (int) start.y;
+            int x1 = (int) end.x;
+            int y1 = (int) end.y;
+
+            bool steep = Mathf.Abs(y1 - y0) > Mathf.Abs(x1 - x0);
+
+            if (steep)   { Swap(ref x0, ref y0); Swap(ref x1, ref y1); }
+            if (x0 > x1) { Swap(ref x0, ref x1); Swap(ref y0, ref y1); }
+
+            int dX = (x1 - x0);
+            int dY = Mathf.Abs(y1 - y0);
+
+            int err = (dX / 2);
+            int ystep = (y0 < y1 ? 1 : -1);
+            int y = y0;
+
+            for (int x = x0; x <= x1; ++x)
+            {
+                if (steep)
+                {
+                    position.x = y;
+                    position.y = x;
+
+                    sweep.Blend(sprite, blend, brushPosition: position);
+                }
+                else
+                {
+                    position.x = x;
+                    position.y = y;
+
+                    sweep.Blend(sprite, blend, brushPosition: position);
+                }
+
+                err = err - dY;
+
+                if (err < 0)
+                {
+                    y += ystep;
+                    err += dX;
+                }
             }
         }
     }
 }
 
-public class Sprite8 : ManagedSprite<byte>, IDisposable //ISprite<Texture8, byte>, IDisposable
-{
-    public Texture2D texture
-    {
-        get
-        {
-            return mTexture.uTexture;
-        }
-    }
-
-    public Sprite8(Texture8 texture8,
-                   Rect rect,
-                   Vector2 pivot)
-    {
-        this.mTexture = texture8;
-        this.rect = rect;
-        this.pivot = pivot;
-
-        uSprite = Sprite.Create(texture8.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
-    }
-
-    public Sprite8(Texture8 texture8,
-                   Sprite sprite)
-    {
-        this.mTexture = texture8;
-        this.uSprite = sprite;
-
-        rect = sprite.textureRect;
-        pivot = sprite.pivot;
-    }
-
-    public byte GetByte(int x, int y)
-    {
-        x += (int) rect.x - (int) pivot.x;
-        y += (int) rect.y - (int) pivot.y;
-
-        if (rect.Contains(new Vector2(x, y)))
-        {
-            return texture8.GetByte(x, y);
-        }
-        else
-        {
-            return 0;
-        }
-    }
-
-    public Brush8 AsBrush(Vector2 position,
-                          Blend8.Function blend)
-    {
-        return new Brush8
-        {
-            sprite = this,
-            position = position,
-            blend = blend,
-        };
-    }
-
-    public bool Brush(Brush8 brush,
-                      Vector2 canvasPosition = default(Vector2))
-    {
-        var canvas = this;
-
-        var b_offset = brush.position - brush.sprite.pivot;
-        var c_offset = canvasPosition - canvas.pivot;
-
-        Rect world_rect_brush = brush.sprite.rect;
-        world_rect_brush.position = b_offset;
-
-        Rect world_rect_canvas = canvas.rect;
-        world_rect_canvas.position = c_offset;
-        
-        var activeRect = DrawingExtensions.Intersect(world_rect_brush, world_rect_canvas);
-
-        if (activeRect.width < 1 || activeRect.height < 1)
-        {
-            return false;
-        }
-
-        Rect local_rect_brush = activeRect;
-        local_rect_brush.x = activeRect.x - world_rect_brush.x + brush.sprite.rect.x;
-        local_rect_brush.y = activeRect.y - world_rect_brush.y + brush.sprite.rect.y;
-
-        Rect local_rect_canvas = activeRect;
-        local_rect_canvas.x = activeRect.x - world_rect_canvas.x + canvas.rect.x;
-        local_rect_canvas.y = activeRect.y - world_rect_canvas.y + canvas.rect.y;
-
-        Texture8.Brush(canvas.mTexture       as Texture8, local_rect_canvas,
-                       brush.sprite.mTexture as Texture8, local_rect_brush,
-                       brush.blend);
-
-        return true;
-    }
-
-    public void Clear(byte value)
-    {
-        mTexture.Clear(value, rect);
-    }
-
-    void IDisposable.Dispose()
-    {
-        UnityEngine.Object.DestroyImmediate(uSprite);
-        Texture8Pooler.FreeTexture(mTexture as Texture8);
-    }
-}
-
-public struct Brush8
-{
-    public Sprite8 sprite;
-    public Vector2 position;
-    public Blend8.Function blend;
-    
-    public static Sprite8 Sweep(Sprite8 sprite,
-                                Vector2 start,
-                                Vector2 end)
-    {
-        var tl = new Vector2(Mathf.Min(start.x, end.x),
-                             Mathf.Min(start.y, end.y));
-
-        int width  = (int) Mathf.Abs(end.x - start.x) + (int) sprite.rect.width;
-        int height = (int) Mathf.Abs(end.y - start.y) + (int) sprite.rect.height;
-        
-        var rect = new Rect(0, 0, width, height);
-
-        var texture8 = Texture8Pooler.GetTexture(width, height);
-        var sprite8 = new Sprite8(texture8, rect, sprite.pivot - tl);
-        sprite8.Clear(0);
-
-        {
-            var brush_ = new Brush8 { sprite = sprite, blend = Blend8.mask };
-
-            Bresenham.PlotFunction plot = delegate (int x, int y)
-            {
-                brush_.position.x = x;
-                brush_.position.y = y;
-
-                sprite8.Brush(brush_);
-            };
-
-            Bresenham.Line((int)start.x,
-                           (int)start.y,
-                           (int)end.x,
-                           (int)end.y,
-                           plot);
-        }
-
-        return sprite8;
-    }
-}
-
 public static class Texture8Pooler
 {
-    private static List<Texture8> textures = new List<Texture8>();
+    private static List<ManagedTexture<byte>> textures = new List<ManagedTexture<byte>>();
 
-    public static Texture8 GetTexture(int width, int height)
+    public static ManagedTexture<byte> GetTexture(int width, int height)
     {
-        Texture8 texture8;
+        ManagedTexture<byte> texture8;
 
         if (textures.Count > 0)
         {
@@ -306,7 +237,14 @@ public static class Texture8Pooler
         return texture8;
     }
 
-    public static void FreeTexture(Texture8 texture)
+    public static ManagedSprite<byte> GetSprite(int width, int height, Vector2 pivot=default(Vector2))
+    {
+        var texture = GetTexture(width, height);
+
+        return new ManagedSprite<byte>(texture, new Rect(0, 0, width, height), pivot);
+    }
+
+    public static void FreeTexture(ManagedTexture<byte> texture)
     {
         textures.Add(texture);
     }
