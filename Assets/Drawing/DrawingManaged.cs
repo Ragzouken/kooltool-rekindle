@@ -43,73 +43,6 @@ public struct DrawingBrush
     public Vector2 position;
     public Blend.Function blend;
 
-    public static ManagedSprite<Color> Circle(int diameter, Color color)
-    {
-        int left = Mathf.FloorToInt(diameter / 2f);
-        float piv = left / (float)diameter;
-
-        Texture2D image = Texture2DExtensions.Blank(diameter, diameter);
-        image.Clear(Color.clear);
-
-        Sprite brush = Sprite.Create(image,
-                                     new Rect(0, 0, diameter, diameter),
-                                     Vector2.one * piv,
-                                     1);
-        brush.name = "Circle (Brush)";
-
-        int radius = (diameter - 1) / 2;
-        int offset = (diameter % 2 == 0) ? 1 : 0;
-
-        int x0 = radius;
-        int y0 = radius;
-
-        int x = radius;
-        int y = 0;
-        int radiusError = 1 - x;
-
-        while (x >= y)
-        {
-            int yoff = (y > 0 ? 1 : 0) * offset;
-            int xoff = (x > 0 ? 1 : 0) * offset;
-
-            for (int i = -x + x0; i <= x + x0 + offset; ++i)
-            {
-                image.SetPixel(i, y + y0 + yoff, color);
-                image.SetPixel(i, -y + y0, color);
-            }
-
-            for (int i = -y + y0; i <= y + y0 + offset; ++i)
-            {
-                image.SetPixel(i, x + y0 + xoff, color);
-                image.SetPixel(i, -x + y0, color);
-            }
-
-            y++;
-
-            if (radiusError < 0)
-            {
-                radiusError += 2 * y + 1;
-            }
-            else
-            {
-                x--;
-                radiusError += 2 * (y - x) + 1;
-            }
-        }
-
-        if (offset > 0)
-        {
-            for (int i = 0; i < diameter; ++i)
-            {
-                image.SetPixel(i, y0 + 1, color);
-            }
-        }
-
-        var dTexture = new DrawingTexture(image);
-        var dSprite = new ManagedSprite<Color>(dTexture, brush);
-
-        return dSprite;
-    }
 
     public static ManagedSprite<Color> Rectangle(int width, int height,
                                           Color color,
@@ -150,9 +83,8 @@ public struct DrawingBrush
         var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
         dSprite.Clear(Color.clear);
 
-        int off = thickness % 2 == 0 ? 0 : 1;
-
-        ManagedSprite<Color> circle = Rectangle(thickness, thickness, Color.clear, left, left);
+        var circle = DrawingTexturePooler.GetSprite(thickness, thickness, Vector2.one * left);
+        circle.Clear(Color.clear);
         Brush8.Circle<Color>(circle, thickness, color);
         {
             Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);

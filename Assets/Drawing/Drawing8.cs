@@ -99,6 +99,17 @@ public static class Brush8
         return sweep;
     }
 
+    public static ManagedSprite<TPixel> Rectange<TPixel>(int width, int height,
+                                                         Func<int, int, Vector2, ManagedSprite<TPixel>> GetSprite,
+                                                         TPixel color,
+                                                         Vector2 pivot=default(Vector2))
+    {
+        var rect = GetSprite(width, height, pivot);
+        rect.Clear(color);
+
+        return rect;
+    }
+
     public static void Circle<TPixel>(ManagedSprite<TPixel> circle,
                                       int diameter,
                                       TPixel value)
@@ -160,8 +171,6 @@ public static class Brush8
     {
         var tl = new Vector2(Mathf.Min(start.x, end.x),
                              Mathf.Min(start.y, end.y));
-
-        Debug.Log(sprite.pivot);
 
         sweep.pivot = sprite.pivot - tl;
 
