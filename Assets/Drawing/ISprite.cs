@@ -168,15 +168,13 @@ public class ManagedSprite<TPixel>
             return false;
         }
 
-        var local_rect_brush = new IntRect(activeRect.x - world_rect_brush.x + brush.rect.x,
-                                           activeRect.y - world_rect_brush.y + brush.rect.y,
-                                           activeRect.width,
-                                           activeRect.height);
+        IntRect local_rect_brush = activeRect;
+        local_rect_brush.Move(-world_rect_brush.xMin + brush.rect.xMin,
+                              -world_rect_brush.yMin + brush.rect.yMin);
 
-        var local_rect_canvas = new IntRect(activeRect.x - world_rect_canvas.x + canvas.rect.x,
-                                            activeRect.y - world_rect_canvas.y + canvas.rect.y,
-                                            activeRect.width,
-                                            activeRect.height);
+        IntRect local_rect_canvas = activeRect;
+        local_rect_canvas.Move(-world_rect_canvas.xMin + canvas.rect.xMin,
+                               -world_rect_canvas.yMin + canvas.rect.yMin);
 
         canvas.mTexture.Blend(brush.mTexture, blend, local_rect_canvas, local_rect_brush);
 

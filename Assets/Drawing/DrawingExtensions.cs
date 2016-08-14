@@ -37,6 +37,14 @@ public struct IntRect
         return Rect.MinMaxRect(rect.xMin, rect.yMin, rect.xMax, rect.yMax);
     }
 
+    public void Move(int dx, int dy)
+    {
+        xMin += dx;
+        xMax += dx;
+        yMin += dy;
+        yMax += dy;
+    }
+
     public bool Contains(int x, int y)
     {
         return x >= xMin && x <= xMax
