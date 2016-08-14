@@ -8,25 +8,7 @@ using System.Collections.Generic;
 
 public delegate TPixel Blend<TPixel>(TPixel canvas, TPixel brush);
 
-public interface ITexture<TPixel>
-{
-    void Blend(ITexture<TPixel> brushTexture, Blend<TPixel> blend, Rect canvasRect, Rect brushRect);
-
-    void Clear(TPixel value);
-    void Clear(TPixel value, Rect rect);
-    void Apply();
-}
-
-/*
-public interface ISprite<TTexture, TPixel>
-    where TTexture : ITexture<TTexture, TPixel>
-{
-    bool Blend(ISprite<TTexture, TPixel> source, Blend<TPixel> blend, int x, int y);
-}
-*/
-
 public abstract class ManagedTexture<TPixel>
-    //where TTexture : ITexture<TTexture, TPixel>
 {
     public int width;
     public int height;
@@ -37,19 +19,19 @@ public abstract class ManagedTexture<TPixel>
 
     public void Blend(ManagedTexture<TPixel> brush,
                       Blend<TPixel> blend,
-                      Rect canvasRect,
-                      Rect brushRect)
+                      IntRect canvasRect,
+                      IntRect brushRect)
     {
-        int dx = (int) brushRect.x - (int) canvasRect.x;
-        int dy = (int) brushRect.y - (int) canvasRect.y;
+        int dx = brushRect.xMin - canvasRect.xMin;
+        int dy = brushRect.yMin - canvasRect.yMin;
 
         int cstride = width;
         int bstride = brush.width;
 
-        int xmin = (int) canvasRect.xMin;
-        int ymin = (int) canvasRect.yMin;
-        int xmax = (int) canvasRect.xMax;
-        int ymax = (int) canvasRect.yMax;
+        int xmin = canvasRect.xMin;
+        int ymin = canvasRect.yMin;
+        int xmax = canvasRect.xMax;
+        int ymax = canvasRect.yMax;
 
         for (int cy = ymin; cy < ymax; ++cy)
         {
@@ -84,14 +66,14 @@ public abstract class ManagedTexture<TPixel>
         dirty = false;
     }
 
-    public void Clear(TPixel value, Rect rect)
+    public void Clear(TPixel value, IntRect rect)
     {
         int stride = uTexture.width;
 
-        int xmin = (int) rect.xMin;
-        int ymin = (int) rect.yMin;
-        int xmax = (int) rect.xMax;
-        int ymax = (int) rect.yMax;
+        int xmin = rect.xMin;
+        int ymin = rect.yMin;
+        int xmax = rect.xMax;
+        int ymax = rect.yMax;
 
         for (int y = ymin; y < ymax; ++y)
         {
@@ -135,11 +117,11 @@ public class ManagedSprite<TPixel>
 {
     public ManagedTexture<TPixel> mTexture;
     public Sprite uSprite;
-    public Rect rect;
+    public IntRect rect;
     public Vector2 pivot;
 
     public ManagedSprite(ManagedTexture<TPixel> mTexture,
-                         Rect rect,
+                         IntRect rect,
                          Vector2 pivot)
     {
         this.mTexture = mTexture;
@@ -169,32 +151,32 @@ public class ManagedSprite<TPixel>
         var b_offset = brushPosition  - brush.pivot;
         var c_offset = canvasPosition - canvas.pivot;
 
-        var world_rect_brush = new Rect(b_offset.x,
-                                        b_offset.y,
-                                        brush.rect.width,
-                                        brush.rect.height);
+        var world_rect_brush = new IntRect((int) b_offset.x,
+                                           (int) b_offset.y,
+                                           brush.rect.width,
+                                           brush.rect.height);
 
-        var world_rect_canvas = new Rect(c_offset.x,
-                                         c_offset.y,
-                                         canvas.rect.width,
-                                         canvas.rect.height);
+        var world_rect_canvas = new IntRect((int) c_offset.x,
+                                            (int) c_offset.y,
+                                            canvas.rect.width,
+                                            canvas.rect.height);
 
-        var activeRect = DrawingExtensions.Intersect(world_rect_brush, world_rect_canvas);
+        var activeRect = world_rect_brush.Intersect(world_rect_canvas);
 
         if (activeRect.width < 1 || activeRect.height < 1)
         {
             return false;
         }
 
-        var local_rect_brush = new Rect(activeRect.x - world_rect_brush.x + brush.rect.x,
-                                        activeRect.y - world_rect_brush.y + brush.rect.y,
-                                        activeRect.width,
-                                        activeRect.height);
+        var local_rect_brush = new IntRect(activeRect.x - world_rect_brush.x + brush.rect.x,
+                                           activeRect.y - world_rect_brush.y + brush.rect.y,
+                                           activeRect.width,
+                                           activeRect.height);
 
-        var local_rect_canvas = new Rect(activeRect.x - world_rect_canvas.x + canvas.rect.x,
-                                         activeRect.y - world_rect_canvas.y + canvas.rect.y,
-                                         activeRect.width,
-                                         activeRect.height);
+        var local_rect_canvas = new IntRect(activeRect.x - world_rect_canvas.x + canvas.rect.x,
+                                            activeRect.y - world_rect_canvas.y + canvas.rect.y,
+                                            activeRect.width,
+                                            activeRect.height);
 
         canvas.mTexture.Blend(brush.mTexture, blend, local_rect_canvas, local_rect_brush);
 
@@ -208,10 +190,10 @@ public class ManagedSprite<TPixel>
 
     public TPixel GetPixel(int x, int y, TPixel @default = default(TPixel))
     {
-        x += (int) rect.x - (int) pivot.x;
-        y += (int) rect.y - (int) pivot.y;
+        x += rect.x - (int) pivot.x;
+        y += rect.y - (int) pivot.y;
 
-        if (rect.Contains(new Vector2(x, y)))
+        if (rect.Contains(x, y))
         {
             return mTexture.GetPixel(x, y, @default);
         }
@@ -223,10 +205,10 @@ public class ManagedSprite<TPixel>
 
     public void SetPixelAbsolute(int x, int y, TPixel value)
     {
-        x += (int) rect.x;
-        y += (int) rect.y;
+        x += rect.x;
+        y += rect.y;
 
-        if (rect.Contains(new Vector2(x, y)))
+        if (rect.Contains(x, y))
         {
             mTexture.SetPixel(x, y, value);
         }

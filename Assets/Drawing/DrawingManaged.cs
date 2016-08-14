@@ -127,7 +127,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
     {
         var texture = GetTexture(width, height);
 
-        return new ManagedSprite<TPixel>(texture, new Rect(0, 0, width, height), pivot);
+        return new ManagedSprite<TPixel>(texture, new IntRect(0, 0, width, height), pivot);
     }
 
     public void FreeTexture(ManagedTexture<TPixel> texture)
