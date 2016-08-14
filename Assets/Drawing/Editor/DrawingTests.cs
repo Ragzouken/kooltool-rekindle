@@ -186,9 +186,9 @@ public class DrawingTests
     [Test]
     public void LineSweep_Managed()
     {
-        var generated1 = DrawingTexturePooler.GetSprite(64, 64);
+        var generated1 = DrawingTexturePooler.Instance.GetSprite(64, 64);
         generated1.Clear(Color.white);
-        var generated2 = DrawingTexturePooler.GetSprite(64, 64);
+        var generated2 = DrawingTexturePooler.Instance.GetSprite(64, 64);
         generated2.Clear(Color.white);
 
         Vector2 start = new Vector2(4, 4);
@@ -196,14 +196,14 @@ public class DrawingTests
 
         Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
-        var circle5 = DrawingTexturePooler.GetSprite(5, 5, pivot: Vector2.one * 2);
+        var circle5 = DrawingTexturePooler.Instance.GetSprite(5, 5, pivot: Vector2.one * 2);
         circle5.Clear(Color.clear);
         Brush8.Circle<Color>(circle5, 5, Color.magenta);
 
         var line = DrawingBrush.Line(start, end, Color.magenta, 5);
         generated1.Blend(line, alpha);
 
-        var sweep = Brush8.Sweep<Color>(circle5, start, end, DrawingTexturePooler.GetSprite, alpha);
+        var sweep = Brush8.Sweep<Color>(circle5, start, end, DrawingTexturePooler.Instance.GetSprite, alpha);
         generated2.Blend(sweep, alpha);
 
         sweep.SetPixelAbsolute((int) sweep.pivot.x, (int) sweep.pivot.y, Color.cyan);
@@ -224,21 +224,21 @@ public class DrawingTests
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3 = DrawingTexturePooler.GetSprite(3, 3, Vector2.one * 1);
+        var circle3 = DrawingTexturePooler.Instance.GetSprite(3, 3, Vector2.one * 1);
         circle3.Clear(Color.clear);
         Brush8.Circle(circle3, 3, Color.black);
 
-        var circle4 = DrawingTexturePooler.GetSprite(4, 4, Vector2.one * 2);
+        var circle4 = DrawingTexturePooler.Instance.GetSprite(4, 4, Vector2.one * 2);
         circle4.Clear(Color.clear);
         Brush8.Circle(circle4, 4, Color.black);
 
-        var circle16 = DrawingTexturePooler.GetSprite(16, 16, Vector2.one * 8);
+        var circle16 = DrawingTexturePooler.Instance.GetSprite(16, 16, Vector2.one * 8);
         circle16.Clear(Color.clear);
         Brush8.Circle(circle16, 16, Color.black);
 
         Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
-        var generated = DrawingTexturePooler.GetSprite(64, 64);
+        var generated = DrawingTexturePooler.Instance.GetSprite(64, 64);
         generated.Clear(Color.white);
         generated.Blend(circle3, alpha, brushPosition: Vector2.one * 4);
 

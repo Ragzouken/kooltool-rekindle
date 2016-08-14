@@ -1073,14 +1073,14 @@ public class Main : MonoBehaviour
                 {
                     //var line = Brush8.Sweep(stamp.brush, prev, next);
                     var line = Brush8.Sweep<byte>(stamp.brush, prev, next,
-                                                  Texture8Pooler.GetSprite,
+                                                  Texture8Pooler.Instance.GetSprite,
                                                   (canvas, brush) => brush == 0 ? canvas : brush);
 
                     {
                         project.world.background.Blend(changes, line, Vector2.zero, blend_);
                     }
 
-                    Texture8Pooler.FreeTexture(line.mTexture);
+                    Texture8Pooler.Instance.FreeTexture(line.mTexture);
                     Destroy(line.uSprite);
 
                     changes.ApplyTextures();

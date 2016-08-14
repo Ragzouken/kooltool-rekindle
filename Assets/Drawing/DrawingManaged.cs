@@ -43,11 +43,11 @@ public struct DrawingBrush
         var pivot = tl * -1 + Vector2.one * left;
         var rect = new Rect(0, 0, size.x, size.y);
 
-        var dTexture = DrawingTexturePooler.GetTexture((int) size.x, (int) size.y);
+        var dTexture = DrawingTexturePooler.Instance.GetTexture((int) size.x, (int) size.y);
         var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
         dSprite.Clear(Color.clear);
 
-        var circle = DrawingTexturePooler.GetSprite(thickness, thickness, Vector2.one * left);
+        var circle = DrawingTexturePooler.Instance.GetSprite(thickness, thickness, Vector2.one * left);
         circle.Clear(Color.clear);
         Brush8.Circle<Color>(circle, thickness, color);
         {
@@ -69,37 +69,59 @@ public struct DrawingBrush
     }
 }
 
-public static class DrawingTexturePooler
+public class DrawingTexturePooler : ManagedPooler<DrawingTexturePooler, Color>
 {
-    private static Stack<DrawingTexture> textures = new Stack<DrawingTexture>();
-
-    public static DrawingTexture GetTexture(int width, int height)
+    public override ManagedTexture<Color> CreateTexture(int width, int height)
     {
-        DrawingTexture dTexture;
+        return new DrawingTexture(Texture2DExtensions.Blank(width, height));
+    }
+}
+
+public class Texture8Pooler : ManagedPooler<Texture8Pooler, byte>
+{
+    public override ManagedTexture<byte> CreateTexture(int width, int height)
+    {
+        return new Texture8(width, height);
+    }
+}
+
+public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
+    where TPooler : ManagedPooler<TPooler, TPixel>, new()
+{
+    private List<ManagedTexture<TPixel>> textures = new List<ManagedTexture<TPixel>>();
+
+    public virtual ManagedTexture<TPixel> CreateTexture(int width, int height)
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public ManagedTexture<TPixel> GetTexture(int width, int height)
+    {
+        ManagedTexture<TPixel> dTexture;
 
         if (textures.Count > 0)
         {
-            dTexture = textures.Pop();
+            dTexture = textures[textures.Count - 1];
+            textures.RemoveAt(textures.Count - 1);
         }
         else
         {
-            var tex = Texture2DExtensions.Blank(256, 256);
-
-            dTexture = new DrawingTexture(tex);
+            dTexture = CreateTexture(256, 256);
         }
 
         return dTexture;
     }
 
-    public static ManagedSprite<Color> GetSprite(int width, int height, Vector2 pivot = default(Vector2))
+    public ManagedSprite<TPixel> GetSprite(int width, int height, Vector2 pivot = default(Vector2))
     {
         var texture = GetTexture(width, height);
 
-        return new ManagedSprite<Color>(texture, new Rect(0, 0, width, height), pivot);
+        return new ManagedSprite<TPixel>(texture, new Rect(0, 0, width, height), pivot);
     }
 
-    public static void FreeTexture(DrawingTexture texture)
+    public void FreeTexture(ManagedTexture<TPixel> texture)
     {
-        textures.Push(texture);
+        textures.Add(texture);
     }
 }
+
