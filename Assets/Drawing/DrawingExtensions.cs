@@ -135,6 +135,22 @@ public static partial class Texture2DExtensions
         return sprite;
     }
 
+    public static void Clear(this Texture2D texture, Color color)
+    {
+        int size = texture.width * texture.height;
+        var bytes = new byte[4 * size];
+
+        for (int i = 0; i < 4 * size; i += 4)
+        {
+            bytes[i + 0] = (byte) (color.a * 255);
+            bytes[i + 1] = (byte) (color.r * 255);
+            bytes[i + 2] = (byte) (color.g * 255);
+            bytes[i + 3] = (byte) (color.b * 255);
+        }
+
+        texture.LoadRawTextureData(bytes);
+    }
+
     public static Color[] GetPixels(this Texture2D texture, 
                                     Rect rect)
     {
@@ -252,6 +268,7 @@ public struct Brush
         float piv = left / (float) diameter;
 
         Texture2D image = Texture2DExtensions.Blank(diameter, diameter);
+        image.Clear(Color.clear);
 
         Sprite brush = Sprite.Create(image, 
                                      new Rect(0, 0, diameter, diameter),
@@ -315,6 +332,7 @@ public struct Brush
                                    float pivotX = 0, float pivotY = 0)
     {
         Texture2D image = Texture2DExtensions.Blank(width, height);
+        image.Clear(color);
 
         Sprite brush = Sprite.Create(image, 
                                      new Rect(0, 0, width, height),
@@ -340,6 +358,7 @@ public struct Brush
         var rect = new Rect(0, 0, size.x, size.y);
 
         Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y);
+        image.Clear(Color.clear);
         Sprite brush = Sprite.Create(image, rect, anchor, 1);
         brush.name = "Line (Brush)";
 
@@ -382,6 +401,7 @@ public struct Brush
         var rect   = new Rect(0, 0, size.x, size.y);
 
         Texture2D image = Texture2DExtensions.Blank((int) size.x, (int) size.y);
+        image.Clear(Color.clear);
         Sprite brush = Sprite.Create(image, rect, anchor, 1);
         brush.name = "Line (Brush)";
 

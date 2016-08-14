@@ -140,8 +140,8 @@ public class DrawingTests
         var sweep = DrawingBrush.Sweep(circle5, start, end);
         generated2.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
 
-        generated1.dTexture.Apply();
-        generated2.dTexture.Apply();
+        generated1.mTexture.Apply();
+        generated2.mTexture.Apply();
 
         System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Line-Managed.png", generated1.texture.EncodeToPNG());
         System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-LineSweep-Sweep-Managed.png", generated2.texture.EncodeToPNG());
@@ -166,8 +166,8 @@ public class DrawingTests
         var generated = DrawingBrush.Rectangle(64, 64, Color.white);
         generated.Brush(circle3.AsBrush(Vector2.one * 4, Blend.alpha));
 
-        generated.dTexture.Apply();
-        Assert.AreNotEqual(Difference(reference, generated.dTexture.texture), 0, "Generated image should be different to reference at this point!");
+        generated.mTexture.Apply();
+        Assert.AreNotEqual(Difference(reference, generated.mTexture.uTexture), 0, "Generated image should be different to reference at this point!");
 
         var line1 = DrawingBrush.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
         generated.Brush(line1.AsBrush(Vector2.zero, Blend.alpha));
@@ -191,10 +191,10 @@ public class DrawingTests
         var lineG = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.green, 2);
         generated.Brush(lineG.AsBrush(Vector2.zero, Blend.alpha));
 
-        generated.dTexture.Apply();
-        int difference = Difference(reference, generated.dTexture.texture);
+        generated.mTexture.Apply();
+        int difference = Difference(reference, generated.mTexture.uTexture);
 
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-Reference-01-Managed.png", generated.dTexture.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-Reference-01-Managed.png", generated.mTexture.uTexture.EncodeToPNG());
         AssetDatabase.Refresh();
 
         Assert.AreEqual(difference, 0, string.Format("Generated image doesn't match reference! ({0} difference)", difference));
