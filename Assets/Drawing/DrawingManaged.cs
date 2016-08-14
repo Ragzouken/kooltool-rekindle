@@ -5,6 +5,17 @@ using System.Collections.Generic;
 
 public class DrawingTexture : ManagedTexture<Color>
 {
+    public DrawingTexture(int width, int height)
+    {
+        this.width = width;
+        this.height = height;
+        uTexture = Texture2DExtensions.Blank(width, height);
+
+        pixels = new Color[width * height];
+
+        dirty = true;
+    }
+
     public DrawingTexture(Texture2D texture)
     {
         width = texture.width;
@@ -73,7 +84,7 @@ public class DrawingTexturePooler : ManagedPooler<DrawingTexturePooler, Color>
 {
     public override ManagedTexture<Color> CreateTexture(int width, int height)
     {
-        return new DrawingTexture(Texture2DExtensions.Blank(width, height));
+        return new DrawingTexture(width, height);
     }
 }
 
