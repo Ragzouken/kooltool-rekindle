@@ -1,83 +1,65 @@
 ﻿using UnityEngine;
 
-using Newtonsoft.Json;
-
-[JsonObject(IsReference=false, MemberSerialization=MemberSerialization.OptIn)]
-public struct Point : System.IEquatable<Point>
+public struct IntVector2 : System.IEquatable<IntVector2>
 {
-    [JsonProperty]
     public int x;
-    [JsonProperty]
     public int y;
 
-    public static Point Zero = new Point(0, 0);
-    public static Point One = new Point(1, 1);
+    public static IntVector2 Zero = new IntVector2(0, 0);
+    public static IntVector2 One = new IntVector2(1, 1);
 
-    public static Point Left  = new Point(-1,  0);
-    public static Point Right = new Point( 1,  0);
-    public static Point Up    = new Point( 0,  1);
-    public static Point Down  = new Point( 0, -1);
+    public static IntVector2 Left  = new IntVector2(-1,  0);
+    public static IntVector2 Right = new IntVector2( 1,  0);
+    public static IntVector2 Up    = new IntVector2( 0,  1);
+    public static IntVector2 Down  = new IntVector2( 0, -1);
 
-    public Point(int x, int y)
+    public IntVector2(int x, int y)
     {
         this.x = x;
         this.y = y;
     }
 
-    public Point(float x, float y)
+    public IntVector2(float x, float y)
         : this((int) x, (int) y)
     {
     }
 
-    public Point(Vector2 point)
-        : this(point.x, point.y)
+    public IntVector2 Offset(Vector2 offset)
     {
+        return this + (IntVector2) offset;
     }
 
-    public Point Offset(Vector2 offset)
-    {
-        return this + new Point(offset);
-    }
-
-    public static implicit operator Vector2(Point point)
+    public static implicit operator Vector2(IntVector2 point)
     {
         return new Vector2(point.x, point.y);
     }
 
-    public static implicit operator Vector3(Point point)
+    public static implicit operator Vector3(IntVector2 point)
     {
         return new Vector3(point.x, point.y, 0);
     }
 
-    public static implicit operator Point(Vector2 vector)
+    public static implicit operator IntVector2(Vector2 vector)
     {
-        return new Point(vector);
+        return new IntVector2(vector.x, vector.y);
     }
 
-    public static implicit operator Point(Vector3 vector)
+    public static implicit operator IntVector2(Vector3 vector)
     {
-        return new Point((Vector2) vector);
-    }
-
-    public Point Size
-    {
-        get
-        {
-            return new Point(Mathf.Abs(x), Mathf.Abs(y));
-        }
+        return new IntVector2(vector.x, vector.y);
     }
 
     public override bool Equals (object obj)
     {
-        if (obj is Point)
+        if (obj is IntVector2)
         {
-            return Equals((Point) obj);
+            return Equals((IntVector2) obj);
         }
 
         return false;
     }
 
-    public bool Equals(Point other)
+    public bool Equals(IntVector2 other)
     {
         return other.x == x
             && other.y == y;
@@ -96,38 +78,37 @@ public struct Point : System.IEquatable<Point>
         return string.Format("Point({0}, {1})", x, y);
     }
 
-    public static bool operator ==(Point a, Point b)
+    public static bool operator ==(IntVector2 a, IntVector2 b)
     {
         return a.x == b.x && a.y == b.y;
     }
 
-    public static bool operator !=(Point a, Point b)
+    public static bool operator !=(IntVector2 a, IntVector2 b)
     {
         return a.x != b.x || a.y != b.y;
     }
 
-    public static Point operator +(Point a, Point b)
+    public static IntVector2 operator +(IntVector2 a, IntVector2 b)
     {
-        return new Point(a.x + b.x, a.y + b.y);
+        a.x += b.x;
+        a.y += b.y;
+
+        return a;
     }
 
-    public static Point operator -(Point a, Point b)
+    public static IntVector2 operator -(IntVector2 a, IntVector2 b)
     {
-        return new Point(a.x - b.x, a.y - b.y);
-    }
+        a.x -= b.x;
+        a.y -= b.x;
 
-    public static Point operator +(Point a, Vector2 b)
-    {
-        return new Point(a.x + b.x, a.y + b.y);
+        return a;
     }
     
-    public static Point operator -(Point a, Vector2 b)
+    public static IntVector2 operator *(IntVector2 a, int scale)
     {
-        return new Point(a.x - b.x, a.y - b.y);
-    }
+        a.x *= scale;
+        a.y *= scale;
 
-    public static Point operator *(Point a, int scale)
-    {
-        return new Point(a.x * scale, a.y * scale);
+        return a;
     }
 }

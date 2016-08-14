@@ -122,7 +122,7 @@ public class PointConverter : JsonConverter
 {
     public override bool CanConvert(Type objectType)
     {
-        return objectType == typeof(Point);
+        return objectType == typeof(IntVector2);
     }
 
     public override object ReadJson(JsonReader reader,
@@ -134,14 +134,14 @@ public class PointConverter : JsonConverter
         int y = (int) reader.ReadAsDecimal().GetValueOrDefault();
         reader.Read();
 
-        return new Point(x, y);
+        return new IntVector2(x, y);
     }
 
     public override void WriteJson(JsonWriter writer,
                                    object value,
                                    JsonSerializer serializer)
     {
-        Point point = (Point) value;
+        IntVector2 point = (IntVector2) value;
 
         writer.WriteStartArray();
         writer.WriteValue(point.x);

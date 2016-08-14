@@ -346,16 +346,16 @@ public class ImageGrid : ICopyable<ImageGrid>
     public class Change : IChange
     {
         public ImageGrid grid;
-        public Dictionary<Point, byte[]> before = new Dictionary<Point, byte[]>();
-        public Dictionary<Point, byte[]> after  = new Dictionary<Point, byte[]>();
-        public HashSet<Point> added = new HashSet<Point>();
+        public Dictionary<IntVector2, byte[]> before = new Dictionary<IntVector2, byte[]>();
+        public Dictionary<IntVector2, byte[]> after  = new Dictionary<IntVector2, byte[]>();
+        public HashSet<IntVector2> added = new HashSet<IntVector2>();
 
-        public void Added(Point point)
+        public void Added(IntVector2 point)
         {
             added.Add(point);
         }
 
-        public void Changed(Point point)
+        public void Changed(IntVector2 point)
         {
             byte[] original;
 
@@ -402,10 +402,10 @@ public class ImageGrid : ICopyable<ImageGrid>
     public Project project;
 
     [JsonArray]
-    public class GridDict : Dictionary<Point, SpriteResource>
+    public class GridDict : Dictionary<IntVector2, SpriteResource>
     {
         public GridDict() : base() { }
-        public GridDict(Dictionary<Point, SpriteResource> dict) : base(dict) { }
+        public GridDict(Dictionary<IntVector2, SpriteResource> dict) : base(dict) { }
     };
 
     public int cellSize;
@@ -418,7 +418,7 @@ public class ImageGrid : ICopyable<ImageGrid>
                                                      pair => copier.Copy(pair.Value)));
     }
 
-    public SpriteResource AddCell(Point cell)
+    public SpriteResource AddCell(IntVector2 cell)
     {
         var texture = new TextureResource(new Texture8(cellSize, cellSize));
         texture.texture8.Clear(0);

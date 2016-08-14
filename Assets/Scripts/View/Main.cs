@@ -226,7 +226,7 @@ public class Main : MonoBehaviour
         w.background.cellSize = 256;
         SetProject(p);
 
-        p.world.background.AddCell(Point.Zero);
+        p.world.background.AddCell(IntVector2.Zero);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -446,7 +446,7 @@ public class Main : MonoBehaviour
 
                 byte[] data = System.Convert.FromBase64String(pair.Value);
 
-                var c = project.world.background.AddCell(new Point(x, y));
+                var c = project.world.background.AddCell(new IntVector2(x, y));
                 c.texture.texture8.DecodeFromPNG(data);
             }
 

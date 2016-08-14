@@ -5,16 +5,16 @@ public class ImageGridView : ViewComponent<ImageGrid>
     [SerializeField] private SpriteRenderer cellPrefab;
     [SerializeField] private Transform cellParent;
 
-    private MonoBehaviourPooler<Point, SpriteRenderer> cells;
+    private MonoBehaviourPooler<IntVector2, SpriteRenderer> cells;
 
     private void Awake()
     {
-        cells = new MonoBehaviourPooler<Point, SpriteRenderer>(cellPrefab,
+        cells = new MonoBehaviourPooler<IntVector2, SpriteRenderer>(cellPrefab,
                                                                cellParent,
                                                                InitCell);
     }
 
-    private void InitCell(Point cell, SpriteRenderer renderer)
+    private void InitCell(IntVector2 cell, SpriteRenderer renderer)
     {
         renderer.transform.localPosition = cell * model.cellSize;
         renderer.sprite = model.cells[cell];
