@@ -14,21 +14,9 @@ public class DrawingTexture : ManagedTexture<Color>
         pixels = texture.GetPixels();
     }
 
-    public void DecodeFromPNG(byte[] data)
-    {
-        uTexture.LoadImage(data);
-        
-        pixels = uTexture.GetPixels();
-    }
-
     public override void Apply()
     {
-        Apply(force: false);
-    }
-
-    public void Apply(bool force=false)
-    {
-        if (dirty || force)
+        if (dirty)
         {
             uTexture.SetPixels(pixels);
             uTexture.Apply();
@@ -39,30 +27,6 @@ public class DrawingTexture : ManagedTexture<Color>
 
 public struct DrawingBrush
 {
-    public ManagedSprite<Color> sprite;
-    public Vector2 position;
-    public Blend.Function blend;
-
-
-    public static ManagedSprite<Color> Rectangle(int width, int height,
-                                          Color color,
-                                          float pivotX = 0, float pivotY = 0)
-    {
-        Texture2D image = Texture2DExtensions.Blank(width, height);
-        image.Clear(color);
-
-        Sprite brush = Sprite.Create(image,
-                                     new Rect(0, 0, width, height),
-                                     new Vector2(pivotX / width, pivotY / height),
-                                     1);
-        brush.name = "Rectangle (Brush)";
-
-        var dTexture = new DrawingTexture(image);
-        var dSprite = new ManagedSprite<Color>(dTexture, brush);
-
-        return dSprite;
-    }
-
     public static ManagedSprite<Color> Line(Vector2 start,
                                      Vector2 end,
                                      Color color,

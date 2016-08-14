@@ -43,12 +43,7 @@ public class Texture8 : ManagedTexture<byte>
 
     public override void Apply()
     {
-        Apply(force: false);
-    }
-
-    public void Apply(bool force=false)
-    {
-        if (dirty || force)
+        if (dirty)
         {
             uTexture.LoadRawTextureData(pixels);
             uTexture.Apply();
@@ -62,6 +57,8 @@ public class Texture8 : ManagedTexture<byte>
         {
             this.pixels[i] = pixels[i].a;
         }
+
+        dirty = true;
     }
 
     public void DecodeFromPNG(byte[] data)
@@ -71,7 +68,7 @@ public class Texture8 : ManagedTexture<byte>
 
         SetPixels32(tex.GetPixels32());
 
-        Apply(true);
+        Apply();
     }
 }
 
