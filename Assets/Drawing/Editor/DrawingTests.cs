@@ -122,6 +122,11 @@ public class DrawingTests
         Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
     }
 
+    private void SaveOut<TPixel>(ManagedSprite<TPixel> sprite, string name)
+    {
+        sprite.mTexture.Apply();
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/" + name + ".png", sprite.mTexture.uTexture.EncodeToPNG());
+    }
 
     [Test]
     public void LineSweep_Managed()
@@ -134,13 +139,17 @@ public class DrawingTests
 
         Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
-        var circle5 = DrawingBrush.Circle(5, Color.magenta);
+        var circle5 = DrawingBrush.Rectangle(5, 5, Color.clear, 2, 2);
+        Brush8.Circle<Color>(circle5, 5, Color.magenta);
 
         var line = DrawingBrush.Line(start, end, Color.magenta, 5);
         generated1.Blend(line, alpha);
 
-        var sweep = Brush8.Sweep(circle5, start, end, DrawingTexturePooler.GetSprite, alpha);
+        var sweep = Brush8.Sweep<Color>(circle5, start, end, DrawingTexturePooler.GetSprite, alpha);
         generated2.Blend(sweep, alpha);
+
+        sweep.SetPixelAbsolute((int) sweep.pivot.x, (int) sweep.pivot.y, Color.cyan);
+        SaveOut(sweep, "sweetest");
 
         generated1.mTexture.Apply();
         generated2.mTexture.Apply();

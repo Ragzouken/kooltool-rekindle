@@ -130,45 +130,6 @@ public struct DrawingBrush
         return dSprite;
     }
 
-    public static ManagedSprite<Color> Sweep(ManagedSprite<Color> sprite,
-                                             Vector2 start,
-                                             Vector2 end)
-    {
-        var tl = new Vector2(Mathf.Min(start.x, end.x),
-                             Mathf.Min(start.y, end.y));
-
-        int width  = (int) Mathf.Abs(end.x - start.x) + (int) sprite.rect.width;
-        int height = (int) Mathf.Abs(end.y - start.y) + (int) sprite.rect.height;
-
-        var pivot = tl * -1 + sprite.pivot;
-        var rect = new Rect(0, 0, width, height);
-
-        var dTexture = DrawingTexturePooler.GetTexture(width, height);
-        var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
-        dSprite.Clear(Color.clear);
-
-        {
-            var brush_ = new DrawingBrush { sprite = sprite, blend = Blend.alpha };
-            Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
-
-            Bresenham.PlotFunction plot = delegate (int x, int y)
-            {
-                brush_.position.x = x;
-                brush_.position.y = y;
-
-                dSprite.Blend(sprite, alpha, brushPosition: brush_.position);
-            };
-
-            Bresenham.Line((int)start.x,
-                           (int)start.y,
-                           (int)end.x,
-                           (int)end.y,
-                           plot);
-        }
-
-        return dSprite;
-    }
-
     public static ManagedSprite<Color> Line(Vector2 start,
                                      Vector2 end,
                                      Color color,
@@ -189,7 +150,10 @@ public struct DrawingBrush
         var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
         dSprite.Clear(Color.clear);
 
-        ManagedSprite<Color> circle = Circle(thickness, color);
+        int off = thickness % 2 == 0 ? 0 : 1;
+
+        ManagedSprite<Color> circle = Rectangle(thickness, thickness, Color.clear, left, left);
+        Brush8.Circle<Color>(circle, thickness, color);
         {
             Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 

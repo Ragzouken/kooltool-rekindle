@@ -161,6 +161,8 @@ public static class Brush8
         var tl = new Vector2(Mathf.Min(start.x, end.x),
                              Mathf.Min(start.y, end.y));
 
+        Debug.Log(sprite.pivot);
+
         sweep.pivot = sprite.pivot - tl;
 
         {
