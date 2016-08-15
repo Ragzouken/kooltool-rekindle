@@ -398,6 +398,8 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
                 circle.SetPixelAbsolute(i, y0 + 1, value);
             }
         }
+
+        circle.pivot = IntVector2.one * ((diameter - 1) / 2);
     }
 
     public static void Sweep(ManagedSprite<TPixel> sweep,

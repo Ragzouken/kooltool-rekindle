@@ -359,7 +359,7 @@ public struct Brush
         var tl = new Vector2(Mathf.Min(start.x, end.x),
                              Mathf.Min(start.y, end.y));
 
-        int left = Mathf.FloorToInt(thickness / 2f);
+        int left = (thickness - 1) / 2;
 
         Vector2 size = new Vector2(Mathf.Abs(end.x - start.x) + thickness,
                                    Mathf.Abs(end.y - start.y) + thickness);

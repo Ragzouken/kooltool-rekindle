@@ -76,12 +76,12 @@ public class DrawingTests
         var line2 = Brush.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
         generated.Brush(line2.AsBrush(Vector2.zero, Blend.alpha));
 
-        generated.Brush(circle4.AsBrush(new Vector2(6, 18), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(6, 26), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(14, 18), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(14, 26), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(5, 17), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(5, 25), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(13, 17), Blend.alpha));
+        generated.Brush(circle4.AsBrush(new Vector2(13, 25), Blend.alpha));
 
-        generated.Brush(circle16.AsBrush(new Vector2(24, 12), Blend.alpha));
+        generated.Brush(circle16.AsBrush(new Vector2(23, 11), Blend.alpha));
 
         var lineR = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6);
         generated.Brush(lineR.AsBrush(Vector2.zero, Blend.alpha));
@@ -224,15 +224,15 @@ public class DrawingTests
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3 = TextureColor.Pooler.Instance.GetSprite(3, 3, Vector2.one * 1);
+        var circle3 = TextureColor.Pooler.Instance.GetSprite(3, 3);
         circle3.Clear(Color.clear);
         TextureColor.Pooler.Instance.Circle(circle3, 3, Color.black);
 
-        var circle4 = TextureColor.Pooler.Instance.GetSprite(4, 4, Vector2.one * 2);
+        var circle4 = TextureColor.Pooler.Instance.GetSprite(4, 4);
         circle4.Clear(Color.clear);
         TextureColor.Pooler.Instance.Circle(circle4, 4, Color.black);
 
-        var circle16 = TextureColor.Pooler.Instance.GetSprite(16, 16, Vector2.one * 8);
+        var circle16 = TextureColor.Pooler.Instance.GetSprite(16, 16);
         circle16.Clear(Color.clear);
         TextureColor.Pooler.Instance.Circle(circle16, 16, Color.black);
 
@@ -250,12 +250,12 @@ public class DrawingTests
         var line2 = TextureColor.Pooler.Instance.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3, TextureColor.mask);
         generated.Blend(line2, alpha);
 
-        generated.Blend(circle4, alpha, brushPosition: new Vector2( 6, 18));
-        generated.Blend(circle4, alpha, brushPosition: new Vector2( 6, 26));
-        generated.Blend(circle4, alpha, brushPosition: new Vector2(14, 18));
-        generated.Blend(circle4, alpha, brushPosition: new Vector2(14, 26));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2( 5, 17));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2( 5, 25));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2(13, 17));
+        generated.Blend(circle4, alpha, brushPosition: new Vector2(13, 25));
 
-        generated.Blend(circle16, alpha, brushPosition: new Vector2(24, 12));
+        generated.Blend(circle16, alpha, brushPosition: new Vector2(23, 11));
 
         var lineR = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.mask);
         generated.Blend(lineR, alpha);
