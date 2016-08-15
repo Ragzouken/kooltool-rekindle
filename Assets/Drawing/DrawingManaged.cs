@@ -337,9 +337,9 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         return sweep;
     }
 
-    public ManagedSprite<TPixel> Rectange(int width, int height,
-                                          TPixel color,
-                                          IntVector2 pivot = default(IntVector2))
+    public ManagedSprite<TPixel> Rectangle(int width, int height,
+                                           TPixel color,
+                                           IntVector2 pivot = default(IntVector2))
     {
         var rect = GetSprite(width, height, pivot);
         rect.Clear(color);
@@ -347,9 +347,19 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         return rect;
     }
 
-    public void Circle(ManagedSprite<TPixel> circle,
-                       int diameter,
-                       TPixel value)
+    public ManagedSprite<TPixel> Circle(int diameter, TPixel color)
+    {
+        var circle = GetSprite(diameter, diameter);
+
+        circle.Clear(default(TPixel));
+        Circle(circle, diameter, color);
+
+        return circle;
+    }
+
+    private void Circle(ManagedSprite<TPixel> circle,
+                        int diameter,
+                        TPixel value)
     {
         int radius = (diameter - 1) / 2;
         int offset = (diameter % 2 == 0) ? 1 : 0;
@@ -399,7 +409,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
             }
         }
 
-        circle.pivot = IntVector2.one * ((diameter - 1) / 2);
+        circle.pivot = IntVector2.one * radius;
     }
 
     public static void Sweep(ManagedSprite<TPixel> sweep,

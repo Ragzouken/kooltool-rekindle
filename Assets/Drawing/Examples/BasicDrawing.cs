@@ -33,7 +33,7 @@ public class BasicDrawing : MonoBehaviour
             if (hit.collider == collider)
             {
                 nextMouse = (Vector2) hit.point * 512;
-                nextMouse = nextMouse.Floored();
+                //nextMouse = nextMouse.Floored();
             }
         }
 
@@ -45,12 +45,14 @@ public class BasicDrawing : MonoBehaviour
             }
             else
             {
+                /*
                 var circle = Brush.Circle(Random.Range(1, 6), 
                                           Color.HSVToRGB(Random.value, 0.75f, 1f));
 
                 var sweep = Brush.Sweep(circle, prevMouse, nextMouse);
                 drawing.sprite.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
                 drawing.sprite.Apply();
+                */
             }
         }
         else

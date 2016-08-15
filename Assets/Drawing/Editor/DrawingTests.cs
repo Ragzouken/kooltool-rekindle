@@ -54,99 +54,6 @@ public class DrawingTests
         return difference;
     }
 
-    [Test]
-    public void Reference01()
-    {
-        var reference = Resources.Load<Texture2D>("Drawing-Reference-01");
-
-        Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
-
-        var circle3 = Brush.Circle(3, Color.black);
-        var circle4 = Brush.Circle(4, Color.black);
-        var circle16 = Brush.Circle(16, Color.black);
-
-        var generated = Brush.Rectangle(64, 64, Color.white);
-        generated.Brush(circle3.AsBrush(Vector2.one * 4, Blend.alpha));
-
-        Assert.AreNotEqual(Difference(reference, generated.texture), 0, "Generated image should be different to reference at this point!");
-
-        var line1 = Brush.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
-        generated.Brush(line1.AsBrush(Vector2.zero, Blend.alpha));
-
-        var line2 = Brush.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
-        generated.Brush(line2.AsBrush(Vector2.zero, Blend.alpha));
-
-        generated.Brush(circle4.AsBrush(new Vector2(5, 17), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(5, 25), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(13, 17), Blend.alpha));
-        generated.Brush(circle4.AsBrush(new Vector2(13, 25), Blend.alpha));
-
-        generated.Brush(circle16.AsBrush(new Vector2(23, 11), Blend.alpha));
-
-        var lineR = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6);
-        generated.Brush(lineR.AsBrush(Vector2.zero, Blend.alpha));
-
-        var lineB = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4);
-        generated.Brush(lineB.AsBrush(Vector2.zero, Blend.alpha));
-
-        var lineG = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2);
-        generated.Brush(lineG.AsBrush(Vector2.zero, Blend.alpha));
-
-        int difference = Difference(reference, generated.texture);
-
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/Drawing-Reference-01.png", generated.texture.EncodeToPNG());
-
-        Assert.AreEqual(difference, 0, string.Format("Generated image doesn't match reference! ({0} difference)", difference));
-    }
-
-    [Test]
-    public void LineCoords()
-    {
-        var generated1 = Brush.Rectangle(64, 64, Color.white);
-        var generated2 = Brush.Rectangle(64, 64, Color.white);
-
-        Vector2 start = new Vector2(4, 4);
-        Vector2 end = new Vector2(60, 60);
-
-        var lineAbs = Brush.Line(start, end, Color.magenta, 5);
-        generated1.Brush(lineAbs.AsBrush(Vector2.zero, Blend.alpha));
-
-        var lineRel = Brush.Line(Vector2.zero, end - start, Color.magenta, 5);
-        generated2.Brush(lineRel.AsBrush(start, Blend.alpha));
-
-        SaveOut(generated1, "Drawing-LineCoords-Abs");
-        SaveOut(generated2, "Drawing-LineCoords-Rel");
-
-        int difference = Difference(lineAbs.texture, lineRel.texture);
-
-        Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
-    }
-
-    [Test]
-    public void LineSweep()
-    {
-        var generated1 = Brush.Rectangle(64, 64, Color.white);
-        var generated2 = Brush.Rectangle(64, 64, Color.white);
-
-        Vector2 start = new Vector2(4, 4);
-        Vector2 end = new Vector2(60, 60);
-
-        var circle5 = Brush.Circle(5, Color.magenta);
-
-        var line = Brush.Line(start, end, Color.magenta, 5);
-        generated1.Brush(line.AsBrush(Vector2.zero, Blend.alpha));
-
-        var sweep = Brush.Sweep(circle5, start, end);
-        generated2.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
-
-        SaveOut(generated1, "Drawing-LineSweep-Line");
-        SaveOut(generated2, "Drawing-LineSweep-Sweep");
-
-        int difference = Difference(generated1.texture, generated2.texture);
-
-        Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
-    }
-
     private void SaveOut(Sprite sprite, string name)
     {
         sprite.texture.Apply();
@@ -184,91 +91,47 @@ public class DrawingTests
     }
 
     [Test]
-    public void LineSweep_Managed()
-    {
-        var generated1 = TextureColor.Pooler.Instance.GetSprite(64, 64);
-        generated1.Clear(Color.white);
-        var generated2 = TextureColor.Pooler.Instance.GetSprite(64, 64);
-        generated2.Clear(Color.white);
-
-        Vector2 start = new Vector2(4, 4);
-        Vector2 end = new Vector2(60, 60);
-
-        Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
-
-        var circle5 = TextureColor.Pooler.Instance.GetSprite(5, 5, pivot: Vector2.one * 2);
-        circle5.Clear(Color.clear);
-        TextureColor.Pooler.Instance.Circle(circle5, 5, Color.magenta);
-
-        var line = TextureColor.Pooler.Instance.Line(start, end, Color.magenta, 5, TextureColor.mask);
-        generated1.Blend(line, alpha);
-
-        var sweep = TextureColor.Pooler.Instance.Sweep(circle5, start, end, alpha);
-        generated2.Blend(sweep, alpha);
-
-        sweep.SetPixelAbsolute((int) sweep.pivot.x, (int) sweep.pivot.y, Color.cyan);
-        SaveOut(sweep, "sweetest");
-
-        SaveOutExact(generated1, "Drawing-LineSweep-Line-Managed");
-        SaveOutExact(generated2, "Drawing-LineSweep-Sweep-Managed");
-
-        int difference = Difference(generated1, generated2);
-
-        Assert.AreEqual(difference, 0, string.Format("Images should match! ({0} difference)", difference));
-    }
-
-    [Test]
     public void Reference01_Managed()
     {
         var reference = Resources.Load<Texture2D>("Drawing-Reference-01");
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3 = TextureColor.Pooler.Instance.GetSprite(3, 3);
-        circle3.Clear(Color.clear);
-        TextureColor.Pooler.Instance.Circle(circle3, 3, Color.black);
-
-        var circle4 = TextureColor.Pooler.Instance.GetSprite(4, 4);
-        circle4.Clear(Color.clear);
-        TextureColor.Pooler.Instance.Circle(circle4, 4, Color.black);
-
-        var circle16 = TextureColor.Pooler.Instance.GetSprite(16, 16);
-        circle16.Clear(Color.clear);
-        TextureColor.Pooler.Instance.Circle(circle16, 16, Color.black);
-
-        Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
+        var circle3  = TextureColor.Pooler.Instance.Circle(3,  Color.black);
+        var circle4  = TextureColor.Pooler.Instance.Circle(4,  Color.black);
+        var circle16 = TextureColor.Pooler.Instance.Circle(16, Color.black);
 
         var generated = TextureColor.Pooler.Instance.GetSprite(64, 64);
         generated.Clear(Color.white);
-        generated.Blend(circle3, alpha, brushPosition: Vector2.one * 4);
+        generated.Blend(circle3, TextureColor.alpha, brushPosition: Vector2.one * 4);
 
         Assert.AreNotEqual(Difference(reference, GetExact(generated)), 0, "Generated image should be different to reference at this point!");
 
         var line1 = TextureColor.Pooler.Instance.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3, TextureColor.mask);
-        generated.Blend(line1, alpha);
+        generated.Blend(line1, TextureColor.alpha);
 
         var line2 = TextureColor.Pooler.Instance.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3, TextureColor.mask);
-        generated.Blend(line2, alpha);
+        generated.Blend(line2, TextureColor.alpha);
 
-        generated.Blend(circle4, alpha, brushPosition: new Vector2( 5, 17));
-        generated.Blend(circle4, alpha, brushPosition: new Vector2( 5, 25));
-        generated.Blend(circle4, alpha, brushPosition: new Vector2(13, 17));
-        generated.Blend(circle4, alpha, brushPosition: new Vector2(13, 25));
+        generated.Blend(circle4, TextureColor.alpha, brushPosition: new Vector2( 5, 17));
+        generated.Blend(circle4, TextureColor.alpha, brushPosition: new Vector2( 5, 25));
+        generated.Blend(circle4, TextureColor.alpha, brushPosition: new Vector2(13, 17));
+        generated.Blend(circle4, TextureColor.alpha, brushPosition: new Vector2(13, 25));
 
-        generated.Blend(circle16, alpha, brushPosition: new Vector2(23, 11));
+        generated.Blend(circle16, TextureColor.alpha, brushPosition: new Vector2(23, 11));
 
         var lineR = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.mask);
-        generated.Blend(lineR, alpha);
+        generated.Blend(lineR, TextureColor.alpha);
 
         var lineB = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4, TextureColor.mask);
-        generated.Blend(lineB, alpha);
+        generated.Blend(lineB, TextureColor.alpha);
 
         var lineG = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2, TextureColor.mask);
-        generated.Blend(lineG, alpha);
+        generated.Blend(lineG, TextureColor.alpha);
 
         int difference = Difference(reference, GetExact(generated));
 
-        SaveOutExact(generated, "Drawing-Reference-01-Managed.png");
+        SaveOutExact(generated, "Drawing-Reference-01-Managed");
 
         Assert.AreEqual(difference, 0, string.Format("Generated image doesn't match reference! ({0} difference)", difference));
     }
