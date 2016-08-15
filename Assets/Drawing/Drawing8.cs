@@ -77,18 +77,18 @@ public static class Brush8
     private static void Swap<T>(ref T lhs, ref T rhs) { T temp; temp = lhs; lhs = rhs; rhs = temp; }
 
     public static ManagedSprite<TPixel> Sweep<TPixel>(ManagedSprite<TPixel> sprite,
-                                                      Vector2 start,
-                                                      Vector2 end,
-                                                      Func<int, int, Vector2, ManagedSprite<TPixel>> GetSprite,
+                                                      IntVector2 start,
+                                                      IntVector2 end,
+                                                      Func<int, int, IntVector2, ManagedSprite<TPixel>> GetSprite,
                                                       Blend<TPixel> blend,
                                                       TPixel background = default(TPixel))
     {
-        int width  = (int) Mathf.Abs(end.x - start.x) + (int) sprite.rect.width;
-        int height = (int) Mathf.Abs(end.y - start.y) + (int) sprite.rect.height;
+        int width  = Mathf.Abs(end.x - start.x) + sprite.rect.width;
+        int height = Mathf.Abs(end.y - start.y) + sprite.rect.height;
 
         var rect = new Rect(0, 0, width, height);
 
-        var sweep = GetSprite(width, height, Vector2.zero);
+        var sweep = GetSprite(width, height, IntVector2.Zero);
         sweep.Clear(background);
 
         Sweep(sweep, sprite, start, end, blend);
@@ -97,9 +97,9 @@ public static class Brush8
     }
 
     public static ManagedSprite<TPixel> Rectange<TPixel>(int width, int height,
-                                                         Func<int, int, Vector2, ManagedSprite<TPixel>> GetSprite,
+                                                         Func<int, int, IntVector2, ManagedSprite<TPixel>> GetSprite,
                                                          TPixel color,
-                                                         Vector2 pivot=default(Vector2))
+                                                         IntVector2 pivot =default(IntVector2))
     {
         var rect = GetSprite(width, height, pivot);
         rect.Clear(color);
@@ -162,22 +162,22 @@ public static class Brush8
 
     public static void Sweep<TPixel>(ManagedSprite<TPixel> sweep,
                                      ManagedSprite<TPixel> sprite,
-                                     Vector2 start,
-                                     Vector2 end,
+                                     IntVector2 start,
+                                     IntVector2 end,
                                      Blend<TPixel> blend)
     {
-        var tl = new Vector2(Mathf.Min(start.x, end.x),
-                             Mathf.Min(start.y, end.y));
+        var tl = new IntVector2(Mathf.Min(start.x, end.x),
+                                Mathf.Min(start.y, end.y));
 
         sweep.pivot = sprite.pivot - tl;
 
         {
-            Vector2 position;
+            IntVector2 position;
 
-            int x0 = (int) start.x;
-            int y0 = (int) start.y;
-            int x1 = (int) end.x;
-            int y1 = (int) end.y;
+            int x0 = start.x;
+            int y0 = start.y;
+            int x1 = end.x;
+            int y1 = end.y;
 
             bool steep = Mathf.Abs(y1 - y0) > Mathf.Abs(x1 - x0);
 

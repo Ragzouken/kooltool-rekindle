@@ -38,27 +38,27 @@ public class DrawingTexture : ManagedTexture<Color>
 
 public struct DrawingBrush
 {
-    public static ManagedSprite<Color> Line(Vector2 start,
-                                     Vector2 end,
-                                     Color color,
-                                     int thickness)
+    public static ManagedSprite<Color> Line(IntVector2 start,
+                                             IntVector2 end,
+                                             Color color,
+                                             int thickness)
     {
-        var tl = new Vector2(Mathf.Min(start.x, end.x),
-                             Mathf.Min(start.y, end.y));
+        var tl = new IntVector2(Mathf.Min(start.x, end.x),
+                                Mathf.Min(start.y, end.y));
 
         int left = Mathf.FloorToInt(thickness / 2f);
 
-        Vector2 size = new Vector2(Mathf.Abs(end.x - start.x) + thickness,
-                                   Mathf.Abs(end.y - start.y) + thickness);
+        IntVector2 size = new IntVector2(Mathf.Abs(end.x - start.x) + thickness,
+                                         Mathf.Abs(end.y - start.y) + thickness);
 
-        var pivot = tl * -1 + Vector2.one * left;
+        var pivot = tl * -1 + IntVector2.One * left;
         var rect = new Rect(0, 0, size.x, size.y);
 
-        var dTexture = DrawingTexturePooler.Instance.GetTexture((int) size.x, (int) size.y);
+        var dTexture = DrawingTexturePooler.Instance.GetTexture(size.x, size.y);
         var dSprite = new ManagedSprite<Color>(dTexture, rect, pivot);
         dSprite.Clear(Color.clear);
 
-        var circle = DrawingTexturePooler.Instance.GetSprite(thickness, thickness, Vector2.one * left);
+        var circle = DrawingTexturePooler.Instance.GetSprite(thickness, thickness, IntVector2.One * left);
         circle.Clear(Color.clear);
         Brush8.Circle<Color>(circle, thickness, color);
         {
@@ -66,14 +66,10 @@ public struct DrawingBrush
 
             Bresenham.PlotFunction plot = delegate (int x, int y)
             {
-                dSprite.Blend(circle, alpha, brushPosition: new Vector2(x, y));
+                dSprite.Blend(circle, alpha, brushPosition: new IntVector2(x, y));
             };
 
-            Bresenham.Line((int)start.x,
-                           (int)start.y,
-                           (int)end.x,
-                           (int)end.y,
-                           plot);
+            Bresenham.Line(start.x, start.y, end.x, end.y, plot);
         }
 
         return dSprite;
@@ -99,11 +95,12 @@ public class Texture8Pooler : ManagedPooler<Texture8Pooler, byte>
 public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
     where TPooler : ManagedPooler<TPooler, TPixel>, new()
 {
+    private List<ManagedSprite<TPixel>> sprites = new List<ManagedSprite<TPixel>>();
     private List<ManagedTexture<TPixel>> textures = new List<ManagedTexture<TPixel>>();
 
     public virtual ManagedTexture<TPixel> CreateTexture(int width, int height)
     {
-        throw new System.NotImplementedException();
+        throw new NotImplementedException();
     }
 
     public ManagedTexture<TPixel> GetTexture(int width, int height)
@@ -123,11 +120,33 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         return dTexture;
     }
 
-    public ManagedSprite<TPixel> GetSprite(int width, int height, Vector2 pivot = default(Vector2))
+    public ManagedSprite<TPixel> GetSprite(int width, int height, IntVector2 pivot = default(IntVector2))
     {
         var texture = GetTexture(width, height);
 
-        return new ManagedSprite<TPixel>(texture, new IntRect(0, 0, width, height), pivot);
+        ManagedSprite<TPixel> sprite;
+
+        if (sprites.Count > 0)
+        {
+            sprite = sprites[sprites.Count - 1];
+            sprites.RemoveAt(sprites.Count - 1);
+
+            sprite.mTexture = texture;
+            sprite.rect = new IntRect(0, 0, width, height);
+            sprite.pivot = pivot;
+        }
+        else
+        {
+            sprite = new ManagedSprite<TPixel>(texture, new IntRect(0, 0, width, height), pivot);
+        }
+
+        return sprite;
+    }
+
+    public void FreeSprite(ManagedSprite<TPixel> sprite)
+    {
+        sprite.Dispose();
+        sprites.Add(sprite);
     }
 
     public void FreeTexture(ManagedTexture<TPixel> texture)

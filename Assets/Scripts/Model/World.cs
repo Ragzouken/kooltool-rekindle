@@ -434,25 +434,25 @@ public class ImageGrid : ICopyable<ImageGrid>
         return sprite;
     }
 
-    public void Blend(Changes changes, ManagedSprite<byte> sprite8, Vector2 brushPosition, Blend<byte> blend)
+    public void Blend(Changes changes, ManagedSprite<byte> sprite8, IntVector2 brushPosition, Blend<byte> blend)
     {
-        Vector2 cell;
+        IntVector2 cell;
         SpriteResource sprite;
 
         // find the rectangle of cells that contains the brush
-        Vector2 brushMin = brushPosition - sprite8.pivot;
-        Vector2 brushMax = brushMin + new Vector2(sprite8.rect.width,
-                                                  sprite8.rect.height);
+        IntVector2 brushMin = brushPosition - sprite8.pivot;
+        IntVector2 brushMax = brushMin + new IntVector2(sprite8.rect.width,
+                                                        sprite8.rect.height);
 
-        Vector2 cellMin = brushMin.CellCoords(cellSize);
-        Vector2 cellMax = brushMax.CellCoords(cellSize);
+        IntVector2 cellMin = brushMin.CellCoords(cellSize);
+        IntVector2 cellMax = brushMax.CellCoords(cellSize);
 
         var chang = changes.GetChange(this, () => new Change { grid = this });
 
         // apply the brush to all cells it overlaps
-        for (int y = (int)cellMin.y; y <= cellMax.y; ++y)
+        for (int y = cellMin.y; y <= cellMax.y; ++y)
         {
-            for (int x = (int)cellMin.x; x <= cellMax.x; ++x)
+            for (int x = cellMin.x; x <= cellMax.x; ++x)
             {
                 cell.x = x;
                 cell.y = y;
@@ -473,15 +473,15 @@ public class ImageGrid : ICopyable<ImageGrid>
         }
     }
    
-    public byte GetPixel(Vector2 position, byte @default = 0)
+    public byte GetPixel(IntVector2 position, byte @default = 0)
     {
-        Vector2 cell, local;
+        IntVector2 cell, local;
         SpriteResource sprite;
 
         position.GridCoords(cellSize, out cell, out local);
 
         return cells.TryGetValue(cell, out sprite)
-             ? sprite.sprite8.GetPixel((int) local.x, (int) local.y)
+             ? sprite.sprite8.GetPixel(local.x, local.y)
              : @default;
     }
 }

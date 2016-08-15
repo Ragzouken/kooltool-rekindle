@@ -29,6 +29,29 @@ public struct IntVector2 : System.IEquatable<IntVector2>
         return this + (IntVector2) offset;
     }
 
+    public void GridCoords(int cellSize,
+                           out IntVector2 cell,
+                           out IntVector2 local)
+    {
+        cell = CellCoords(cellSize);
+        local = OffsetCoords(cellSize);
+    }
+
+    public IntVector2 CellCoords(int cellSize)
+    {
+        return new IntVector2(Mathf.FloorToInt(x / (float) cellSize),
+                              Mathf.FloorToInt(y / (float) cellSize));
+    }
+
+    public IntVector2 OffsetCoords(int cellSize)
+    {
+        float ox = x % cellSize;
+        float oy = y % cellSize;
+
+        return new IntVector2(ox >= 0 ? ox : cellSize + ox,
+                              oy >= 0 ? oy : cellSize + oy);
+    }
+
     public static implicit operator Vector2(IntVector2 point)
     {
         return new Vector2(point.x, point.y);
@@ -75,7 +98,7 @@ public struct IntVector2 : System.IEquatable<IntVector2>
 
     public override string ToString ()
     {
-        return string.Format("Point({0}, {1})", x, y);
+        return string.Format("(x: {0}, y: {1})", x, y);
     }
 
     public static bool operator ==(IntVector2 a, IntVector2 b)
@@ -99,7 +122,7 @@ public struct IntVector2 : System.IEquatable<IntVector2>
     public static IntVector2 operator -(IntVector2 a, IntVector2 b)
     {
         a.x -= b.x;
-        a.y -= b.x;
+        a.y -= b.y;
 
         return a;
     }

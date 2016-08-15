@@ -1077,11 +1077,11 @@ public class Main : MonoBehaviour
                                                   (canvas, brush) => brush == 0 ? canvas : brush);
 
                     {
-                        project.world.background.Blend(changes, line, Vector2.zero, blend_);
+                        project.world.background.Blend(changes, line, IntVector2.Zero, blend_);
                     }
 
                     Texture8Pooler.Instance.FreeTexture(line.mTexture);
-                    Destroy(line.uSprite);
+                    Texture8Pooler.Instance.FreeSprite(line);
 
                     changes.ApplyTextures();
                 }

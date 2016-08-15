@@ -113,22 +113,39 @@ public abstract class ManagedTexture<TPixel>
     public abstract void Apply();
 }
 
-public class ManagedSprite<TPixel>
+public class ManagedSprite<TPixel> : IDisposable
 {
     public ManagedTexture<TPixel> mTexture;
-    public Sprite uSprite;
+
+    private Sprite _uSprite;
+    public Sprite uSprite
+    {
+        get
+        {
+            if (_uSprite == null)
+            {
+                uSprite = Sprite.Create(mTexture.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+            }
+
+            return _uSprite;
+        }
+
+        set
+        {
+            _uSprite = value;
+        }
+    }
+
     public IntRect rect;
-    public Vector2 pivot;
+    public IntVector2 pivot;
 
     public ManagedSprite(ManagedTexture<TPixel> mTexture,
                          IntRect rect,
-                         Vector2 pivot)
+                         IntVector2 pivot)
     {
         this.mTexture = mTexture;
         this.rect = rect;
         this.pivot = pivot;
-
-        uSprite = Sprite.Create(mTexture.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
     }
 
     public ManagedSprite(ManagedTexture<TPixel> mTexture,
@@ -143,21 +160,21 @@ public class ManagedSprite<TPixel>
 
     public bool Blend(ManagedSprite<TPixel> brush,
                       Blend<TPixel> blend,
-                      Vector2 canvasPosition = default(Vector2),
-                      Vector2 brushPosition = default(Vector2))
+                      IntVector2 canvasPosition = default(IntVector2),
+                      IntVector2 brushPosition = default(IntVector2))
     {
         var canvas = this;
 
         var b_offset = brushPosition  - brush.pivot;
         var c_offset = canvasPosition - canvas.pivot;
 
-        var world_rect_brush = new IntRect((int) b_offset.x,
-                                           (int) b_offset.y,
+        var world_rect_brush = new IntRect(b_offset.x,
+                                           b_offset.y,
                                            brush.rect.width,
                                            brush.rect.height);
 
-        var world_rect_canvas = new IntRect((int) c_offset.x,
-                                            (int) c_offset.y,
+        var world_rect_canvas = new IntRect(c_offset.x,
+                                            c_offset.y,
                                             canvas.rect.width,
                                             canvas.rect.height);
 
@@ -188,8 +205,8 @@ public class ManagedSprite<TPixel>
 
     public TPixel GetPixel(int x, int y, TPixel @default = default(TPixel))
     {
-        x += rect.x - (int) pivot.x;
-        y += rect.y - (int) pivot.y;
+        x += rect.x - pivot.x;
+        y += rect.y - pivot.y;
 
         if (rect.Contains(x, y))
         {
@@ -210,5 +227,13 @@ public class ManagedSprite<TPixel>
         {
             mTexture.SetPixel(x, y, value);
         }
+    }
+
+    public void Dispose()
+    {
+        if (_uSprite != null)
+        {
+            UnityEngine.Object.Destroy(_uSprite);
+        } 
     }
 }
