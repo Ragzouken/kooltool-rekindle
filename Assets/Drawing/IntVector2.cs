@@ -5,13 +5,13 @@ public struct IntVector2 : System.IEquatable<IntVector2>
     public int x;
     public int y;
 
-    public static IntVector2 Zero = new IntVector2(0, 0);
-    public static IntVector2 One = new IntVector2(1, 1);
+    public static IntVector2 zero = new IntVector2(0, 0);
+    public static IntVector2 one  = new IntVector2(1, 1);
 
-    public static IntVector2 Left  = new IntVector2(-1,  0);
-    public static IntVector2 Right = new IntVector2( 1,  0);
-    public static IntVector2 Up    = new IntVector2( 0,  1);
-    public static IntVector2 Down  = new IntVector2( 0, -1);
+    public static IntVector2 left  = new IntVector2(-1,  0);
+    public static IntVector2 right = new IntVector2( 1,  0);
+    public static IntVector2 up    = new IntVector2( 0,  1);
+    public static IntVector2 down  = new IntVector2( 0, -1);
 
     public IntVector2(int x, int y)
     {
@@ -19,15 +19,7 @@ public struct IntVector2 : System.IEquatable<IntVector2>
         this.y = y;
     }
 
-    public IntVector2(float x, float y)
-        : this((int) x, (int) y)
-    {
-    }
-
-    public IntVector2 Offset(Vector2 offset)
-    {
-        return this + (IntVector2) offset;
-    }
+    public IntVector2(float x, float y) : this((int) x, (int) y) { }
 
     public void GridCoords(int cellSize,
                            out IntVector2 cell,

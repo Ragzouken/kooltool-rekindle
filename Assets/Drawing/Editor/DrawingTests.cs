@@ -83,13 +83,13 @@ public class DrawingTests
 
         generated.Brush(circle16.AsBrush(new Vector2(24, 12), Blend.alpha));
 
-        var lineR = Brush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.red, 6);
+        var lineR = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6);
         generated.Brush(lineR.AsBrush(Vector2.zero, Blend.alpha));
 
-        var lineB = Brush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.blue, 4);
+        var lineB = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4);
         generated.Brush(lineB.AsBrush(Vector2.zero, Blend.alpha));
 
-        var lineG = Brush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.green, 2);
+        var lineG = Brush.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2);
         generated.Brush(lineG.AsBrush(Vector2.zero, Blend.alpha));
 
         int difference = Difference(reference, generated.texture);
@@ -186,9 +186,9 @@ public class DrawingTests
     [Test]
     public void LineSweep_Managed()
     {
-        var generated1 = DrawingTexturePooler.Instance.GetSprite(64, 64);
+        var generated1 = TextureColor.Pooler.Instance.GetSprite(64, 64);
         generated1.Clear(Color.white);
-        var generated2 = DrawingTexturePooler.Instance.GetSprite(64, 64);
+        var generated2 = TextureColor.Pooler.Instance.GetSprite(64, 64);
         generated2.Clear(Color.white);
 
         Vector2 start = new Vector2(4, 4);
@@ -196,14 +196,14 @@ public class DrawingTests
 
         Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
-        var circle5 = DrawingTexturePooler.Instance.GetSprite(5, 5, pivot: Vector2.one * 2);
+        var circle5 = TextureColor.Pooler.Instance.GetSprite(5, 5, pivot: Vector2.one * 2);
         circle5.Clear(Color.clear);
-        Brush8.Circle<Color>(circle5, 5, Color.magenta);
+        TextureColor.Pooler.Instance.Circle(circle5, 5, Color.magenta);
 
-        var line = DrawingBrush.Line(start, end, Color.magenta, 5);
+        var line = TextureColor.Pooler.Instance.Line(start, end, Color.magenta, 5, TextureColor.mask);
         generated1.Blend(line, alpha);
 
-        var sweep = Brush8.Sweep<Color>(circle5, start, end, DrawingTexturePooler.Instance.GetSprite, alpha);
+        var sweep = TextureColor.Pooler.Instance.Sweep(circle5, start, end, alpha);
         generated2.Blend(sweep, alpha);
 
         sweep.SetPixelAbsolute((int) sweep.pivot.x, (int) sweep.pivot.y, Color.cyan);
@@ -224,30 +224,30 @@ public class DrawingTests
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3 = DrawingTexturePooler.Instance.GetSprite(3, 3, Vector2.one * 1);
+        var circle3 = TextureColor.Pooler.Instance.GetSprite(3, 3, Vector2.one * 1);
         circle3.Clear(Color.clear);
-        Brush8.Circle(circle3, 3, Color.black);
+        TextureColor.Pooler.Instance.Circle(circle3, 3, Color.black);
 
-        var circle4 = DrawingTexturePooler.Instance.GetSprite(4, 4, Vector2.one * 2);
+        var circle4 = TextureColor.Pooler.Instance.GetSprite(4, 4, Vector2.one * 2);
         circle4.Clear(Color.clear);
-        Brush8.Circle(circle4, 4, Color.black);
+        TextureColor.Pooler.Instance.Circle(circle4, 4, Color.black);
 
-        var circle16 = DrawingTexturePooler.Instance.GetSprite(16, 16, Vector2.one * 8);
+        var circle16 = TextureColor.Pooler.Instance.GetSprite(16, 16, Vector2.one * 8);
         circle16.Clear(Color.clear);
-        Brush8.Circle(circle16, 16, Color.black);
+        TextureColor.Pooler.Instance.Circle(circle16, 16, Color.black);
 
         Blend<Color> alpha = (canvas, brush) => Blend.Lerp(canvas, brush, brush.a);
 
-        var generated = DrawingTexturePooler.Instance.GetSprite(64, 64);
+        var generated = TextureColor.Pooler.Instance.GetSprite(64, 64);
         generated.Clear(Color.white);
         generated.Blend(circle3, alpha, brushPosition: Vector2.one * 4);
 
         Assert.AreNotEqual(Difference(reference, GetExact(generated)), 0, "Generated image should be different to reference at this point!");
 
-        var line1 = DrawingBrush.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
+        var line1 = TextureColor.Pooler.Instance.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3, TextureColor.mask);
         generated.Blend(line1, alpha);
 
-        var line2 = DrawingBrush.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
+        var line2 = TextureColor.Pooler.Instance.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3, TextureColor.mask);
         generated.Blend(line2, alpha);
 
         generated.Blend(circle4, alpha, brushPosition: new Vector2( 6, 18));
@@ -257,13 +257,13 @@ public class DrawingTests
 
         generated.Blend(circle16, alpha, brushPosition: new Vector2(24, 12));
 
-        var lineR = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.red, 6);
+        var lineR = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.mask);
         generated.Blend(lineR, alpha);
 
-        var lineB = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.blue, 4);
+        var lineB = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4, TextureColor.mask);
         generated.Blend(lineB, alpha);
 
-        var lineG = DrawingBrush.Line(new Vector2(36, 4), new Vector2(60, 4), Color.green, 2);
+        var lineG = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2, TextureColor.mask);
         generated.Blend(lineG, alpha);
 
         int difference = Difference(reference, GetExact(generated));

@@ -58,7 +58,7 @@ public class Main : MonoBehaviour
 
     private Actor possessed;
 
-    private Texture8 test;
+    private TextureByte test;
 
     public static bool mouseOverUI
     {
@@ -151,7 +151,7 @@ public class Main : MonoBehaviour
         Cursor.visible = false;
 
         {
-            test = new Texture8(128, 128);
+            test = new TextureByte(128, 128);
             test.Clear(0);
 
             var pixels = costumeTexture.GetPixels32();
@@ -170,7 +170,7 @@ public class Main : MonoBehaviour
 
         var brushtext = Texture2DExtensions.Blank(16, 16, TextureFormat.Alpha8);
         brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
-        brushSpriteD = new ManagedSprite<byte>(new Texture8(brushtext), brushSprite);
+        brushSpriteD = new ManagedSprite<byte>(new TextureByte(brushtext), brushSprite);
 
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
@@ -188,7 +188,7 @@ public class Main : MonoBehaviour
 
         foreach (var sprite in testbrushes)
         {
-            var tex = new Texture8(sprite.texture);
+            var tex = new TextureByte(sprite.texture);
 
             stamps.Add(new Stamp
             {
@@ -226,7 +226,7 @@ public class Main : MonoBehaviour
         w.background.cellSize = 256;
         SetProject(p);
 
-        p.world.background.AddCell(IntVector2.Zero);
+        p.world.background.AddCell(IntVector2.zero);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -1072,16 +1072,14 @@ public class Main : MonoBehaviour
                 if (freeToggle.isOn)
                 {
                     //var line = Brush8.Sweep(stamp.brush, prev, next);
-                    var line = Brush8.Sweep<byte>(stamp.brush, prev, next,
-                                                  Texture8Pooler.Instance.GetSprite,
-                                                  (canvas, brush) => brush == 0 ? canvas : brush);
+                    var line = TextureByte.Pooler.Instance.Sweep(stamp.brush, prev, next, (canvas, brush) => brush == 0 ? canvas : brush);
 
                     {
-                        project.world.background.Blend(changes, line, IntVector2.Zero, blend_);
+                        project.world.background.Blend(changes, line, IntVector2.zero, blend_);
                     }
 
-                    Texture8Pooler.Instance.FreeTexture(line.mTexture);
-                    Texture8Pooler.Instance.FreeSprite(line);
+                    TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
+                    TextureByte.Pooler.Instance.FreeSprite(line);
 
                     changes.ApplyTextures();
                 }

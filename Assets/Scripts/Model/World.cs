@@ -51,7 +51,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
     [JsonIgnore]
     public bool dirty = false;
     [JsonIgnore]
-    public Texture8 texture8;
+    public TextureByte texture8;
 
     [JsonIgnore]
     public Texture2D uTexture
@@ -87,7 +87,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
         Debug.Log(real.format.ToString());
 
-        texture8 = new Texture8(real);
+        texture8 = new TextureByte(real);
     }
 
     void IResource.SaveFinalise(Project project)
@@ -106,10 +106,10 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     public TextureResource(Texture2D texture)
     {
-        texture8 = new Texture8(texture);
+        texture8 = new TextureByte(texture);
     }
 
-    public TextureResource(Texture8 texture8)
+    public TextureResource(TextureByte texture8)
     {
         this.texture8 = texture8;
     }
@@ -124,7 +124,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         var tex = Texture2DExtensions.Blank(texture8.uTexture.width, texture8.uTexture.height, TextureFormat.Alpha8);
         tex.SetPixels32(texture8.uTexture.GetPixels32());
 
-        copy.texture8 = new Texture8(tex);
+        copy.texture8 = new TextureByte(tex);
 
         copy.id = id;
     }
@@ -420,7 +420,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
     public SpriteResource AddCell(IntVector2 cell)
     {
-        var texture = new TextureResource(new Texture8(cellSize, cellSize));
+        var texture = new TextureResource(new TextureByte(cellSize, cellSize));
         texture.texture8.Clear(0);
         var sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
 
