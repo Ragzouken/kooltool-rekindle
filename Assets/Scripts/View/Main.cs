@@ -1071,7 +1071,6 @@ public class Main : MonoBehaviour
             {
                 if (freeToggle.isOn)
                 {
-                    //var line = Brush8.Sweep(stamp.brush, prev, next);
                     var line = TextureByte.Pooler.Instance.Sweep(stamp.brush, prev, next, (canvas, brush) => brush == 0 ? canvas : brush);
 
                     {

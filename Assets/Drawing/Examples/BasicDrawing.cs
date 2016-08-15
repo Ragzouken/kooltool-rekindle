@@ -9,7 +9,8 @@ public class BasicDrawing : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer drawing;
 
-    private Texture2D texture;
+    private ManagedSprite<Color> sprite;
+
     private new Collider collider;
 
     private bool dragging;
@@ -17,8 +18,12 @@ public class BasicDrawing : MonoBehaviour
 
     private void Awake()
     {
-        texture = Texture2DExtensions.Blank(512, 512);
-        drawing.sprite = texture.FullSprite(pixelsPerUnit: 512);
+        sprite = TextureColor.Pooler.Instance.GetSprite(512, 512);
+        sprite.SetPixelsPerUnit(512);
+        sprite.Clear(Color.clear);
+        sprite.mTexture.Apply();
+
+        drawing.sprite = sprite.uSprite;
 
         collider = drawing.GetComponent<Collider>();
     }
@@ -33,7 +38,6 @@ public class BasicDrawing : MonoBehaviour
             if (hit.collider == collider)
             {
                 nextMouse = (Vector2) hit.point * 512;
-                //nextMouse = nextMouse.Floored();
             }
         }
 
@@ -45,14 +49,16 @@ public class BasicDrawing : MonoBehaviour
             }
             else
             {
-                /*
-                var circle = Brush.Circle(Random.Range(1, 6), 
-                                          Color.HSVToRGB(Random.value, 0.75f, 1f));
+                int thickness = Random.Range(1, 6);
+                Color color = Color.HSVToRGB(Random.value, 0.75f, 1f);
 
-                var sweep = Brush.Sweep(circle, prevMouse, nextMouse);
-                drawing.sprite.Brush(sweep.AsBrush(Vector2.zero, Blend.alpha));
-                drawing.sprite.Apply();
-                */
+                var line = TextureColor.Pooler.Instance.Line(prevMouse, nextMouse, color, thickness, TextureColor.alpha);
+
+                sprite.Blend(line, TextureColor.alpha);
+                sprite.mTexture.Apply();
+
+                TextureColor.Pooler.Instance.FreeTexture(line.mTexture);
+                TextureColor.Pooler.Instance.FreeSprite(line);
             }
         }
         else

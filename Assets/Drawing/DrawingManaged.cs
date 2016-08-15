@@ -232,6 +232,13 @@ public class ManagedSprite<TPixel> : IDisposable
             UnityEngine.Object.Destroy(_uSprite);
         }
     }
+
+    public void SetPixelsPerUnit(float ppu)
+    {
+        Dispose();
+
+        uSprite = Sprite.Create(mTexture.uTexture, rect, pivot, ppu, 0, SpriteMeshType.FullRect);
+    }
 }
 
 public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
@@ -249,20 +256,24 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
     {
         ManagedTexture<TPixel> dTexture;
 
-        if (textures.Count > 0)
+        if (textures.Count > 0 
+         && textures[0].width >= width
+         && textures[0].height >= height)
         {
             dTexture = textures[textures.Count - 1];
             textures.RemoveAt(textures.Count - 1);
         }
         else
         {
-            dTexture = CreateTexture(256, 256);
+            dTexture = CreateTexture(Mathf.Max(256, width), Mathf.Max(256, height));
         }
 
         return dTexture;
     }
 
-    public ManagedSprite<TPixel> GetSprite(int width, int height, IntVector2 pivot = default(IntVector2))
+    public ManagedSprite<TPixel> GetSprite(int width, 
+                                           int height, 
+                                           IntVector2 pivot = default(IntVector2))
     {
         var texture = GetTexture(width, height);
 
