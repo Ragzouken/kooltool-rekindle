@@ -31,23 +31,8 @@ public class TextureColor : ManagedTexture<Color>
     public static Blend<Color> stencilCut  = (canvas, brush) => Lerp(canvas, Color.clear, brush.a);
 
     public TextureColor(int width, int height)
+        : base(width, height, TextureFormat.ARGB32)
     {
-        this.width = width;
-        this.height = height;
-        uTexture = Texture2DExtensions.Blank(width, height);
-
-        pixels = new Color[width * height];
-
-        dirty = true;
-    }
-
-    public TextureColor(Texture2D texture)
-    {
-        width = texture.width;
-        height = texture.height;
-        uTexture = texture;
-
-        pixels = texture.GetPixels();
     }
 
     public override void Apply()

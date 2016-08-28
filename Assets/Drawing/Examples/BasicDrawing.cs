@@ -1,15 +1,10 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.Assertions;
-using System.Linq;
-using System.Collections;
-using System.Collections.Generic;
 
 public class BasicDrawing : MonoBehaviour 
 {
     [SerializeField] private SpriteRenderer drawing;
 
-    private ManagedSprite<Color> sprite;
+    private ManagedSprite<Color32> sprite;
 
     private new Collider collider;
 
@@ -18,7 +13,7 @@ public class BasicDrawing : MonoBehaviour
 
     private void Awake()
     {
-        sprite = TextureColor.Pooler.Instance.GetSprite(512, 512);
+        sprite = TextureColor32.Pooler.Instance.GetSprite(512, 512);
         sprite.SetPixelsPerUnit(512);
         sprite.Clear(Color.clear);
         sprite.mTexture.Apply();
@@ -51,14 +46,15 @@ public class BasicDrawing : MonoBehaviour
             {
                 int thickness = Random.Range(1, 6);
                 Color color = Color.HSVToRGB(Random.value, 0.75f, 1f);
+                color.a = .75f;
 
-                var line = TextureColor.Pooler.Instance.Line(prevMouse, nextMouse, color, thickness, TextureColor.alpha);
+                var line = TextureColor32.Pooler.Instance.Line(prevMouse, nextMouse, color, thickness, TextureColor32.mask);
 
-                sprite.Blend(line, TextureColor.alpha);
+                sprite.Blend(line, TextureColor32.alpha);
                 sprite.mTexture.Apply();
 
-                TextureColor.Pooler.Instance.FreeTexture(line.mTexture);
-                TextureColor.Pooler.Instance.FreeSprite(line);
+                TextureColor32.Pooler.Instance.FreeTexture(line.mTexture);
+                TextureColor32.Pooler.Instance.FreeSprite(line);
             }
         }
         else

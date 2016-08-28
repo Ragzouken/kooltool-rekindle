@@ -13,6 +13,21 @@ public abstract class ManagedTexture<TPixel>
     public TPixel[] pixels;
     public bool dirty;
 
+    public ManagedSprite<TPixel> FullSprite(IntVector2 pivot)
+    {
+        return new ManagedSprite<TPixel>(this, new IntRect(0, 0, width, height), pivot);
+    }
+
+    protected ManagedTexture(int width, int height, TextureFormat format)
+    {
+        this.width = width;
+        this.height = height;
+
+        uTexture = Texture2DExtensions.Blank(width, height, format);
+        pixels = new TPixel[width * height];
+        dirty = true;
+    }
+
     public void Blend(ManagedTexture<TPixel> brush,
                       Blend<TPixel> blend,
                       IntRect canvasRect,
@@ -59,7 +74,7 @@ public abstract class ManagedTexture<TPixel>
     {
         Array.Copy(pixels, this.pixels, this.pixels.Length);
 
-        dirty = false;
+        dirty = true;
     }
 
     public void Clear(TPixel value, IntRect rect)
@@ -120,7 +135,11 @@ public class ManagedSprite<TPixel> : IDisposable
         {
             if (_uSprite == null)
             {
-                uSprite = Sprite.Create(mTexture.uTexture, rect, pivot, 1, 0, SpriteMeshType.FullRect);
+                Vector2 piv;
+                piv.x = pivot.x / (float) rect.width;
+                piv.y = pivot.y / (float) rect.height;
+
+                uSprite = Sprite.Create(mTexture.uTexture, rect, piv, 1, 0, SpriteMeshType.FullRect);
             }
 
             return _uSprite;
@@ -317,8 +336,6 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
     {
         int width = Mathf.Abs(end.x - start.x) + sprite.rect.width;
         int height = Mathf.Abs(end.y - start.y) + sprite.rect.height;
-
-        var rect = new Rect(0, 0, width, height);
 
         var sweep = GetSprite(width, height, IntVector2.zero);
         sweep.Clear(background);

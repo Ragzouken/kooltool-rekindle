@@ -95,6 +95,7 @@ public static partial class Texture2DExtensions
 }
 
 // Author: Jason Morley (Source: http://www.morleydev.co.uk/blog/2010/11/18/generic-bresenhams-line-algorithm-in-visual-basic-net/)
+// Licence: Public Domain
 public static class Bresenham
 {
     private static void Swap<T>(ref T lhs, ref T rhs) { T temp; temp = lhs; lhs = rhs; rhs = temp; }

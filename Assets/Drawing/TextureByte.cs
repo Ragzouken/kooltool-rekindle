@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using System;
 
 public class TextureByte : ManagedTexture<byte>
 {
@@ -18,29 +17,9 @@ public class TextureByte : ManagedTexture<byte>
 
     public static Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : brush;
 
-    public TextureByte(int width, int height)
+    public TextureByte(int width, int height) 
+        : base(width, height, TextureFormat.Alpha8)
     {
-        this.width = width;
-        this.height = height;
-
-        uTexture = Texture2DExtensions.Blank(width, height, TextureFormat.Alpha8);
-        uTexture.name = "Texture8";
-        pixels = new byte[width * height];
-        dirty = true;
-    }
-
-    // TODO: this isn't safe, what if the texture is the wrong format
-    public TextureByte(Texture2D texture)
-    {
-        width = texture.width;
-        height = texture.height;
-
-        uTexture = texture;
-        uTexture.name = "Texture8";
-
-        pixels = new byte[width * height];
-
-        SetPixels32(texture.GetPixels32());
     }
 
     public override void Apply()
@@ -53,7 +32,7 @@ public class TextureByte : ManagedTexture<byte>
         }
     }
 
-    private void SetPixels32(Color32[] pixels)
+    public void SetPixels32(Color32[] pixels)
     {
         for (int i = 0; i < this.pixels.Length; ++i)
         {
@@ -65,10 +44,8 @@ public class TextureByte : ManagedTexture<byte>
 
     public void DecodeFromPNG(byte[] data)
     {
-        var tex = Texture2DExtensions.Blank(1, 1, TextureFormat.Alpha8);
-        tex.LoadImage(data);
-
-        SetPixels32(tex.GetPixels32());
+        uTexture.LoadImage(data);
+        SetPixels32(uTexture.GetPixels32());
 
         Apply();
     }

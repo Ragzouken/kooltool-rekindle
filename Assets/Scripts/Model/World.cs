@@ -81,13 +81,9 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         var tex = Texture2DExtensions.Blank(1, 1);
         tex.LoadImage(System.IO.File.ReadAllBytes(path));
 
-        var real = Texture2DExtensions.Blank(tex.width, tex.height, TextureFormat.Alpha8);
-        real.SetPixels32(tex.GetPixels32());
-        real.Apply();
-
-        Debug.Log(real.format.ToString());
-
-        texture8 = new TextureByte(real);
+        texture8 = new TextureByte(tex.width, tex.height);
+        texture8.SetPixels32(tex.GetPixels32());
+        texture8.Apply();
     }
 
     void IResource.SaveFinalise(Project project)
@@ -104,11 +100,6 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     public TextureResource() { }
 
-    public TextureResource(Texture2D texture)
-    {
-        texture8 = new TextureByte(texture);
-    }
-
     public TextureResource(TextureByte texture8)
     {
         this.texture8 = texture8;
@@ -121,10 +112,9 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     public void Copy(Copier copier, TextureResource copy)
     {
-        var tex = Texture2DExtensions.Blank(texture8.uTexture.width, texture8.uTexture.height, TextureFormat.Alpha8);
-        tex.SetPixels32(texture8.uTexture.GetPixels32());
-
-        copy.texture8 = new TextureByte(tex);
+        copy.texture8 = new TextureByte(texture8.uTexture.width, texture8.uTexture.height);
+        Array.Copy(texture8.pixels, copy.texture8.pixels, texture8.pixels.Length);
+        copy.texture8.dirty = true;
 
         copy.id = id;
     }
@@ -369,7 +359,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var cell in added)
             {
-                var rTexture = new TextureResource(Texture2DExtensions.Blank(grid.cellSize, grid.cellSize));
+                var rTexture = new TextureResource(new TextureByte(grid.cellSize, grid.cellSize));
                 var sprite = new SpriteResource(rTexture, rTexture.uTexture.FullSprite(pixelsPerUnit: 1));
 
                 grid.cells.Add(cell, sprite);

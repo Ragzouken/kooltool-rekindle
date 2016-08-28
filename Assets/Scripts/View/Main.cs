@@ -168,9 +168,7 @@ public class Main : MonoBehaviour
             test.Apply();
         }
 
-        var brushtext = Texture2DExtensions.Blank(16, 16, TextureFormat.Alpha8);
-        brushSprite = brushtext.FullSprite(pivot: Vector2.one * 0.5f);
-        brushSpriteD = new ManagedSprite<byte>(new TextureByte(brushtext), brushSprite);
+        brushSpriteD = new TextureByte(16, 16).FullSprite(IntVector2.one * 8);
 
         //string path = Application.streamingAssetsPath + @"\test.txt";
         //var script = ScriptFromCSV(File.ReadAllText(path));
@@ -181,18 +179,23 @@ public class Main : MonoBehaviour
         {
             var rect = new Rect(0, 32 * (3 - i), 32, 32);
 
-            sprites[i] = new ManagedSprite<byte>(test, rect, Vector2.one * 0.5f);
+            sprites[i] = new ManagedSprite<byte>(test, rect, IntVector2.one * 16);
         }
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
 
         foreach (var sprite in testbrushes)
         {
-            var tex = new TextureByte(sprite.texture);
+            int width  = (int) sprite.rect.width;
+            int height = (int) sprite.rect.height;
+
+            var tex = new TextureByte(width, height);
+            tex.SetPixels(sprite.GetPixels().Select(c => ((Color32) c).a).ToArray());
+            tex.Apply();
 
             stamps.Add(new Stamp
             {
-                brush = new ManagedSprite<byte>(tex, sprite),
+                brush = tex.FullSprite(sprite.pivot),
                 thumbnail = sprite,
             });
         }
@@ -561,7 +564,9 @@ public class Main : MonoBehaviour
         */
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
-            StartCoroutine(SaveProject());
+            //StartCoroutine(SaveProject());
+
+            Debug.Log(string.Join(" ", (brushSpriteD.mTexture.pixels.Select(b => b.ToString()).ToArray())));
         }
         //*/
 
@@ -1029,7 +1034,7 @@ public class Main : MonoBehaviour
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
 
         brushRenderer.gameObject.SetActive(!mouseOverUI);
-        brushRenderer.sprite = brushSprite;
+        brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
 
         if (!mouseOverUI
