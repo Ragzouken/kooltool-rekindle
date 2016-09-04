@@ -381,6 +381,7 @@ public class ImageGrid : ICopyable<ImageGrid>
             if (!before.TryGetValue(point, out original))
             {
                 before[point] = grid.cells[point].sprite8.mTexture.GetPixels();
+                 after[point] = new byte[grid.cells[point].sprite8.mTexture.pixels.Length]; 
             }
         }
 
@@ -396,8 +397,8 @@ public class ImageGrid : ICopyable<ImageGrid>
 
             foreach (var pair in after)
             {
-                before[pair.Key] = grid.cells[pair.Key].sprite8.mTexture.GetPixels();
-                grid.cells[pair.Key].sprite8.mTexture.SetPixels(after[pair.Key]);
+                grid.cells[pair.Key].sprite8.GetPixels(before[pair.Key]);
+                grid.cells[pair.Key].sprite8.SetPixels(after[pair.Key]);
             }
 
 
@@ -407,8 +408,8 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             foreach (var pair in before)
             {
-                after[pair.Key] = grid.cells[pair.Key].sprite8.mTexture.GetPixels();
-                grid.cells[pair.Key].sprite8.mTexture.SetPixels(after[pair.Key]);
+                grid.cells[pair.Key].sprite8.GetPixels(after[pair.Key]);
+                grid.cells[pair.Key].sprite8.SetPixels(before[pair.Key]);
             }
 
             foreach (var cell in added)

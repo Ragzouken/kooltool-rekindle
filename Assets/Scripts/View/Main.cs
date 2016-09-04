@@ -235,8 +235,6 @@ public class Main : MonoBehaviour
         w.background.cellSize = 256;
         SetProject(p);
 
-        p.world.background.AddCell(IntVector2.zero);
-
         for (int i = 0; i < 16; ++i)
         {
             var next = Vector2.right * Random.Range(-4, 4) * 32
