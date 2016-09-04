@@ -479,7 +479,7 @@ public class Costume
     public World world;
     public SpriteResource up, down, left, right;
 
-    public Sprite this[Position.Direction direction]
+    public SpriteResource this[Position.Direction direction]
     {
         get
         {
@@ -509,6 +509,21 @@ public class Actor : ICopyable<Actor>
         copy.script = script;
         copy.position = copier.Copy(position);
         copy.state = copier.Copy(state);
+    }
+
+    public void Blend(Changes changes, ManagedSprite<byte> sprite8, IntVector2 brushPosition, Blend<byte> blend)
+    {
+        //chang.Changed(cell);
+
+        var sprite = costume[position.direction];
+        
+        sprite.sprite8.Blend(sprite8, 
+                             blend, 
+                             brushPosition: brushPosition, 
+                             canvasPosition: position.current);
+        sprite.texture.dirty = true;
+
+        changes.sprites.Add(sprite.sprite8);
     }
 }
 

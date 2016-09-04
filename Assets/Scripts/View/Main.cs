@@ -1066,6 +1066,11 @@ public class Main : MonoBehaviour
 
                     {
                         project.world.background.Blend(changes, line, IntVector2.zero, blend_);
+
+                        foreach (var actor in project.world.actors)
+                        {
+                            actor.Blend(changes, line, IntVector2.zero, blend_);
+                        }
                     }
 
                     TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
@@ -1082,6 +1087,11 @@ public class Main : MonoBehaviour
                         stampTimer += 16;
 
                         project.world.background.Blend(changes, stamp.brush, next, blend_);
+
+                        foreach (var actor in project.world.actors)
+                        {
+                            actor.Blend(changes, stamp.brush, next, blend_);
+                        }
 
                         changes.ApplyTextures();
                     }
