@@ -29,8 +29,6 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
-    [SerializeField] private Toggle moveToggle, takeToggle, makeToggle, killToggle;
-    
     [SerializeField] private Toggle freeToggle, stampToggle;
 
     [SerializeField] private Slider zoomSlider;
@@ -166,6 +164,7 @@ public class Main : MonoBehaviour
             }
 
             test.Apply();
+            test.uTexture.name = "Costume Texture";
         }
 
         brushSpriteD = new TextureByte(16, 16).FullSprite(IntVector2.one * 8);
@@ -180,6 +179,7 @@ public class Main : MonoBehaviour
             var rect = new Rect(0, 32 * (3 - i), 32, 32);
 
             sprites[i] = new ManagedSprite<byte>(test, rect, IntVector2.one * 16);
+            sprites[i].uSprite.name = "Costume " + i;
         }
 
         stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
@@ -592,6 +592,7 @@ public class Main : MonoBehaviour
 
         zoomSlider.value += input.zoom * 4 * Time.deltaTime;
 
+        // TODO: controller cursor lib??
         EventSystem.current.RaycastAll(pointer, raycasts);
 
         if (raycasts.Count > 0)
@@ -860,134 +861,10 @@ public class Main : MonoBehaviour
         float t;
         plane.Raycast(ray, out t);
         Vector2 point = ray.GetPoint(t);
-        RaycastHit hit;
 
         Vector2 screenMouse;
         RectTransformUtility.ScreenPointToLocalPointInRectangle(mouseCursorTransform.parent as RectTransform, Input.mousePosition, null, out screenMouse);
         mouseCursorTransform.localPosition = screenMouse;
-
-        if (clickedOnWorld)
-        {
-            if (Physics.Raycast(ray, out hit))
-            {
-                Actor actor = hit.collider.GetComponent<ActorView>().actor;
-
-                if (takeToggle.isOn)
-                {
-                    possessed = possessed == actor ? null : actor;
-                }
-                else if (killToggle.isOn)
-                {
-                    if (possessed == actor) possessed = null;
-
-                    project.world.actors.Remove(actor);
-                }
-            }
-            else if (plane.Raycast(ray, out t))
-            {
-                if (makeToggle.isOn)
-                {
-                    point.x = Mathf.RoundToInt(point.x / 32);
-                    point.y = Mathf.RoundToInt(point.y / 32);
-
-                    project.world.actors.Add(new Actor
-                    {
-                        position = new Position { next = point * 32, prev = point * 32 },
-                        world = project.world,
-                    });
-                }
-            }
-        }
-
-        if (moveToggle.isOn)
-        {
-            var pos = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
-                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
-
-            ray = Camera.main.ScreenPointToRay(pos);
-            plane.Raycast(ray, out t);
-            point = ray.GetPoint(t);
-
-            Vector2 delta = point - cameraController.focusTarget;
-
-            //cameraController.focusTarget += delta * 2f * Time.deltaTime;
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                Actor actor = hit.collider.GetComponent<ActorView>().actor;
-
-                Vector2 local = point - actor.position.current - Vector2.one * 16;
-
-                if (input.click.IsPressed)
-                {
-                    /*
-                    using (var brush = PixelDraw.Brush.Line(prevMouse, point, Color.red, 1))
-                    //using (var brush = PixelDraw.Brush.Circle(3, Color.red))
-                    {
-                        var sprite = actor.costume[actor.position.direction];
-
-                        Vector2 current = actor.position.current;
-
-
-                        local.x = Mathf.Round(local.x);
-                        local.y = Mathf.Round(local.y);
-
-                        //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
-
-                        PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing)sprite,
-                                                         prevMouse - actor.position.current,
-                                                         local,
-                                                         1,
-                                                         Color.red,
-                                                         PixelDraw.Blend.Alpha);
-
-                        //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
-
-                        sprite.texture.Apply();
-                    }
-                    */
-                }
-            }
-
-            if (Physics.Raycast(ray, out hit))
-            {
-                Actor actor = hit.collider.GetComponent<ActorView>().actor;
-
-                Vector2 local = point - actor.position.current - Vector2.one * 16;
-
-                if (clickedOnWorld)
-                {
-                    /*
-                    using (var brush = PixelDraw.Brush.Line(prevMouse, point, Color.red, 1))
-                    //using (var brush = PixelDraw.Brush.Circle(3, Color.red))
-                    {
-                        var sprite = actor.costume[actor.position.direction];
-
-                        Vector2 current = actor.position.current;
-
-
-                        local.x = Mathf.Round(local.x);
-                        local.y = Mathf.Round(local.y);
-
-                        //PixelDraw.Brush.Apply(brush, prevMouse, sprite, Vector2.zero, PixelDraw.Blend.Alpha);
-
-                        PixelDraw.IDrawingPaint.DrawLine((PixelDraw.SpriteDrawing)sprite,
-                                                         prevMouse - actor.position.current,
-                                                         local,
-                                                         1,
-                                                         Color.red,
-                                                         PixelDraw.Blend.Alpha);
-
-                        //PixelDraw.Brush.Line(prevMouse, point, Color.red, 1);
-
-                        sprite.texture.Apply();
-                    }
-                    */
-                }
-            }
-        }
-
-        //nextCursor = (Vector2.one * 128 + input.cursor.Value * 32) * 3;
 
         {
             ray = Camera.main.ScreenPointToRay(Input.mousePosition);

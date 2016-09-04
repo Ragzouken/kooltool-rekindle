@@ -120,6 +120,33 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
 public class SpriteResource : IResource, ICopyable<SpriteResource>
 {
+    public class Change : IChange
+    {
+        public SpriteResource sprite;
+        public byte[] before, after;
+
+        public Change(SpriteResource sprite)
+        {
+            this.sprite = sprite;
+
+            before = sprite.sprite8.GetPixels();
+            after = new byte[sprite.sprite8.rect.width * sprite.sprite8.rect.height];
+        }
+
+        void IChange.Redo(Changes changes)
+        {
+            sprite.sprite8.SetPixels(after);
+        }
+
+        void IChange.Undo(Changes changes)
+        {
+            sprite.sprite8.GetPixels(after);
+            sprite.sprite8.SetPixels(before);
+
+            Debug.Log(sprite.sprite8.mTexture.uTexture.name + " SHOULD BE " + sprite.sprite8.mTexture.dirty);
+        }
+    }
+
     public TextureResource texture;
     public Vector2 pivot;
     public Rect rect;
@@ -318,6 +345,8 @@ public class Changes
         {
             change.Undo(this);
         }
+
+        ApplyTextures();
     }
 
     public void Redo()
@@ -326,6 +355,8 @@ public class Changes
         {
             change.Redo(this);
         }
+
+        ApplyTextures();
     }
 }
 
@@ -516,7 +547,8 @@ public class Actor : ICopyable<Actor>
         //chang.Changed(cell);
 
         var sprite = costume[position.direction];
-        
+        var change = changes.GetChange(sprite, () => new SpriteResource.Change(sprite));
+
         sprite.sprite8.Blend(sprite8, 
                              blend, 
                              brushPosition: brushPosition, 

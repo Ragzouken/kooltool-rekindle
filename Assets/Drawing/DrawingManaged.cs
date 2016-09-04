@@ -70,9 +70,51 @@ public abstract class ManagedTexture<TPixel>
         return copy;
     }
 
+    public TPixel[] GetPixels(IntRect rect, TPixel[] copy=null)
+    {
+        copy = copy ?? new TPixel[rect.width * rect.height];
+
+        int tstride = width;
+        int cstride = rect.width;
+
+        for (int cy = 0; cy < rect.height; ++cy)
+        {
+            int tx = rect.xMin;
+            int ty = cy + rect.yMin;
+
+            int cx = 0;
+
+            Array.Copy(pixels, ty * tstride + tx, 
+                       copy,   cy * cstride + cx, 
+                       cstride);
+        }
+
+        return copy;
+    }
+
     public void SetPixels(TPixel[] pixels)
     {
         Array.Copy(pixels, this.pixels, this.pixels.Length);
+
+        dirty = true;
+    }
+
+    public void SetPixels(IntRect rect, TPixel[] copy)
+    {
+        int tstride = width;
+        int cstride = rect.width;
+
+        for (int cy = 0; cy < rect.height; ++cy)
+        {
+            int tx = rect.xMin;
+            int ty = rect.yMin + cy;
+
+            int cx = 0;
+
+            Array.Copy(copy,   cy * cstride + cx, 
+                       pixels, ty * tstride + tx, 
+                       cstride);
+        }
 
         dirty = true;
     }
@@ -257,6 +299,16 @@ public class ManagedSprite<TPixel> : IDisposable
         Dispose();
 
         uSprite = Sprite.Create(mTexture.uTexture, rect, pivot, ppu, 0, SpriteMeshType.FullRect);
+    }
+    
+    public TPixel[] GetPixels(TPixel[] copy=null)
+    {
+        return mTexture.GetPixels(rect, copy);
+    }
+
+    public void SetPixels(TPixel[] pixels)
+    {
+        mTexture.SetPixels(rect, pixels);
     }
 }
 
