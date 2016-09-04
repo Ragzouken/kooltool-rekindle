@@ -50,7 +50,6 @@ public class TextureResource : IResource, ICopyable<TextureResource>
     public string id = "";
     [JsonIgnore]
     public bool dirty = false;
-    [JsonIgnore]
     public TextureByte texture8;
 
     [JsonIgnore]
@@ -81,7 +80,6 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         var tex = Texture2DExtensions.Blank(1, 1);
         tex.LoadImage(System.IO.File.ReadAllBytes(path));
 
-        texture8 = new TextureByte(tex.width, tex.height);
         texture8.SetPixels32(tex.GetPixels32());
         texture8.Apply();
     }

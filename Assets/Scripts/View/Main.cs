@@ -218,7 +218,13 @@ public class Main : MonoBehaviour
 
         var p = new Project();
         var w = new World();
-        
+        res.dirty = true;
+        p.resources.Add(res);
+        p.resources.Add(costume.right);
+        p.resources.Add(costume.left);
+        p.resources.Add(costume.down);
+        p.resources.Add(costume.up);
+
         for (int i = 1; i < 16; ++i)
         {
             w.palette[i] = new Color(Random.value, Random.value, Random.value, 1f);
@@ -404,24 +410,6 @@ public class Main : MonoBehaviour
         undos.Push(change);
     }
 
-    private byte[] Encode(Texture2D texture)
-    {
-        return texture.EncodeToPNG();
-
-        var colors = texture.GetPixels32();
-        var data = new byte[colors.Length / 2];
-
-        for (int i = 0; i < data.Length; ++i)
-        {
-            int left  = colors[i * 2 + 0].r & 0xFF00;
-            int right = colors[i * 2 + 1].r >> 4;
-
-            data[i] = (byte) (left | right);
-        }
-
-        return data;
-    }
-
     private List<RaycastResult> raycasts = new List<RaycastResult>();
 
     [System.Runtime.InteropServices.DllImport("__Internal")]
@@ -556,17 +544,15 @@ public class Main : MonoBehaviour
             change = true;
         }
 
-        /*
+        ///*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(LoadProject());
         }
-        */
+        //*/
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
-            //StartCoroutine(SaveProject());
-
-            Debug.Log(string.Join(" ", (brushSpriteD.mTexture.pixels.Select(b => b.ToString()).ToArray())));
+            StartCoroutine(SaveProject());
         }
         //*/
 

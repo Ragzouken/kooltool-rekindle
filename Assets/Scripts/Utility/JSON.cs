@@ -24,6 +24,7 @@ public static class JSON
         settings.Converters.Add(new ColorConverter());
         settings.Converters.Add(new ByteSetConverter());
         settings.Converters.Add(new PointConverter());
+        settings.Converters.Add(new TextureByteConverter());
         settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
         settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     }
@@ -222,5 +223,42 @@ public class ByteSetConverter : JsonConverter
         byte[] members = set.ToArray();
 
         serializer.Serialize(writer, members);
+    }
+}
+
+public class TextureByteConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(TextureByte);
+    }
+
+    public override object ReadJson(JsonReader reader,
+                                    Type objectType,
+                                    object existingValue,
+                                    JsonSerializer serializer)
+    {
+        int width  = reader.ReadAsInt32().GetValueOrDefault();
+        int height = reader.ReadAsInt32().GetValueOrDefault();
+        reader.Read();
+
+        return new TextureByte(width, height);
+    }
+
+    public override void WriteJson(JsonWriter writer,
+                                   object value,
+                                   JsonSerializer serializer)
+    {
+        Color32 color = default(Color32);
+        
+        if (value is Color)   color = (Color)   value;
+        if (value is Color32) color = (Color32) value;
+
+        var texture = value as TextureByte;
+
+        writer.WriteStartArray();
+        writer.WriteValue(texture.width);
+        writer.WriteValue(texture.height);
+        writer.WriteEndArray();
     }
 }
