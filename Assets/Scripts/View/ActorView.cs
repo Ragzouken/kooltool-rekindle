@@ -16,10 +16,8 @@ public class ActorView : MonoBehaviour
         this.actor = actor;
 
         offset = Random.value;
-        block = new MaterialPropertyBlock();
     }
 
-    private MaterialPropertyBlock block;
     private float offset;
 
     public void Refresh()

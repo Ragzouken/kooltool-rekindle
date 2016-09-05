@@ -142,8 +142,6 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
         {
             sprite.sprite8.GetPixels(after);
             sprite.sprite8.SetPixels(before);
-
-            Debug.Log(sprite.sprite8.mTexture.uTexture.name + " SHOULD BE " + sprite.sprite8.mTexture.dirty);
         }
     }
 
@@ -365,56 +363,47 @@ public class ImageGrid : ICopyable<ImageGrid>
     public class Change : IChange
     {
         public ImageGrid grid;
-        public Dictionary<IntVector2, byte[]> before = new Dictionary<IntVector2, byte[]>();
-        public Dictionary<IntVector2, byte[]> after  = new Dictionary<IntVector2, byte[]>();
-        public HashSet<IntVector2> added = new HashSet<IntVector2>();
+        public Dictionary<IntVector2, IChange> sprites 
+            = new Dictionary<IntVector2, IChange>();
+        public Dictionary<IntVector2, SpriteResource> added 
+            = new Dictionary<IntVector2, SpriteResource>();
 
-        public void Added(IntVector2 point)
+        public void Added(IntVector2 point, SpriteResource sprite)
         {
-            added.Add(point);
+            added.Add(point, sprite);
         }
 
         public void Changed(IntVector2 point)
         {
-            byte[] original;
-
-            if (!before.TryGetValue(point, out original))
+            if (!sprites.ContainsKey(point))
             {
-                before[point] = grid.cells[point].sprite8.mTexture.GetPixels();
-                 after[point] = new byte[grid.cells[point].sprite8.mTexture.pixels.Length]; 
+                sprites[point] = new SpriteResource.Change(grid.cells[point]);
             }
         }
 
         void IChange.Redo(Changes changes)
         {
-            foreach (var cell in added)
+            foreach (var add in added)
             {
-                var rTexture = new TextureResource(new TextureByte(grid.cellSize, grid.cellSize));
-                var sprite = new SpriteResource(rTexture, rTexture.uTexture.FullSprite(pixelsPerUnit: 1));
-
-                grid.cells.Add(cell, sprite);
+                grid.cells[add.Key] = add.Value;
             }
 
-            foreach (var pair in after)
+            foreach (var sprite in sprites.Values)
             {
-                grid.cells[pair.Key].sprite8.GetPixels(before[pair.Key]);
-                grid.cells[pair.Key].sprite8.SetPixels(after[pair.Key]);
+                sprite.Redo(changes);
             }
-
-
         }
 
         void IChange.Undo(Changes changes)
         {
-            foreach (var pair in before)
+            foreach (var sprite in sprites.Values)
             {
-                grid.cells[pair.Key].sprite8.GetPixels(after[pair.Key]);
-                grid.cells[pair.Key].sprite8.SetPixels(before[pair.Key]);
+                sprite.Undo(changes);
             }
 
-            foreach (var cell in added)
+            foreach (var add in added)
             {
-                grid.cells.Remove(cell);
+                grid.cells.Remove(add.Key);
             }
         }
     }
@@ -479,8 +468,8 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                 if (!cells.TryGetValue(cell, out sprite))
                 {
-                    chang.Added(cell);
                     sprite = AddCell(cell);
+                    chang.Added(cell, sprite);
                 }
 
                 chang.Changed(cell);
