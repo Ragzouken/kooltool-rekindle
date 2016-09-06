@@ -10,6 +10,7 @@ move,west
 move,west
 move,north
 move,north
+move,random
 follow,panic
 
 script,bump

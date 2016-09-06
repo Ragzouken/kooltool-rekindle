@@ -35,7 +35,6 @@ public class Main : MonoBehaviour
     [SerializeField] private Texture2D costumeTexture;
     [SerializeField] private ManagedSprite<byte>[] sprites;
 
-    [SerializeField] private ToggleAnimatorBool toggler;
     [SerializeField] private RectTransform cursor;
 
     [SerializeField] private Image brightImage;
@@ -169,8 +168,8 @@ public class Main : MonoBehaviour
 
         brushSpriteD = new TextureByte(16, 16).FullSprite(IntVector2.one * 8);
 
-        //string path = Application.streamingAssetsPath + @"\test.txt";
-        //var script = ScriptFromCSV(File.ReadAllText(path));
+        string path = Application.streamingAssetsPath + @"\test.txt";
+        var script = ScriptFromCSV(File.ReadAllText(path));
 
         sprites = new ManagedSprite<byte>[4];
 
@@ -244,7 +243,7 @@ public class Main : MonoBehaviour
             {
                 world = project.world,
                 costume = costume,
-                //script = script,
+                script = script,
                 state = new State { fragment = "start", line = 0 },
                 position = new Position
                 {
@@ -508,11 +507,6 @@ public class Main : MonoBehaviour
 
     private void CheckHotkeys()
     {
-        if (input.expand.WasPressed)
-        {
-            toggler.Toggle();
-        }
-
         var pan = input.move.Value;
 
         Position.Direction direction = Position.Direction.Down;
@@ -788,7 +782,7 @@ public class Main : MonoBehaviour
 
         project.world.timer += Time.deltaTime;
 
-        while (project.world.timer > interval && false)
+        while (project.world.timer > interval)
         {
             project.world.timer -= interval;
 

@@ -86,9 +86,6 @@ public class TextureResource : IResource, ICopyable<TextureResource>
 
     void IResource.SaveFinalise(Project project)
     {
-        if (!dirty)
-            Debug.Log("Ignoring texture not direty");
-
         if (!dirty) return;
 
         id = id == "" ? Guid.NewGuid().ToString() : id;
