@@ -258,7 +258,7 @@ public class Main : MonoBehaviour
 
         //Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
 
-        /*
+        ///*
         var watcher = new FileSystemWatcher(Application.streamingAssetsPath);
 
         watcher.Changed += (source, args) =>
@@ -279,7 +279,7 @@ public class Main : MonoBehaviour
         };
 
         watcher.EnableRaisingEvents = true;
-        */
+        //*/
 
         //Application.OpenURL(path);
 
@@ -302,8 +302,11 @@ public class Main : MonoBehaviour
 #endif
     }
 
-    private class TestInputSet : PlayerActionSet
+    public class TestInputSet : PlayerActionSet
     {
+        public PlayerAction confirm;
+        public PlayerAction cancel;
+
         public PlayerAction expand;
         public PlayerTwoAxisAction move;
         public PlayerTwoAxisAction cursor;
@@ -314,9 +317,14 @@ public class Main : MonoBehaviour
         public TestInputSet()
         {
             expand = CreatePlayerAction("Expand");
-            expand.AddDefaultBinding(Mouse.RightButton);
-            expand.AddDefaultBinding(Key.Space);
-            expand.AddDefaultBinding(InputControlType.Action4);
+            //expand.AddDefaultBinding(Mouse.RightButton);
+            //expand.AddDefaultBinding(Key.Space);
+            //expand.AddDefaultBinding(InputControlType.Action4);
+
+            cancel = CreatePlayerAction("Cancel");
+            cancel.AddDefaultBinding(Mouse.RightButton);
+            cancel.AddDefaultBinding(Key.Escape);
+            cancel.AddDefaultBinding(InputControlType.Action2);
 
             {
                 var up = CreatePlayerAction("Up");
@@ -366,7 +374,7 @@ public class Main : MonoBehaviour
         }
     }
 
-    private TestInputSet input;
+    public TestInputSet input;
 
     private static Vector2[] directions =
     {
@@ -637,6 +645,14 @@ public class Main : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Y))
         {
             Redo();
+        }
+
+        if (input.cancel.WasPressed)
+        {
+            if (palettePanel.mode == PalettePanel.Mode.Colors)
+            {
+                palettePanel.SetMode(PalettePanel.Mode.Paint);
+            }
         }
 
         /*

@@ -43,6 +43,15 @@ public class PalettePanel : MonoBehaviour
 
             main.RecordPaletteHistory(selected, original, main.project.world.palette[selected]);
         });
+
+        for (int i = 0; i < colorToggles.Length; ++i)
+        {
+            int index = i;
+            var clicks = colorToggles[i].gameObject.AddComponent<UIClicks>();
+
+            clicks.onSingleClick.AddListener(() => SelectPaletteIndex(index));
+            clicks.onDoubleClick.AddListener(() => SetMode(Mode.Colors));
+        }
     }
 
     private Color original;
@@ -72,10 +81,6 @@ public class PalettePanel : MonoBehaviour
             int index = i;
 
             colorImages[i].color = Color.red * i / 15f;
-            colorToggles[i].onValueChanged.AddListener(active =>
-            {
-                if (active) SelectPaletteIndex(index);
-            });
         }
 
         colorToggles[0].isOn = true;

@@ -2,14 +2,6 @@ name,COOLBOY
 follow,panic
 
 script,panic
-move,east
-move,east
-move,south
-move,south
-move,west
-move,west
-move,north
-move,north
 move,random
 follow,panic
 
