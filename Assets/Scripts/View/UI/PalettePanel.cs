@@ -56,12 +56,14 @@ public class PalettePanel : MonoBehaviour
             clicks.onSingleClick.AddListener(() => SelectPaletteIndex(index));
             clicks.onDoubleClick.AddListener(() => SetMode(Mode.Colors));
 
+            /*
             var hover = toggle.gameObject.AddComponent<UIHover>();
 
             hover.onTrigger.AddListener(() => tooltip.Show(toggle.transform as RectTransform, 
                                                            "Draw in this colour, double click to edit the color"));
             hover.onHoverEnd.AddListener(() => tooltip.Hide());
             hover.triggerTime = 0.25f;
+            */
         }
     }
 

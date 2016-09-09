@@ -20,7 +20,8 @@ public class UIHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
     public float triggerTime;
 
     public OnAction onHoverBegin = new OnAction();
-    public OnAction onTrigger = new OnAction();
+    public OnAction onTriggerBegin = new OnAction();
+    public OnAction onTriggerEnd = new OnAction();
     public OnAction onHoverEnd = new OnAction();
 
     private float triggerTimer;
@@ -34,26 +35,44 @@ public class UIHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
             if (triggerTimer > triggerTime)
             {
                 triggered = true;
-                onTrigger.Invoke();
+                onTriggerBegin.Invoke();
             }
+        }
+    }
+
+    public void Cancel()
+    {
+        Reset();
+
+        hovering = false;
+    }
+
+    public void Reset()
+    {
+        triggerTimer = 0;
+
+        if (triggered)
+        {
+            triggered = false;
+            onTriggerEnd.Invoke();
         }
     }
 
     void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData)
     {
         hovering = true;
-        triggered = false;
-        triggerTimer = 0;
 
+        Reset();
+        
         onHoverBegin.Invoke();
     }
 
     void IPointerExitHandler.OnPointerExit(PointerEventData eventData)
     {
         hovering = false;
-        triggered = false;
-        triggerTimer = 0;
 
+        Reset();
+        
         onHoverEnd.Invoke();
     }
 }

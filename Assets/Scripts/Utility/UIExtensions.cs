@@ -6,6 +6,14 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+public enum TooltipBias
+{
+    Up,
+    Down,
+    Left,
+    Right
+}
+
 public static partial class UIExtensions 
 {
     public static Rect GetWorldRect(this RectTransform rtrans)
@@ -25,14 +33,15 @@ public static partial class UIExtensions
     public static void RepositionTooltip(RectTransform tooltip,
                                          RectTransform source,
                                          RectTransform bounds,
-                                         RectTransform extent=null)
+                                         RectTransform extent=null,
+                                         TooltipBias bias=TooltipBias.Down)
     {
         tooltip.position = source.position;
 
         extent = extent ?? tooltip; // allow you to bound less than the whole assembly
         
         // work in world space because it's easier
-        var tooltipRect = tooltip.GetWorldRect();
+        var extentRect = extent.GetWorldRect();
         var sourceRect = source.GetWorldRect();
         var boundsRect = bounds.GetWorldRect();
 
@@ -47,7 +56,24 @@ public static partial class UIExtensions
         var yMaxRect = Rect.MinMaxRect(boundsRect.xMin, sourceRect.yMax,
                                        boundsRect.xMax, boundsRect.yMax);
 
-        var rects = new[] { yMinRect, yMaxRect, xMinRect, xMaxRect };
+        Rect[] rects;
+
+        if (bias == TooltipBias.Down)
+        {
+            rects = new[] { yMinRect, yMaxRect, xMinRect, xMaxRect };
+        }
+        else if (bias == TooltipBias.Up)
+        {
+            rects = new[] { yMaxRect, yMinRect, xMinRect, xMaxRect };
+        }
+        else if (bias == TooltipBias.Left)
+        {
+            rects = new[] { xMinRect, xMaxRect, yMinRect, yMaxRect };
+        }
+        else
+        {
+            rects = new[] { xMaxRect, xMinRect, yMinRect, yMaxRect };
+        }
 
         //  bounds                     bounds
         //+------------------------+ +--------+--------+------+
@@ -70,15 +96,15 @@ public static partial class UIExtensions
         {
             Rect rect = rects[i];
 
-            if (tooltipRect.width  <= rect.width
-             && tooltipRect.height <= rect.height)
+            if (extentRect.width  <= rect.width
+             && extentRect.height <= rect.height)
             {
                 // push the tooltip rect into the division
-                float pushR = Mathf.Max(0f, rect.xMin - tooltipRect.xMin);
-                float pushU = Mathf.Max(0f, rect.yMin - tooltipRect.yMin);
+                float pushR = Mathf.Max(0f, rect.xMin - extentRect.xMin);
+                float pushU = Mathf.Max(0f, rect.yMin - extentRect.yMin);
 
-                float pushL = Mathf.Min(0f, rect.xMax - tooltipRect.xMax);
-                float pushD = Mathf.Min(0f, rect.yMax - tooltipRect.yMax);
+                float pushL = Mathf.Min(0f, rect.xMax - extentRect.xMax);
+                float pushD = Mathf.Min(0f, rect.yMax - extentRect.yMax);
 
                 var push = new Vector2(pushL + pushR, pushU + pushD);
 

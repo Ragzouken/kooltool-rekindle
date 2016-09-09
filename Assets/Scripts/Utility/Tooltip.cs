@@ -14,6 +14,7 @@ public class Tooltip : MonoBehaviour
     [SerializeField] private CanvasGroup group;
 
     private RectTransform source;
+    private TooltipBias bias;
     
     private void Update()
     {
@@ -22,13 +23,17 @@ public class Tooltip : MonoBehaviour
         UIExtensions.RepositionTooltip(transform as RectTransform,
                                        source,
                                        bounds,
-                                       extent);
+                                       extent,
+                                       bias);
     }
 
-    public void Show(RectTransform source, string text)
+    public void Show(RectTransform source, 
+                     string text,
+                     TooltipBias bias)
     {
         this.source = source;
         this.text.text = text;
+        this.bias = bias;
         group.alpha = 1;
 
         Update();
