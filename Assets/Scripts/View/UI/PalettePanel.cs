@@ -25,6 +25,8 @@ public class PalettePanel : MonoBehaviour
     [SerializeField] private Slider brightnessSlider;
     [SerializeField] private Slider2D hueSaturationSlider;
 
+    [SerializeField] private Tooltip tooltip;
+
     public event System.Action<int> OnPaletteIndexSelected = delegate { };
 
     public Mode mode { get; private set; }
@@ -46,11 +48,20 @@ public class PalettePanel : MonoBehaviour
 
         for (int i = 0; i < colorToggles.Length; ++i)
         {
+            var toggle = colorToggles[i];
             int index = i;
-            var clicks = colorToggles[i].gameObject.AddComponent<UIClicks>();
+
+            var clicks = toggle.gameObject.AddComponent<UIClicks>();
 
             clicks.onSingleClick.AddListener(() => SelectPaletteIndex(index));
             clicks.onDoubleClick.AddListener(() => SetMode(Mode.Colors));
+
+            var hover = toggle.gameObject.AddComponent<UIHover>();
+
+            hover.onTrigger.AddListener(() => tooltip.Show(toggle.transform as RectTransform, 
+                                                           "Draw in this colour, double click to edit the color"));
+            hover.onHoverEnd.AddListener(() => tooltip.Hide());
+            hover.triggerTime = 0.25f;
         }
     }
 
