@@ -26,6 +26,7 @@ public class Main : MonoBehaviour
     }
 #endif
 
+    [SerializeField] private HUD hud;
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
@@ -282,6 +283,8 @@ public class Main : MonoBehaviour
         //*/
 
         //Application.OpenURL(path);
+
+        hud.mode = HUD.Mode.Draw;
 
         input = new TestInputSet();
 
@@ -649,9 +652,16 @@ public class Main : MonoBehaviour
 
         if (input.cancel.WasPressed)
         {
-            if (palettePanel.mode == PalettePanel.Mode.Colors)
+            if (hud.mode == HUD.Mode.Draw)
             {
-                palettePanel.SetMode(PalettePanel.Mode.Paint);
+                if (palettePanel.mode == PalettePanel.Mode.Colors)
+                {
+                    palettePanel.SetMode(PalettePanel.Mode.Paint);
+                }
+                else if (palettePanel.mode == PalettePanel.Mode.Paint)
+                {
+                    hud.mode = HUD.Mode.Switch;
+                }
             }
         }
 
@@ -904,7 +914,11 @@ public class Main : MonoBehaviour
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
 
-        brushRenderer.gameObject.SetActive(!mouseOverUI);
+        bool draw = !mouseOverUI
+                 && hud.mode == HUD.Mode.Draw
+                 && palettePanel.mode == PalettePanel.Mode.Paint;
+
+        brushRenderer.gameObject.SetActive(draw);
         brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
 
@@ -936,7 +950,9 @@ public class Main : MonoBehaviour
             }
         }
 
-        if ((mouse || gamep) && palettePanel.mode == PalettePanel.Mode.Paint)
+        if ((mouse || gamep) 
+         && hud.mode == HUD.Mode.Draw
+         && palettePanel.mode == PalettePanel.Mode.Paint)
         {
             if (!dragging_)
             {
