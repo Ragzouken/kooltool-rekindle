@@ -6,11 +6,13 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using TMPro;
+
 public class Tooltip : MonoBehaviour 
 {
     [SerializeField] private RectTransform bounds;
     [SerializeField] private RectTransform extent;
-    [SerializeField] private Text text;
+    [SerializeField] private TextMeshProUGUI text;
     [SerializeField] private CanvasGroup group;
 
     private RectTransform source;
@@ -25,6 +27,11 @@ public class Tooltip : MonoBehaviour
                                        bounds,
                                        extent,
                                        bias);
+    }
+
+    public void SetText(string text)
+    {
+        this.text.text = text;
     }
 
     public void Show(RectTransform source, 

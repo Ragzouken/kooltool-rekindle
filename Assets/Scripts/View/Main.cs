@@ -945,6 +945,7 @@ public class Main : MonoBehaviour
             }
             else
             {
+                /*
                 if (freeToggle.isOn)
                 {
                     var line = TextureByte.Pooler.Instance.Sweep(stamp.brush, prev, next, (canvas, brush) => brush == 0 ? canvas : brush);
@@ -963,7 +964,8 @@ public class Main : MonoBehaviour
 
                     changes.ApplyTextures();
                 }
-                else if (stampToggle.isOn)
+                */
+                //else if (stampToggle.isOn)
                 {
                     stampTimer -= (next - prev).magnitude;
 

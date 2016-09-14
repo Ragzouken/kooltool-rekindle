@@ -21,6 +21,7 @@ public class TooltipTrigger : MonoBehaviour
     {
         hover = GetComponent<UIHover>();
 
+        hover.onHoverBegin.AddListener(() => tooltip.SetText(text));
         hover.onTriggerBegin.AddListener(() => tooltip.Show(source, text, bias));
         hover.onTriggerEnd.AddListener(() => tooltip.Hide());
     }
