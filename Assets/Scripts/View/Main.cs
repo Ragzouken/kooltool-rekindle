@@ -169,8 +169,10 @@ public class Main : MonoBehaviour
 
         brushSpriteD = new TextureByte(16, 16).FullSprite(IntVector2.one * 8);
 
+        /*
         string path = Application.streamingAssetsPath + @"\test.txt";
         var script = ScriptFromCSV(File.ReadAllText(path));
+        */
 
         sprites = new ManagedSprite<byte>[4];
 
@@ -244,7 +246,7 @@ public class Main : MonoBehaviour
             {
                 world = project.world,
                 costume = costume,
-                script = script,
+                //script = script,
                 state = new State { fragment = "start", line = 0 },
                 position = new Position
                 {
@@ -259,7 +261,7 @@ public class Main : MonoBehaviour
 
         //Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
 
-        ///*
+        /*
         var watcher = new FileSystemWatcher(Application.streamingAssetsPath);
 
         watcher.Changed += (source, args) =>
@@ -280,7 +282,7 @@ public class Main : MonoBehaviour
         };
 
         watcher.EnableRaisingEvents = true;
-        //*/
+        */
 
         //Application.OpenURL(path);
 
@@ -547,17 +549,17 @@ public class Main : MonoBehaviour
             change = true;
         }
 
-        ///*
+        /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
             StartCoroutine(LoadProject());
         }
-        //*/
+
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
             StartCoroutine(SaveProject());
         }
-        //*/
+        */
 
         if (Input.GetKeyDown(KeyCode.Slash))
         {
@@ -777,6 +779,11 @@ public class Main : MonoBehaviour
     private Sprite brushSprite;
     [SerializeField] private SpriteRenderer brushRenderer;
 
+    private int stippleOffset;
+    private int stippleStride = 8;
+
+    [SerializeField] private Slider stippleSlider;
+
     private void Update()
     {
         ///System.GC.Collect();
@@ -958,47 +965,28 @@ public class Main : MonoBehaviour
             {
                 dragging_ = true;
                 changes = new Changes();
+                stippleOffset = 0;
             }
             else
             {
-                /*
-                if (freeToggle.isOn)
+                var line = TextureByte.Pooler.Instance.Sweep(stamp.brush, 
+                                                prev, 
+                                                next, 
+                                                (canvas, brush) => brush == 0 ? canvas : brush,
+                                                (int) stippleSlider.value,
+                                                ref stippleOffset);
+
+                project.world.background.Blend(changes, line, IntVector2.zero, blend_);
+
+                foreach (var actor in project.world.actors)
                 {
-                    var line = TextureByte.Pooler.Instance.Sweep(stamp.brush, prev, next, (canvas, brush) => brush == 0 ? canvas : brush);
-
-                    {
-                        project.world.background.Blend(changes, line, IntVector2.zero, blend_);
-
-                        foreach (var actor in project.world.actors)
-                        {
-                            actor.Blend(changes, line, IntVector2.zero, blend_);
-                        }
-                    }
-
-                    TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
-                    TextureByte.Pooler.Instance.FreeSprite(line);
-
-                    changes.ApplyTextures();
+                    actor.Blend(changes, line, IntVector2.zero, blend_);
                 }
-                */
-                //else if (stampToggle.isOn)
-                {
-                    stampTimer -= (next - prev).magnitude;
 
-                    if (stampTimer <= 0f)
-                    {
-                        stampTimer += 16;
+                TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
+                TextureByte.Pooler.Instance.FreeSprite(line);
 
-                        project.world.background.Blend(changes, stamp.brush, next, blend_);
-
-                        foreach (var actor in project.world.actors)
-                        {
-                            actor.Blend(changes, stamp.brush, next, blend_);
-                        }
-
-                        changes.ApplyTextures();
-                    }
-                }
+                changes.ApplyTextures();
             }
         }
         else

@@ -397,6 +397,25 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         return sweep;
     }
 
+    public ManagedSprite<TPixel> Sweep(ManagedSprite<TPixel> sprite,
+                                       IntVector2 start,
+                                       IntVector2 end,
+                                       Blend<TPixel> blend,
+                                       int stippleStride,
+                                       ref int stippleOffset,
+                                       TPixel background = default(TPixel))
+    {
+        int width = Mathf.Abs(end.x - start.x) + sprite.rect.width;
+        int height = Mathf.Abs(end.y - start.y) + sprite.rect.height;
+
+        var sweep = GetSprite(width, height, IntVector2.zero);
+        sweep.Clear(background);
+
+        stippleOffset = Sweep(sweep, sprite, start, end, blend, stippleStride, stippleOffset);
+
+        return sweep;
+    }
+
     public ManagedSprite<TPixel> Line(IntVector2 start, 
                                       IntVector2 end,
                                       TPixel color,
@@ -492,62 +511,70 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         circle.pivot = IntVector2.one * radius;
     }
 
-    public static void Sweep(ManagedSprite<TPixel> sweep,
-                             ManagedSprite<TPixel> sprite,
-                             IntVector2 start,
-                             IntVector2 end,
-                             Blend<TPixel> blend)
+    public static int Sweep(ManagedSprite<TPixel> sweep,
+                            ManagedSprite<TPixel> sprite,
+                            IntVector2 start,
+                            IntVector2 end,
+                            Blend<TPixel> blend,
+                            int stippleStride=1,
+                            int stippleOffset=0)
     {
         var tl = new IntVector2(Mathf.Min(start.x, end.x),
                                 Mathf.Min(start.y, end.y));
 
         sweep.pivot = sprite.pivot - tl;
 
+        IntVector2 position;
+
+        int x0 = start.x;
+        int y0 = start.y;
+        int x1 = end.x;
+        int y1 = end.y;
+
+        int stippleLength = Mathf.Max(x1 - x0, y1 - y0);
+
+        bool steep = Mathf.Abs(y1 - y0) > Mathf.Abs(x1 - x0);
+
+        if (steep) { Swap(ref x0, ref y0); Swap(ref x1, ref y1); }
+        if (x0 > x1) { Swap(ref x0, ref x1); Swap(ref y0, ref y1); }
+
+        int dX = (x1 - x0);
+        int dY = Mathf.Abs(y1 - y0);
+
+        int err = (dX / 2);
+        int ystep = (y0 < y1 ? 1 : -1);
+        int y = y0;
+
+        for (int x = x0; x <= x1; ++x)
         {
-            IntVector2 position;
+            bool stipple = stippleOffset % stippleStride == 0;
 
-            int x0 = start.x;
-            int y0 = start.y;
-            int x1 = end.x;
-            int y1 = end.y;
-
-            bool steep = Mathf.Abs(y1 - y0) > Mathf.Abs(x1 - x0);
-
-            if (steep) { Swap(ref x0, ref y0); Swap(ref x1, ref y1); }
-            if (x0 > x1) { Swap(ref x0, ref x1); Swap(ref y0, ref y1); }
-
-            int dX = (x1 - x0);
-            int dY = Mathf.Abs(y1 - y0);
-
-            int err = (dX / 2);
-            int ystep = (y0 < y1 ? 1 : -1);
-            int y = y0;
-
-            for (int x = x0; x <= x1; ++x)
+            if (stipple && steep)
             {
-                if (steep)
-                {
-                    position.x = y;
-                    position.y = x;
+                position.x = y;
+                position.y = x;
 
-                    sweep.Blend(sprite, blend, brushPosition: position);
-                }
-                else
-                {
-                    position.x = x;
-                    position.y = y;
+                sweep.Blend(sprite, blend, brushPosition: position);
+            }
+            else if (stipple)
+            {
+                position.x = x;
+                position.y = y;
 
-                    sweep.Blend(sprite, blend, brushPosition: position);
-                }
+                sweep.Blend(sprite, blend, brushPosition: position);
+            }
 
-                err = err - dY;
+            stippleOffset += 1;
 
-                if (err < 0)
-                {
-                    y += ystep;
-                    err += dX;
-                }
+            err = err - dY;
+
+            if (err < 0)
+            {
+                y += ystep;
+                err += dX;
             }
         }
+
+        return stippleOffset - 1;
     }
 }

@@ -5006,6 +5006,8 @@ GameObject:
   m_Component:
   - 224: {fileID: 588000095}
   - 114: {fileID: 588000096}
+  - 114: {fileID: 588000098}
+  - 114: {fileID: 588000097}
   m_Layer: 0
   m_Name: Slider
   m_TagString: Untagged
@@ -5050,6 +5052,53 @@ MonoBehaviour:
   m_PreferredHeight: 16
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
+--- !u!114 &588000097
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 588000094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 588000095}
+  bias: 1
+  tooltip: {fileID: 1344759522}
+  text: change brush spacing
+--- !u!114 &588000098
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 588000094}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 004561631d5ba8744a1b98a6e750f4c1, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  triggerTime: 0.25
+  onHoverBegin:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  onTriggerBegin:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  onTriggerEnd:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  onHoverEnd:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!1 &596571364
 GameObject:
   m_ObjectHideFlags: 0
@@ -12142,10 +12191,10 @@ MonoBehaviour:
   m_FillRect: {fileID: 2131302082}
   m_HandleRect: {fileID: 27831269}
   m_Direction: 0
-  m_MinValue: 0
-  m_MaxValue: 1
-  m_WholeNumbers: 0
-  m_Value: 0
+  m_MinValue: 1
+  m_MaxValue: 32
+  m_WholeNumbers: 1
+  m_Value: 1
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -16298,6 +16347,7 @@ MonoBehaviour:
   - {fileID: 21300060, guid: 99ae4e391bb237f4090bdc0c4d04b8a3, type: 3}
   - {fileID: 21300062, guid: 99ae4e391bb237f4090bdc0c4d04b8a3, type: 3}
   brushRenderer: {fileID: 517085007}
+  stippleSlider: {fileID: 1476595744}
 --- !u!4 &2018536470
 Transform:
   m_ObjectHideFlags: 0
