@@ -667,6 +667,10 @@ public class Main : MonoBehaviour
                     hud.mode = HUD.Mode.Switch;
                 }
             }
+            else if (hud.mode == HUD.Mode.Character)
+            {
+                hud.mode = HUD.Mode.Switch;
+            }
         }
 
         /*

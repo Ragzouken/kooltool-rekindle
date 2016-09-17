@@ -14,6 +14,7 @@ public class HUD : MonoBehaviour
     {
         Switch,
         Draw,
+        Character,
     }
 
     private Mode mode_;
