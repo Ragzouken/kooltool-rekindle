@@ -967,7 +967,6 @@ public class Main : MonoBehaviour
             {
                 dragging_ = true;
                 changes = new Changes();
-                stippleOffset = 0;
             }
             else
             {
@@ -994,7 +993,7 @@ public class Main : MonoBehaviour
         else
         {
             dragging_ = false;
-            stampTimer = 0;
+            stippleOffset = 0;
 
             if (changes != null)
             {
@@ -1018,7 +1017,6 @@ public class Main : MonoBehaviour
 
     private Changes changes;
     private bool dragging_;
-    private float stampTimer;
 
     public bool locked { get; private set; }
 

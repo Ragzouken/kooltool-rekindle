@@ -531,12 +531,13 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         int x1 = end.x;
         int y1 = end.y;
 
-        int stippleLength = Mathf.Max(x1 - x0, y1 - y0);
-
         bool steep = Mathf.Abs(y1 - y0) > Mathf.Abs(x1 - x0);
 
-        if (steep) { Swap(ref x0, ref y0); Swap(ref x1, ref y1); }
-        if (x0 > x1) { Swap(ref x0, ref x1); Swap(ref y0, ref y1); }
+        if (steep)   { Swap(ref x0, ref y0); Swap(ref x1, ref y1); }
+
+        bool reverse = x0 > x1;
+
+        if (reverse) { Swap(ref x0, ref x1); Swap(ref y0, ref y1); }
 
         int dX = (x1 - x0);
         int dY = Mathf.Abs(y1 - y0);
@@ -544,6 +545,11 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         int err = (dX / 2);
         int ystep = (y0 < y1 ? 1 : -1);
         int y = y0;
+
+        int stippleLength = x1 - x0;
+        int stippleFinal = stippleOffset + stippleLength;
+
+        if (reverse) stippleOffset = stippleFinal;
 
         for (int x = x0; x <= x1; ++x)
         {
@@ -564,7 +570,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
                 sweep.Blend(sprite, blend, brushPosition: position);
             }
 
-            stippleOffset += 1;
+            stippleOffset += reverse ? -1 : 1;
 
             err = err - dY;
 
@@ -575,6 +581,6 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
             }
         }
 
-        return stippleOffset - 1;
+        return stippleFinal;
     }
 }
