@@ -15,7 +15,13 @@ public class TextureByte : ManagedTexture<byte>
         return (byte)(a + ((u * (b - a)) >> 8));
     }
 
+    public static Texture2D temporary;
     public static Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : brush;
+
+    static TextureByte()
+    {
+        temporary = Texture2DExtensions.Blank(1, 1);
+    }
 
     public TextureByte(int width, int height) 
         : base(width, height, TextureFormat.Alpha8)
@@ -44,8 +50,8 @@ public class TextureByte : ManagedTexture<byte>
 
     public void DecodeFromPNG(byte[] data)
     {
-        uTexture.LoadImage(data);
-        SetPixels32(uTexture.GetPixels32());
+        temporary.LoadImage(data);
+        SetPixels32(temporary.GetPixels32());
 
         Apply();
     }

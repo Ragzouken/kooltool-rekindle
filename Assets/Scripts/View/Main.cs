@@ -242,6 +242,7 @@ public class Main : MonoBehaviour
             var next = Vector2.right * Random.Range(-4, 4) * 32
                      + Vector2.up    * Random.Range(-4, 4) * 32;
 
+            /*
             project.world.actors.Add(new Actor
             {
                 world = project.world,
@@ -255,6 +256,7 @@ public class Main : MonoBehaviour
                     progress = 0,
                 },
             });
+            */
         }
 
         saved = project.world.Copy();
