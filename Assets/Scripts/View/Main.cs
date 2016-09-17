@@ -909,6 +909,9 @@ public class Main : MonoBehaviour
             nextCursor = ray.GetPoint(t);
         }
 
+        bool mouseHold  = Input.GetMouseButton(0);
+        bool mousePress = Input.GetMouseButtonDown(0) && !mouseOverUI;
+
         bool mouse = Input.GetMouseButton(0) && !mouseOverUI;
         bool gamep = input.click.IsPressed && !hovering;
 
@@ -958,8 +961,10 @@ public class Main : MonoBehaviour
                 SetCursorSprite(normalCursor);
             }
         }
+        
+        bool mouseCounts = (dragging_ && mouseHold) || mousePress;
 
-        if ((mouse || gamep) 
+        if ((mouseCounts || gamep) 
          && hud.mode == HUD.Mode.Draw
          && palettePanel.mode == PalettePanel.Mode.Paint)
         {
