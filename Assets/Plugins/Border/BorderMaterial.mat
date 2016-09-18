@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: PaletteSwapSprite
-  m_Shader: {fileID: 4800000, guid: 873aa5863ed7f2548900c1ef14e7e236, type: 3}
+  m_Name: BorderMaterial
+  m_Shader: {fileID: 4800000, guid: 47580ff66e9ea4d4da43e10a2d8b7240, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
-  m_CustomRenderQueue: 2000
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -48,7 +48,7 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 2800000, guid: 1eae312baf4ae304fbc63d424cc2dc02, type: 3}
+        m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
@@ -71,14 +71,17 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - first:
+        name: _Bounds
+      second: 0
+    - first:
         name: _BumpScale
       second: 1
     - first:
+        name: _ColorMask
+      second: 15
+    - first:
         name: _Cutoff
       second: 0.5
-    - first:
-        name: _Cutout
-      second: 1
     - first:
         name: _DetailNormalMapScale
       second: 1
@@ -101,8 +104,14 @@ Material:
         name: _Parallax
       second: 0.02
     - first:
+        name: _Scale
+      second: 0
+    - first:
         name: _SrcBlend
       second: 1
+    - first:
+        name: _TexelSize
+      second: 0
     - first:
         name: _UVSec
       second: 0
@@ -112,55 +121,7 @@ Material:
     m_Colors:
     - first:
         name: _Color
-      second: {r: 1, g: 1, b: 1, a: 1}
+      second: {r: 0.16782005, g: 0.71323526, b: 0.26185718, a: 1}
     - first:
         name: _EmissionColor
       second: {r: 0, g: 0, b: 0, a: 1}
-    - first:
-        name: _Palette00
-      second: {r: 0, g: 0, b: 0, a: 0}
-    - first:
-        name: _Palette01
-      second: {r: 0.120140806, g: 0.21974662, b: 0.98795235, a: 1}
-    - first:
-        name: _Palette02
-      second: {r: 0.08224321, g: 0.025877599, b: 0.9079187, a: 1}
-    - first:
-        name: _Palette03
-      second: {r: 0.8777312, g: 0.2340608, b: 0.99961925, a: 1}
-    - first:
-        name: _Palette04
-      second: {r: 0.9214642, g: 0.921137, b: 0.52401346, a: 1}
-    - first:
-        name: _Palette05
-      second: {r: 0.31819835, g: 0.71047205, b: 0.45212787, a: 1}
-    - first:
-        name: _Palette06
-      second: {r: 0.91718125, g: 0.5350519, b: 0.67309135, a: 1}
-    - first:
-        name: _Palette07
-      second: {r: 0.8219764, g: 0.35615626, b: 0.57324535, a: 1}
-    - first:
-        name: _Palette08
-      second: {r: 0.46061414, g: 0.94310904, b: 0.71100587, a: 1}
-    - first:
-        name: _Palette09
-      second: {r: 0.5897842, g: 0.036500815, b: 0.13331164, a: 1}
-    - first:
-        name: _Palette10
-      second: {r: 0.36912706, g: 0.45736998, b: 0.6303584, a: 1}
-    - first:
-        name: _Palette11
-      second: {r: 0.4058109, g: 0.16768779, b: 0.014240624, a: 1}
-    - first:
-        name: _Palette12
-      second: {r: 0.034753922, g: 0.9395329, b: 0.69805413, a: 1}
-    - first:
-        name: _Palette13
-      second: {r: 0.21878865, g: 0.71404034, b: 0.50579756, a: 1}
-    - first:
-        name: _Palette14
-      second: {r: 0.33091143, g: 0.45639402, b: 0.28171733, a: 1}
-    - first:
-        name: _Palette15
-      second: {r: 0.5844489, g: 0.63740784, b: 0.74513954, a: 1}

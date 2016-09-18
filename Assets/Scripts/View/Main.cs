@@ -51,6 +51,8 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite normalCursor;
     [SerializeField] private Sprite pickCursor, stampCursor;
 
+    [SerializeField] private SpriteRenderer borderTest;
+
     public Project project { get; private set; }
     private World saved;
 
@@ -242,7 +244,7 @@ public class Main : MonoBehaviour
             var next = Vector2.right * Random.Range(-4, 4) * 32
                      + Vector2.up    * Random.Range(-4, 4) * 32;
 
-            /*
+            ///*
             project.world.actors.Add(new Actor
             {
                 world = project.world,
@@ -256,7 +258,7 @@ public class Main : MonoBehaviour
                     progress = 0,
                 },
             });
-            */
+            //*/
         }
 
         saved = project.world.Copy();
@@ -291,6 +293,9 @@ public class Main : MonoBehaviour
         hud.mode = HUD.Mode.Draw;
 
         input = new TestInputSet();
+
+        borderSprite0 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
+        borderSprite1 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
 
 #if UNITY_WEBGL
         Debug.Log("Location: " + GetWindowSearch());
@@ -775,6 +780,7 @@ public class Main : MonoBehaviour
 
     private GameObject hovering;
     private GameObject dragging;
+    private Actor targetActor;
 
     private bool clickedOnWorld;
     private bool clickingOnWorld;
@@ -789,6 +795,49 @@ public class Main : MonoBehaviour
     private int stippleStride = 8;
 
     [SerializeField] private Slider stippleSlider;
+
+    private ManagedSprite<byte> borderSprite0;
+    private ManagedSprite<byte> borderSprite1;
+
+    public int borderSize = 1;
+
+    private void UpdateBorder(Actor actor)
+    {
+
+        borderTest.transform.localPosition = actor.position.current;
+
+        borderSprite0.Clear(0);
+        borderSprite0.Blend(actor.costume[actor.position.direction].sprite8,
+                            TextureByte.mask);
+
+        int w = borderSprite0.mTexture.width;
+        int h = borderSprite0.mTexture.height;
+
+        for (int i = 0; i < borderSize; ++i)
+        { 
+            borderSprite1.Clear(0);
+
+            for (int y = 0; y < h; ++y)
+            {
+                for (int x = 0; x < w; ++x)
+                {
+                    if ((x > 0   && borderSprite0.mTexture.pixels[(x - 1) * w + y] > 0)
+                     || (y > 0   && borderSprite0.mTexture.pixels[(x) * w + y - 1] > 0)
+                     || (x < w-1 && borderSprite0.mTexture.pixels[(x + 1) * w + y] > 0)
+                     || (y < h-1 && borderSprite0.mTexture.pixels[(x) * w + y + 1] > 0))
+                    {
+                        borderSprite1.mTexture.pixels[x * w + y] = 3;
+                    }
+                }
+            }
+
+            borderSprite0.mTexture.Clear(0);
+            borderSprite0.mTexture.SetPixels(borderSprite1.mTexture.pixels);
+        }
+
+        borderTest.sprite = borderSprite1.uSprite;
+        borderSprite1.mTexture.Apply();
+    }
 
     private void Update()
     {
@@ -829,7 +878,7 @@ public class Main : MonoBehaviour
             {
                 if (actor.position.moving) continue;
 
-                while (true)
+                while (true && false)
                 {
                     var fragment = actor.script.fragments.FirstOrDefault(frag => frag.name == actor.state.fragment);
 
@@ -881,6 +930,8 @@ public class Main : MonoBehaviour
                 actor.position.progress = 0;
             }
         }
+
+        UpdateBorder(project.world.actors.First());
 
         clickedOnWorld = !mouseOverUI && Input.GetMouseButtonDown(0);
 
@@ -976,6 +1027,7 @@ public class Main : MonoBehaviour
             {
                 dragging_ = true;
                 changes = new Changes();
+                project.world.TryGetActor(next, out targetActor);
             }
             else
             {
@@ -986,11 +1038,13 @@ public class Main : MonoBehaviour
                                                 (int) stippleSlider.value,
                                                 ref stippleOffset);
 
-                project.world.background.Blend(changes, line, IntVector2.zero, blend_);
-
-                foreach (var actor in project.world.actors)
+                if (targetActor != null)
                 {
-                    actor.Blend(changes, line, IntVector2.zero, blend_);
+                    targetActor.Blend(changes, line, IntVector2.zero, blend_);
+                }
+                else
+                {
+                    project.world.background.Blend(changes, line, IntVector2.zero, blend_);
                 }
 
                 TextureByte.Pooler.Instance.FreeTexture(line.mTexture);

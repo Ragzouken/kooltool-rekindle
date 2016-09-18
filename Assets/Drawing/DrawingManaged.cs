@@ -151,7 +151,7 @@ public abstract class ManagedTexture<TPixel>
         dirty = true;
     }
 
-    public TPixel GetPixel(int x, int y, TPixel @default = default(TPixel))
+    public TPixel GetPixel(int x, int y)
     {
         return pixels[width * y + x];
     }
@@ -267,7 +267,7 @@ public class ManagedSprite<TPixel> : IDisposable
 
         if (rect.Contains(x, y))
         {
-            return mTexture.GetPixel(x, y, @default);
+            return mTexture.GetPixel(x, y);
         }
         else
         {

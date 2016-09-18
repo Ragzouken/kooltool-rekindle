@@ -44,10 +44,20 @@ public struct IntRect
         yMax += dy;
     }
 
+    public void Move(IntVector2 offset)
+    {
+        Move(offset.x, offset.y);
+    }
+
     public bool Contains(int x, int y)
     {
         return x >= xMin && x <= xMax
             && y >= yMin && y <= yMax;
+    }
+
+    public bool Contains(IntVector2 position)
+    {
+        return Contains(position.x, position.y);
     }
 
     public IntRect Intersect(IntRect b)

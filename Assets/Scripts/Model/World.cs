@@ -293,6 +293,22 @@ public class World : ICopyable<World>
         copy.actors.AddRange(actors.Select(actor => copier.Copy(actor)));
         copy.background = copier.Copy(background);
     }
+
+    public bool TryGetActor(IntVector2 position, out Actor actor)
+    {
+        for (int i = 0; i < actors.Count; ++i)
+        {
+            actor = actors[i];
+            
+            if (actor.ContainsPoint(position))
+            {
+                return true;
+            }
+        }
+
+        actor = default(Actor);
+        return false;
+    }
 }
 
 public interface IChange
@@ -543,6 +559,19 @@ public class Actor : ICopyable<Actor>
         sprite.texture.dirty = true;
 
         changes.sprites.Add(sprite.sprite8);
+    }
+
+    public bool ContainsPoint(IntVector2 position)
+    {
+        var sprite = costume[this.position.direction];
+
+        IntRect rect = sprite.rect;
+        rect.Move(-rect.x, -rect.y);
+        rect.Move(this.position.current - sprite.pivot);
+
+        Debug.Log(position + " / " + rect);
+
+        return rect.Contains(position);
     }
 }
 
