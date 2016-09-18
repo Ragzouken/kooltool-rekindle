@@ -381,6 +381,9 @@ public class Main : MonoBehaviour
                 zoomIn.AddDefaultBinding(InputControlType.LeftStickButton);
                 zoomOut.AddDefaultBinding(InputControlType.RightStickButton);
 
+                zoomIn.AddDefaultBinding(Key.Equals);
+                zoomOut.AddDefaultBinding(Key.Minus);
+
                 zoom = CreateOneAxisPlayerAction(zoomOut, zoomIn);
             }
         }
@@ -931,7 +934,7 @@ public class Main : MonoBehaviour
             }
         }
 
-        UpdateBorder(project.world.actors.First());
+        //UpdateBorder(project.world.actors.First());
 
         clickedOnWorld = !mouseOverUI && Input.GetMouseButtonDown(0);
 

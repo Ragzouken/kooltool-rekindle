@@ -41,7 +41,10 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
-  - name: World
+  - name: World - Background
+    uniqueID: 1225492293
+    locked: 0
+  - name: World - Actors
     uniqueID: 4006360207
     locked: 0
   - name: UI

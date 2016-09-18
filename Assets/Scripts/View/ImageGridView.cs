@@ -18,6 +18,7 @@ public class ImageGridView : ViewComponent<ImageGrid>
     {
         renderer.transform.localPosition = cell * model.cellSize;
         renderer.sprite = model.cells[cell];
+        renderer.sortingLayerName = "World - Background";
     }
 
     public void Setup(ImageGrid grid)

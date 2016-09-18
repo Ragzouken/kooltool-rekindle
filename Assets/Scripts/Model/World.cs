@@ -569,8 +569,6 @@ public class Actor : ICopyable<Actor>
         rect.Move(-rect.x, -rect.y);
         rect.Move(this.position.current - sprite.pivot);
 
-        Debug.Log(position + " / " + rect);
-
         return rect.Contains(position);
     }
 }

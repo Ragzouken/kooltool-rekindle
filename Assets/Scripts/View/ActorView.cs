@@ -24,5 +24,6 @@ public class ActorView : MonoBehaviour
     {
         transform.position = actor.position.current;
         renderer.sprite = actor.costume[actor.position.direction];
+        renderer.sortingLayerName = "World - Actors";
     }
 }
