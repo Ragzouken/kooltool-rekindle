@@ -51,8 +51,8 @@ public struct IntRect
 
     public bool Contains(int x, int y)
     {
-        return x >= xMin && x <= xMax
-            && y >= yMin && y <= yMax;
+        return x >= xMin && x < xMax
+            && y >= yMin && y < yMax;
     }
 
     public bool Contains(IntVector2 position)
@@ -70,6 +70,22 @@ public struct IntRect
         a.yMax = Mathf.Min(a.yMax, b.yMax);
 
         return a;
+    }
+
+    public bool Intersects(IntRect b)
+    {
+        var i = Intersect(b);
+
+        return i.width  > 0 
+            && i.height > 0;
+    }
+
+    public void Expand(int size)
+    {
+        xMin -= size;
+        yMin -= size;
+        xMax += size;
+        yMax += size;
     }
 
     public override string ToString()

@@ -984,6 +984,8 @@ public class Main : MonoBehaviour
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
 
+        Actor actor_;
+
         bool draw = !mouseOverUI
                  && hud.mode == HUD.Mode.Draw
                  && palettePanel.mode == PalettePanel.Mode.Paint;
@@ -991,6 +993,17 @@ public class Main : MonoBehaviour
         brushRenderer.gameObject.SetActive(draw);
         brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
+
+        if (project.world.TryGetActor(next, out actor_, 0))
+        {
+            brushRenderer.sortingLayerName = "World - Actors";
+            brushRenderer.sortingOrder = 1;
+        }
+        else
+        {
+            brushRenderer.sortingLayerName = "World - Background";
+            brushRenderer.sortingOrder = 1;
+        }
 
         if (!mouseOverUI
          && palettePanel.mode == PalettePanel.Mode.Colors)
@@ -1030,7 +1043,7 @@ public class Main : MonoBehaviour
             {
                 dragging_ = true;
                 changes = new Changes();
-                project.world.TryGetActor(next, out targetActor);
+                project.world.TryGetActor(next, out targetActor, 0);
             }
             else
             {

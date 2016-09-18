@@ -294,15 +294,26 @@ public class World : ICopyable<World>
         copy.background = copier.Copy(background);
     }
 
-    public bool TryGetActor(IntVector2 position, out Actor actor)
+    public bool TryGetActor(IntVector2 position, 
+                            out Actor actor,
+                            int range=0)
     {
         for (int i = 0; i < actors.Count; ++i)
         {
             actor = actors[i];
-            
-            if (actor.ContainsPoint(position))
+
+            var rect = actor.GetWorldRect();
+            rect.Expand(range);
+
+            if (rect.Contains(position))
             {
-                return true;
+                for (int y = position.y - range; y < position.y + range + 1; ++y)
+                {
+                    for (int x = position.x - range; x < position.x + range + 1; ++x)
+                    {
+                        if (actor.GetPixel(new IntVector2(x, y)) > 0) return true;
+                    }
+                }
             }
         }
 
@@ -575,15 +586,20 @@ public class Actor : ICopyable<Actor>
         changes.sprites.Add(sprite.sprite8);
     }
 
-    public bool ContainsPoint(IntVector2 position)
+    public IntRect GetWorldRect()
     {
-        var sprite = costume[this.position.direction];
+        var sprite = costume[position.direction];
 
         IntRect rect = sprite.rect;
         rect.Move(-rect.x, -rect.y);
-        rect.Move(this.position.current - sprite.pivot);
+        rect.Move(position.current - sprite.pivot);
 
-        return rect.Contains(position);
+        return rect;
+    }
+
+    public bool ContainsPoint(IntVector2 position)
+    {
+        return GetWorldRect().Contains(position);
     }
 
     public byte GetPixel(IntVector2 position)
@@ -591,8 +607,6 @@ public class Actor : ICopyable<Actor>
         var sprite = costume[this.position.direction];
 
         position -= (IntVector2) this.position.current;
-
-        Debug.Log(position);
 
         return sprite.sprite8.GetPixel(position.x, position.y);
     }
