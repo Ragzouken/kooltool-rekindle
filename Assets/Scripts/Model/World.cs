@@ -309,6 +309,20 @@ public class World : ICopyable<World>
         actor = default(Actor);
         return false;
     }
+
+    public byte GetPixel(IntVector2 position)
+    {
+        Actor actor;
+
+        if (TryGetActor(position, out actor))
+        {
+            return actor.GetPixel(position);
+        }
+        else
+        {
+            return background.GetPixel(position);
+        }
+    }
 }
 
 public interface IChange
@@ -570,6 +584,17 @@ public class Actor : ICopyable<Actor>
         rect.Move(this.position.current - sprite.pivot);
 
         return rect.Contains(position);
+    }
+
+    public byte GetPixel(IntVector2 position)
+    {
+        var sprite = costume[this.position.direction];
+
+        position -= (IntVector2) this.position.current;
+
+        Debug.Log(position);
+
+        return sprite.sprite8.GetPixel(position.x, position.y);
     }
 }
 

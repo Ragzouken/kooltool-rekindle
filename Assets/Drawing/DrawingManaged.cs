@@ -262,8 +262,8 @@ public class ManagedSprite<TPixel> : IDisposable
 
     public TPixel GetPixel(int x, int y, TPixel @default = default(TPixel))
     {
-        x += rect.x - pivot.x;
-        y += rect.y - pivot.y;
+        x += rect.x + pivot.x;
+        y += rect.y + pivot.y;
 
         if (rect.Contains(x, y))
         {

@@ -999,7 +999,7 @@ public class Main : MonoBehaviour
 
             if ((Input.GetMouseButtonDown(0) || input.click.WasPressed))
             {
-                int index = project.world.background.GetPixel(next);
+                int index = project.world.GetPixel(next);
 
                 palettePanel.SelectPaletteIndex(index);
             }
