@@ -380,6 +380,51 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
     private static void Swap<T>(ref T lhs, ref T rhs) { T temp; temp = lhs; lhs = rhs; rhs = temp; }
 
+    public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> sprite,
+                                        float shear,
+                                        TPixel background = default(TPixel))
+    {
+        var src = sprite;
+        var dst = GetSprite(sprite.rect.width, sprite.rect.height, sprite.pivot);
+        
+        int ox = src.rect.xMin - dst.rect.xMin;
+        int oy = src.rect.yMin - dst.rect.yMin;
+
+        int sstride = src.mTexture.width;
+        int dstride = dst.mTexture.width;
+
+        int xmin = dst.rect.xMin;
+        int ymin = dst.rect.yMin;
+        int xmax = dst.rect.xMax;
+        int ymax = dst.rect.yMax;
+
+        var dstp = dst.mTexture.pixels;
+        var srcp = src.mTexture.pixels;
+
+        for (int dy = ymin; dy < ymax; ++dy)
+        {
+            int skew = (int) (shear * (dy - src.rect.yMin));
+
+            for (int dx = xmin; dx < xmax; ++dx)
+            {
+                int sx = dx + ox;
+                int sy = dy + oy;
+
+                int di = dy * dstride + dx;
+                int si = sy * sstride + sx;
+
+                if (sx + skew < src.rect.xMax)
+                {
+                    dstp[di] = srcp[si + skew];
+                }
+            }
+        }
+
+        dst.mTexture.dirty = true;
+
+        return dst;
+    }
+
     public ManagedSprite<TPixel> Sweep(ManagedSprite<TPixel> sprite,
                                        IntVector2 start,
                                        IntVector2 end,

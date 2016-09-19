@@ -1085,12 +1085,23 @@ public class Main : MonoBehaviour
         prevCursor = nextCursor;
     }
 
+    private ManagedSprite<byte> shearSprite;
+
     private void RefreshBrushCursor()
     {
+        if (shearSprite != null)
+        {
+            TextureByte.Pooler.Instance.FreeSprite(shearSprite);
+        }
+
+        shearSprite = TextureByte.Pooler.Instance.ShearX(stamp.brush, 0.5f);
+        shearSprite.mTexture.Apply();
+
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
-        brushSpriteD.Blend(stamp.brush, blend_);
+        brushSpriteD.Blend(shearSprite, blend_);
+        //brushSpriteD.Blend(stamp.brush, blend_);
         brushSpriteD.mTexture.Apply();
     }
 
