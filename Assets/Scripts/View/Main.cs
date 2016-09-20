@@ -169,7 +169,7 @@ public class Main : MonoBehaviour
             test.uTexture.name = "Costume Texture";
         }
 
-        brushSpriteD = new TextureByte(16, 16).FullSprite(IntVector2.one * 8);
+        brushSpriteD = new TextureByte(64, 64).FullSprite(IntVector2.one * 32);
 
         /*
         string path = Application.streamingAssetsPath + @"\test.txt";
@@ -994,6 +994,11 @@ public class Main : MonoBehaviour
         brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
 
+        var delta2 = next - prev;
+        if (next != prev) angle = Mathf.Atan2(delta2.y, delta2.x);
+
+        RefreshBrushCursor();
+
         if (project.world.TryGetActor(next, out actor_, 0))
         {
             brushRenderer.sortingLayerName = "World - Actors";
@@ -1047,7 +1052,7 @@ public class Main : MonoBehaviour
             }
             else
             {
-                var line = TextureByte.Pooler.Instance.Sweep(stamp.brush, 
+                var line = TextureByte.Pooler.Instance.Sweep(shearSprite, 
                                                 prev, 
                                                 next, 
                                                 (canvas, brush) => brush == 0 ? canvas : brush,
@@ -1086,6 +1091,7 @@ public class Main : MonoBehaviour
     }
 
     private ManagedSprite<byte> shearSprite;
+    private float angle;
 
     private void RefreshBrushCursor()
     {
@@ -1094,12 +1100,25 @@ public class Main : MonoBehaviour
             TextureByte.Pooler.Instance.FreeSprite(shearSprite);
         }
 
-        shearSprite = TextureByte.Pooler.Instance.ShearX(stamp.brush, 0.5f);
+        float quarter = Mathf.PI * 0.5f;
+
+        //this.angle = Time.timeSinceLevelLoad % (Mathf.PI * 2);
+        var angle = this.angle % quarter;
+        int rots = Mathf.FloorToInt(this.angle / quarter);
+
+        float alpha = -Mathf.Tan(angle / 2f);
+        float beta = Mathf.Sin(angle);
+
+        shearSprite = TextureByte.Pooler.Instance.Rotated(stamp.brush, 3 - rots);
+        shearSprite = TextureByte.Pooler.Instance.ShearX(shearSprite, alpha);
+        shearSprite = TextureByte.Pooler.Instance.ShearY(shearSprite, beta);
+        shearSprite = TextureByte.Pooler.Instance.ShearX(shearSprite, alpha);
         shearSprite.mTexture.Apply();
 
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
+        brushSpriteD.Clear(0);
         brushSpriteD.Blend(shearSprite, blend_);
         //brushSpriteD.Blend(stamp.brush, blend_);
         brushSpriteD.mTexture.Apply();
