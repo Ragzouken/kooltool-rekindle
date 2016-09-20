@@ -995,7 +995,13 @@ public class Main : MonoBehaviour
         brushRenderer.transform.position = next;
 
         var delta2 = next - prev;
-        if (next != prev) angle = Mathf.Atan2(delta2.y, delta2.x);
+        if (next != prev)
+        {
+            angles.Enqueue(Mathf.Atan2(delta2.y, delta2.x));
+            if (angles.Count > 3) angles.Dequeue();
+
+            angle = angles.Average();
+        }
 
         RefreshBrushCursor();
 
@@ -1092,6 +1098,7 @@ public class Main : MonoBehaviour
 
     private ManagedSprite<byte> shearSprite;
     private float angle;
+    private Queue<float> angles = new Queue<float>();
 
     private void RefreshBrushCursor()
     {
@@ -1102,9 +1109,19 @@ public class Main : MonoBehaviour
 
         float quarter = Mathf.PI * 0.5f;
 
+        this.angle = (this.angle + Mathf.PI * 2) % (Mathf.PI * 2);
+
         //this.angle = Time.timeSinceLevelLoad % (Mathf.PI * 2);
         var angle = this.angle % quarter;
         int rots = Mathf.FloorToInt(this.angle / quarter);
+
+        if (angle > quarter * 0.5f)
+        {
+            angle *= -0.5f;
+            rots = 1;
+        }
+
+        Debug.Log(angle * Mathf.Rad2Deg);
 
         float alpha = -Mathf.Tan(angle / 2f);
         float beta = Mathf.Sin(angle);
