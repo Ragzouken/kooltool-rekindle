@@ -412,10 +412,8 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
             {
                 for (int sx = xmin; sx < xmax; ++sx)
                 {
-                    int dx = sx + ox;
-                    int dy = sy + oy;
-
-                    Swap(ref dx, ref dy);
+                    int dx = sy + ox;
+                    int dy = ymax - (sx - xmin);
 
                     int di = dy * dstride + dx;
                     int si = sy * dstride + sx;
@@ -426,6 +424,9 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
             Swap(ref dst, ref dst2);
         }
+
+        FreeTexture(dst2.mTexture);
+        FreeSprite(dst2);
 
         return dst;
     }

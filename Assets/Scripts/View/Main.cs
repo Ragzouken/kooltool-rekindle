@@ -976,6 +976,17 @@ public class Main : MonoBehaviour
         Vector2 prev = gamep ? prevCursor : prevMouse;
         Vector2 next = gamep ? nextCursor : nextMouse;
 
+        var delta2 = next - prev;
+        if (next != prev)
+        {
+            float a = Mathf.Atan2(delta2.y, delta2.x);
+            angles.Enqueue(a);
+
+            if (angles.Count > 3) angles.Dequeue();
+
+            angle = angles.Average();
+        }
+
         prev.x = (int)prev.x;
         prev.y = (int)prev.y;
         next.x = (int)next.x;
@@ -993,15 +1004,6 @@ public class Main : MonoBehaviour
         brushRenderer.gameObject.SetActive(draw);
         brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
-
-        var delta2 = next - prev;
-        if (next != prev)
-        {
-            angles.Enqueue(Mathf.Atan2(delta2.y, delta2.x));
-            if (angles.Count > 3) angles.Dequeue();
-
-            angle = angles.Average();
-        }
 
         RefreshBrushCursor();
 
@@ -1058,7 +1060,7 @@ public class Main : MonoBehaviour
             }
             else
             {
-                var line = TextureByte.Pooler.Instance.Sweep(shearSprite, 
+                var line = TextureByte.Pooler.Instance.Sweep(brushSpriteD, 
                                                 prev, 
                                                 next, 
                                                 (canvas, brush) => brush == 0 ? canvas : brush,
@@ -1102,41 +1104,41 @@ public class Main : MonoBehaviour
 
     private void RefreshBrushCursor()
     {
-        if (shearSprite != null)
-        {
-            TextureByte.Pooler.Instance.FreeSprite(shearSprite);
-        }
-
         float quarter = Mathf.PI * 0.5f;
 
         this.angle = (this.angle + Mathf.PI * 2) % (Mathf.PI * 2);
-
-        //this.angle = Time.timeSinceLevelLoad % (Mathf.PI * 2);
         var angle = this.angle % quarter;
-        int rots = Mathf.FloorToInt(this.angle / quarter);
+        int rots = Mathf.FloorToInt(this.angle / quarter + 2) % 4;
 
+        //*
         if (angle > quarter * 0.5f)
         {
-            angle *= -0.5f;
-            rots = 1;
+            angle -= quarter;
+            rots = (rots + 1) % 4;
         }
-
-        Debug.Log(angle * Mathf.Rad2Deg);
+        //*/
 
         float alpha = -Mathf.Tan(angle / 2f);
         float beta = Mathf.Sin(angle);
 
-        shearSprite = TextureByte.Pooler.Instance.Rotated(stamp.brush, 3 - rots);
-        shearSprite = TextureByte.Pooler.Instance.ShearX(shearSprite, alpha);
-        shearSprite = TextureByte.Pooler.Instance.ShearY(shearSprite, beta);
-        shearSprite = TextureByte.Pooler.Instance.ShearX(shearSprite, alpha);
-        shearSprite.mTexture.Apply();
+        var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, 3 - rots);
+        var shearSprite2 = TextureByte.Pooler.Instance.ShearX(shearSprite1, alpha);
+        TextureByte.Pooler.Instance.FreeTexture(shearSprite1.mTexture);
+        TextureByte.Pooler.Instance.FreeSprite(shearSprite1);
+        var shearSprite3 = TextureByte.Pooler.Instance.ShearY(shearSprite2, beta);
+        TextureByte.Pooler.Instance.FreeTexture(shearSprite2.mTexture);
+        TextureByte.Pooler.Instance.FreeSprite(shearSprite2);
+        var shearSprite4 = TextureByte.Pooler.Instance.ShearX(shearSprite3, alpha);
+        TextureByte.Pooler.Instance.FreeTexture(shearSprite3.mTexture);
+        TextureByte.Pooler.Instance.FreeSprite(shearSprite3);
 
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
         brushSpriteD.Clear(0);
-        brushSpriteD.Blend(shearSprite, blend_);
+        brushSpriteD.Blend(shearSprite4, blend_);
+        TextureByte.Pooler.Instance.FreeTexture(shearSprite4.mTexture);
+        TextureByte.Pooler.Instance.FreeSprite(shearSprite4);
         //brushSpriteD.Blend(stamp.brush, blend_);
         brushSpriteD.mTexture.Apply();
     }
