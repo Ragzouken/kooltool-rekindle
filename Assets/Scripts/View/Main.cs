@@ -1125,6 +1125,8 @@ public class Main : MonoBehaviour
         float alpha = -Mathf.Tan(angle / 2f);
         float beta = Mathf.Sin(angle);
 
+        //var shearSprite4 = TextureByte.Pooler.Instance.ShearX(stamp.brush, Time.timeSinceLevelLoad % 1);
+
         var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, rots);
         //var shearSprite1 = TextureByte.Pooler.Instance.Copy(stamp.brush);
         var shearSprite2 = TextureByte.Pooler.Instance.ShearX(shearSprite1, alpha);
@@ -1137,7 +1139,7 @@ public class Main : MonoBehaviour
         TextureByte.Pooler.Instance.FreeTexture(shearSprite3.mTexture);
         TextureByte.Pooler.Instance.FreeSprite(shearSprite3);
 
-        //var shearSprite4 = shearSprite1;
+        ////var shearSprite4 = shearSprite1;
 
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;

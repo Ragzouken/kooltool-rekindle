@@ -393,9 +393,6 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
     public ManagedSprite<TPixel> Rotated1(ManagedSprite<TPixel> src)
     {
-        // dst.x = src.y
-        // dst.y = src.w - 1 - src.x
-
         int dw = src.rect.height;
         int dh = src.rect.width;
 
@@ -455,17 +452,73 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         return intermediate;
     }
 
-    public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> sprite,
+    //public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> sprite,
+    //                                    float shear,
+    //                                    TPixel background = default(TPixel))
+    //{
+    //    int ow = sprite.rect.width / 2;
+    //    int cy = sprite.rect.height / 2;
+
+    //    var src = sprite;
+    //    var dst = GetSprite(sprite.rect.width * 2, 
+    //                        sprite.rect.height, 
+    //                        new IntVector2(ow * 2, sprite.pivot.y));
+    //    dst.Clear(background);
+
+    //    int ox = src.rect.xMin - dst.rect.xMin;
+    //    int oy = src.rect.yMin - dst.rect.yMin;
+
+    //    int sstride = src.mTexture.width;
+    //    int dstride = dst.mTexture.width;
+
+    //    int xmin = src.rect.xMin;
+    //    int ymin = src.rect.yMin;
+    //    int xmax = src.rect.xMax;
+    //    int ymax = src.rect.yMax;
+
+    //    var dstp = dst.mTexture.pixels;
+    //    var srcp = src.mTexture.pixels;
+
+    //    for (int sy = ymin; sy < ymax; ++sy)
+    //    {
+    //        int skew = (int) (shear * (sy - src.rect.yMin - cy) + 0.5f);
+
+    //        for (int sx = xmin; sx < xmax; ++sx)
+    //        {
+    //            int dx = sx + ox + skew + ow;
+    //            int dy = sy + oy;
+
+    //            int di = dy * dstride + dx;
+    //            int si = sy * sstride + sx;
+
+    //            if (di >= 0 && di < dstp.Length) dstp[di] = srcp[si];
+    //        }
+    //    }
+
+    //    dst.mTexture.dirty = true;
+
+    //    return dst;
+    //}
+
+    public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> src,
                                         float shear,
                                         TPixel background = default(TPixel))
     {
-        int ow = sprite.rect.width / 2;
-        int cy = sprite.rect.height / 2;
+        bool invert = shear < 0;
+        shear = Mathf.Abs(shear);
 
-        var src = sprite;
-        var dst = GetSprite(sprite.rect.width * 2, 
-                            sprite.rect.height, 
-                            new IntVector2(ow * 2, cy));
+        int grow = (int) (src.rect.width * shear + 0.5f);
+
+        int dw = (int) (src.rect.height * shear) + src.rect.width;
+        int dh = src.rect.height;
+
+        int push = invert ? grow : 0;
+        int mult = invert ? -1 : 1;
+
+        var pivot = new IntVector2((int) ((1 + shear) * src.pivot.x + 0.5f), 
+                                   src.pivot.y);
+
+        var dst = GetSprite(dw, dh, pivot);
         dst.Clear(background);
 
         int ox = src.rect.xMin - dst.rect.xMin;
@@ -484,17 +537,17 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         for (int sy = ymin; sy < ymax; ++sy)
         {
-            int skew = (int) (shear * (sy - src.rect.yMin - cy) + 0.5f);
+            int skew = (int) (shear * (sy - ymin) + 0.5f);
 
             for (int sx = xmin; sx < xmax; ++sx)
             {
-                int dx = sx + ox + skew + ow;
-                int dy = sy + oy;
+                int dx = ox + sx + skew * mult + push;
+                int dy = oy + sy;
 
                 int di = dy * dstride + dx;
                 int si = sy * sstride + sx;
 
-                if (di >= 0 && di < dstp.Length) dstp[di] = srcp[si];
+                dstp[di] = srcp[si];
             }
         }
 
@@ -503,65 +556,25 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         return dst;
     }
 
-    public ManagedSprite<TPixel> ShearX_(ManagedSprite<TPixel> sprite,
+    public ManagedSprite<TPixel> ShearY(ManagedSprite<TPixel> src,
                                         float shear,
                                         TPixel background = default(TPixel))
     {
-        int ow = sprite.rect.width / 2;
-        int cy = sprite.rect.height / 2;
+        bool invert = shear < 0;
+        shear = Mathf.Abs(shear);
 
-        var src = sprite;
-        var dst = GetSprite(sprite.rect.width * 2, 
-                            sprite.rect.height, 
-                            new IntVector2(ow * 2, cy));
-        dst.Clear(background);
+        int grow = (int) (src.rect.width * shear + 0.5f);
 
-        int ox = src.rect.xMin - dst.rect.xMin;
-        int oy = src.rect.yMin - dst.rect.yMin;
+        int dw = src.rect.width;
+        int dh = src.rect.height + grow;
 
-        int sstride = src.mTexture.width;
-        int dstride = dst.mTexture.width;
+        int push = invert ? grow : 0;
+        int mult = invert ? -1 : 1;
 
-        int xmin = src.rect.xMin;
-        int ymin = src.rect.yMin;
-        int xmax = src.rect.xMax;
-        int ymax = src.rect.yMax;
+        var pivot = new IntVector2(src.pivot.x,
+                                   (int) ((1 + shear) * src.pivot.y + 0.5f));
 
-        var dstp = dst.mTexture.pixels;
-        var srcp = src.mTexture.pixels;
-
-        for (int sy = ymin; sy < ymax; ++sy)
-        {
-            int skew = (int) (shear * (sy - src.rect.yMin - cy) + 0.5f);
-
-            for (int sx = xmin; sx < xmax; ++sx)
-            {
-                int dx = sx + ox + skew + ow;
-                int dy = sy + oy;
-
-                int di = dy * dstride + dx;
-                int si = sy * sstride + sx;
-
-                if (di >= 0 && di < dstp.Length) dstp[di] = srcp[si];
-            }
-        }
-
-        dst.mTexture.dirty = true;
-
-        return dst;
-    }
-
-    public ManagedSprite<TPixel> ShearY(ManagedSprite<TPixel> sprite,
-                                        float shear,
-                                        TPixel background = default(TPixel))
-    {
-        int oh = sprite.rect.height / 2;
-        int cx = sprite.rect.width / 2;
-
-        var src = sprite;
-        var dst = GetSprite(sprite.rect.width, 
-                            sprite.rect.height * 2, 
-                            new IntVector2(cx, oh * 2));
+        var dst = GetSprite(dw, dh, pivot);
         dst.Clear(background);
 
         int ox = src.rect.xMin - dst.rect.xMin;
@@ -580,17 +593,17 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         for (int sx = xmin; sx < xmax; ++sx)
         {
-            int skew = (int) (shear * (sx - src.rect.xMin - cx) + 0.5f);
+            int skew = (int) (shear * (sx - xmin) + 0.5f);
 
             for (int sy = ymin; sy < ymax; ++sy)
             {
-                int dx = sx + ox;
-                int dy = sy + oy + skew + oh;
+                int dx = ox + sx;
+                int dy = oy + sy + skew * mult + push;
 
                 int di = dy * dstride + dx;
                 int si = sy * sstride + sx;
 
-                if (di >= 0 && di < dstp.Length) dstp[di] = srcp[si];
+                dstp[di] = srcp[si];
             }
         }
 
@@ -598,7 +611,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         return dst;
     }
-
+    
     public ManagedSprite<TPixel> Sweep(ManagedSprite<TPixel> sprite,
                                        IntVector2 start,
                                        IntVector2 end,
