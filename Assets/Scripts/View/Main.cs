@@ -977,7 +977,7 @@ public class Main : MonoBehaviour
         Vector2 next = gamep ? nextCursor : nextMouse;
 
         var delta2 = next - prev;
-        if (next != prev)
+        if (delta2.magnitude > 1)
         {
             float a = Mathf.Atan2(delta2.y, delta2.x);
             angles.Enqueue(a);
@@ -1107,8 +1107,9 @@ public class Main : MonoBehaviour
         float quarter = Mathf.PI * 0.5f;
 
         this.angle = (this.angle + Mathf.PI * 2) % (Mathf.PI * 2);
+
         var angle = this.angle % quarter;
-        int rots = Mathf.FloorToInt(this.angle / quarter + 2) % 4;
+        int rots = Mathf.FloorToInt(this.angle / quarter + 3) % 4;
 
         //*
         if (angle > quarter * 0.5f)
@@ -1121,7 +1122,8 @@ public class Main : MonoBehaviour
         float alpha = -Mathf.Tan(angle / 2f);
         float beta = Mathf.Sin(angle);
 
-        var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, 3 - rots);
+        var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, rots);
+        //var shearSprite1 = TextureByte.Pooler.Instance.Copy(stamp.brush);
         var shearSprite2 = TextureByte.Pooler.Instance.ShearX(shearSprite1, alpha);
         TextureByte.Pooler.Instance.FreeTexture(shearSprite1.mTexture);
         TextureByte.Pooler.Instance.FreeSprite(shearSprite1);

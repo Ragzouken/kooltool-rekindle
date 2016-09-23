@@ -393,18 +393,16 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
     public ManagedSprite<TPixel> Rotated1(ManagedSprite<TPixel> src)
     {
-        int sw = src.rect.width;
-        int sh = src.rect.height;
+        // dst.x = src.y
+        // dst.y = src.w - 1 - src.x
 
-        int dw = sh;
-        int dh = sw;
+        int dw = src.rect.height;
+        int dh = src.rect.width;
 
         var dst = GetSprite(dw, 
                             dh,
-                            new IntVector2(src.pivot.y, dh - 1 - src.pivot.x));
-
-        dst.Clear(default(TPixel));
-
+                            new IntVector2(dw - 1 - src.pivot.y, src.pivot.x));
+        
         int ox = dst.rect.xMin - src.rect.xMin;
         int oy = dst.rect.yMin - src.rect.yMin;
 
@@ -424,9 +422,10 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
             for (int sx = xmin; sx < xmax; ++sx)
             {
                 int rsx = sx - xmin;
+                int rsy = sy - ymin;
 
-                int dx = ox + sy;
-                int dy = oy + ymin + (dh - 1 - rsx);
+                int dx = ox + xmin + (dw - 1 - rsy);
+                int dy = oy + sx;
 
                 int si = sy * sstride + sx;
                 int di = dy * dstride + dx;
@@ -457,6 +456,54 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
     }
 
     public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> sprite,
+                                        float shear,
+                                        TPixel background = default(TPixel))
+    {
+        int ow = sprite.rect.width / 2;
+        int cy = sprite.rect.height / 2;
+
+        var src = sprite;
+        var dst = GetSprite(sprite.rect.width * 2, 
+                            sprite.rect.height, 
+                            new IntVector2(ow * 2, cy));
+        dst.Clear(background);
+
+        int ox = src.rect.xMin - dst.rect.xMin;
+        int oy = src.rect.yMin - dst.rect.yMin;
+
+        int sstride = src.mTexture.width;
+        int dstride = dst.mTexture.width;
+
+        int xmin = src.rect.xMin;
+        int ymin = src.rect.yMin;
+        int xmax = src.rect.xMax;
+        int ymax = src.rect.yMax;
+
+        var dstp = dst.mTexture.pixels;
+        var srcp = src.mTexture.pixels;
+
+        for (int sy = ymin; sy < ymax; ++sy)
+        {
+            int skew = (int) (shear * (sy - src.rect.yMin - cy));
+
+            for (int sx = xmin; sx < xmax; ++sx)
+            {
+                int dx = sx + ox + skew + ow;
+                int dy = sy + oy;
+
+                int di = dy * dstride + dx;
+                int si = sy * sstride + sx;
+
+                if (di >= 0 && di < dstp.Length) dstp[di] = srcp[si];
+            }
+        }
+
+        dst.mTexture.dirty = true;
+
+        return dst;
+    }
+
+    public ManagedSprite<TPixel> ShearX_(ManagedSprite<TPixel> sprite,
                                         float shear,
                                         TPixel background = default(TPixel))
     {
