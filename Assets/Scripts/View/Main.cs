@@ -981,11 +981,14 @@ public class Main : MonoBehaviour
         {
             float a = Mathf.Atan2(delta2.y, delta2.x);
             angles.Enqueue(a);
-
-            if (angles.Count > 3) angles.Dequeue();
-
-            angle = angles.Average();
         }
+        else if (angles.Count > 0)
+        {
+            angles.Enqueue(angles.Peek());
+        }
+
+        if (angles.Count > 3) angles.Dequeue();
+        if (angles.Count > 0) angle = angles.Average();
 
         prev.x = (int)prev.x;
         prev.y = (int)prev.y;

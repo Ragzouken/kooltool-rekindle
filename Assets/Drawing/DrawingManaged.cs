@@ -484,7 +484,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         for (int sy = ymin; sy < ymax; ++sy)
         {
-            int skew = (int) (shear * (sy - src.rect.yMin - cy));
+            int skew = (int) (shear * (sy - src.rect.yMin - cy) + 0.5f);
 
             for (int sx = xmin; sx < xmax; ++sx)
             {
@@ -532,7 +532,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         for (int sy = ymin; sy < ymax; ++sy)
         {
-            int skew = (int) (shear * (sy - src.rect.yMin - cy));
+            int skew = (int) (shear * (sy - src.rect.yMin - cy) + 0.5f);
 
             for (int sx = xmin; sx < xmax; ++sx)
             {
@@ -580,7 +580,7 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         for (int sx = xmin; sx < xmax; ++sx)
         {
-            int skew = (int) (shear * (sx - src.rect.xMin - cx));
+            int skew = (int) (shear * (sx - src.rect.xMin - cx) + 0.5f);
 
             for (int sy = ymin; sy < ymax; ++sy)
             {
