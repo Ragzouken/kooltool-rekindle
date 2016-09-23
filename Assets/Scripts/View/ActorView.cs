@@ -5,25 +5,14 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class ActorView : MonoBehaviour 
+public class ActorView : PoolerInstance<Actor>
 {
     [SerializeField] private new SpriteRenderer renderer;
 
-    public Actor actor { get; private set; }
-
-    public void SetActor(Actor actor)
+    public override void Refresh()
     {
-        this.actor = actor;
-
-        offset = Random.value;
-    }
-
-    private float offset;
-
-    public void Refresh()
-    {
-        transform.position = actor.position.current;
-        renderer.sprite = actor.costume[actor.position.direction];
+        transform.position = shortcut.position.current;
+        renderer.sprite = shortcut.costume[shortcut.position.direction];
         renderer.sortingLayerName = "World - Actors";
     }
 }

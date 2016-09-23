@@ -15,13 +15,11 @@ public class WorldView : ViewComponent<World>
 
     [SerializeField] private ImageGridView backgroundView;
 
-    public MonoBehaviourPooler<Actor, ActorView> actors;
+    public PoolerPro<Actor, ActorView> actors;
 
     private void Awake()
     {
-        actors = new MonoBehaviourPooler<Actor, ActorView>(spritePrefab,
-                                                           actorParent,
-                                                           (a, r) => r.SetActor(a));
+        actors = new PoolerPro<Actor, ActorView>(spritePrefab, actorParent);
     }
 
     public void Setup(World world)
@@ -32,7 +30,7 @@ public class WorldView : ViewComponent<World>
 
     private void Update()
     {
-        actors.MapActive((actor, render) => render.Refresh());
+        actors.Refresh();
 
         backgroundView.Refresh();
     }
