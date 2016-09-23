@@ -139,7 +139,7 @@ public class Main : MonoBehaviour
     [SerializeField]
     private BrushToggle stampPrefab;
 
-    private MonoBehaviourPooler<Stamp, BrushToggle> stampsp;
+    private PoolerPro<Stamp, BrushToggle> stampsp;
 
     public Sprite[] testbrushes;
     private ManagedSprite<byte> brushSpriteD;
@@ -186,7 +186,7 @@ public class Main : MonoBehaviour
             sprites[i].uSprite.name = "Costume " + i;
         }
 
-        stampsp = new MonoBehaviourPooler<Stamp, BrushToggle>(stampPrefab, stampParent, (s, i) => i.SetStamp(s));
+        stampsp = new PoolerPro<Stamp, BrushToggle>(stampPrefab, stampParent);
 
         foreach (var sprite in testbrushes)
         {

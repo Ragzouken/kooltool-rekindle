@@ -5,23 +5,21 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class BrushToggle : MonoBehaviour 
+public class BrushToggle : PoolerInstance<Main.Stamp> 
 {
     [SerializeField] private Main main;
 
     [SerializeField] private Toggle toggle;
     [SerializeField] private Image thumbnail;
 
-    private Main.Stamp stamp;
-
     private void Start()
     {
-        toggle.onValueChanged.AddListener(active => { if (active) main.SetStamp(stamp); });
+        toggle.onValueChanged.AddListener(active => { if (active) main.SetStamp(shortcut); });
     }
 
-    public void SetStamp(Main.Stamp stamp)
+    public override void SetShortcut(Main.Stamp stamp)
     {
-        this.stamp = stamp;
+        base.SetShortcut(stamp);
 
         thumbnail.sprite = stamp.thumbnail;
     }
