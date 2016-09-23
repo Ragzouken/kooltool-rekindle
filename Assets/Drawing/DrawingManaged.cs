@@ -431,6 +431,8 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
             }
         }
 
+        dst.mTexture.dirty = true;
+
         return dst;
     }
 
@@ -451,54 +453,6 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
         return intermediate;
     }
-
-    //public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> sprite,
-    //                                    float shear,
-    //                                    TPixel background = default(TPixel))
-    //{
-    //    int ow = sprite.rect.width / 2;
-    //    int cy = sprite.rect.height / 2;
-
-    //    var src = sprite;
-    //    var dst = GetSprite(sprite.rect.width * 2, 
-    //                        sprite.rect.height, 
-    //                        new IntVector2(ow * 2, sprite.pivot.y));
-    //    dst.Clear(background);
-
-    //    int ox = src.rect.xMin - dst.rect.xMin;
-    //    int oy = src.rect.yMin - dst.rect.yMin;
-
-    //    int sstride = src.mTexture.width;
-    //    int dstride = dst.mTexture.width;
-
-    //    int xmin = src.rect.xMin;
-    //    int ymin = src.rect.yMin;
-    //    int xmax = src.rect.xMax;
-    //    int ymax = src.rect.yMax;
-
-    //    var dstp = dst.mTexture.pixels;
-    //    var srcp = src.mTexture.pixels;
-
-    //    for (int sy = ymin; sy < ymax; ++sy)
-    //    {
-    //        int skew = (int) (shear * (sy - src.rect.yMin - cy) + 0.5f);
-
-    //        for (int sx = xmin; sx < xmax; ++sx)
-    //        {
-    //            int dx = sx + ox + skew + ow;
-    //            int dy = sy + oy;
-
-    //            int di = dy * dstride + dx;
-    //            int si = sy * sstride + sx;
-
-    //            if (di >= 0 && di < dstp.Length) dstp[di] = srcp[si];
-    //        }
-    //    }
-
-    //    dst.mTexture.dirty = true;
-
-    //    return dst;
-    //}
 
     public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> src,
                                         float shear,
