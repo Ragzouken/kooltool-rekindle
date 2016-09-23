@@ -380,55 +380,80 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
 
     private static void Swap<T>(ref T lhs, ref T rhs) { T temp; temp = lhs; lhs = rhs; rhs = temp; }
 
-    public ManagedSprite<TPixel> Rotated(ManagedSprite<TPixel> sprite,
-                                         int rotations)
+    public ManagedSprite<TPixel> Copy(ManagedSprite<TPixel> src)
     {
-        var src = sprite;
-        var dst = GetSprite(sprite.rect.width,
-                            sprite.rect.height,
-                            sprite.pivot);
-        var dst2 = GetSprite(sprite.rect.width,
-                            sprite.rect.height,
-                            sprite.pivot);
+        var dst = GetSprite(src.rect.width,
+                            src.rect.height,
+                            src.pivot);
 
         dst.Blend(src, (c, b) => b);
 
-        int ox = dst2.rect.xMin - dst.rect.xMin;
-        int oy = dst2.rect.yMin - dst.rect.yMin;
+        return dst;
+    }
 
+    public ManagedSprite<TPixel> Rotated1(ManagedSprite<TPixel> src)
+    {
+        int sw = src.rect.width;
+        int sh = src.rect.height;
+
+        int dw = sh;
+        int dh = sw;
+
+        var dst = GetSprite(dw, 
+                            dh,
+                            new IntVector2(src.pivot.y, dh - 1 - src.pivot.x));
+
+        dst.Clear(default(TPixel));
+
+        int ox = dst.rect.xMin - src.rect.xMin;
+        int oy = dst.rect.yMin - src.rect.yMin;
+
+        int sstride = src.mTexture.width;
         int dstride = dst.mTexture.width;
 
-        int xmin = dst.rect.xMin;
-        int ymin = dst.rect.yMin;
-        int xmax = dst.rect.xMax;
-        int ymax = dst.rect.yMax;
+        int xmin = src.rect.xMin;
+        int ymin = src.rect.yMin;
+        int xmax = src.rect.xMax;
+        int ymax = src.rect.yMax;
+        
+        var srcp = src.mTexture.pixels;
+        var dstp = dst.mTexture.pixels;
+
+        for (int sy = ymin; sy < ymax; ++sy)
+        {
+            for (int sx = xmin; sx < xmax; ++sx)
+            {
+                int rsx = sx - xmin;
+
+                int dx = ox + sy;
+                int dy = oy + ymin + (dh - 1 - rsx);
+
+                int si = sy * sstride + sx;
+                int di = dy * dstride + dx;
+
+                dstp[di] = srcp[si];
+            }
+        }
+
+        return dst;
+    }
+
+    public ManagedSprite<TPixel> Rotated(ManagedSprite<TPixel> sprite,
+                                         int rotations)
+    {
+        var intermediate = Copy(sprite);
 
         for (int i = 0; i < rotations; ++i)
         {
-            var dstp = dst.mTexture.pixels;
-            var dstp2 = dst2.mTexture.pixels;
+            var next = Rotated1(intermediate);
 
-            for (int sy = ymin; sy < ymax; ++sy)
-            {
-                for (int sx = xmin; sx < xmax; ++sx)
-                {
-                    int dx = sy + ox;
-                    int dy = ymax - (sx - xmin);
+            FreeTexture(intermediate.mTexture);
+            FreeSprite(intermediate);
 
-                    int di = dy * dstride + dx;
-                    int si = sy * dstride + sx;
-
-                    dstp2[di] = dstp[si];
-                }
-            }
-
-            Swap(ref dst, ref dst2);
+            intermediate = next;
         }
 
-        FreeTexture(dst2.mTexture);
-        FreeSprite(dst2);
-
-        return dst;
+        return intermediate;
     }
 
     public ManagedSprite<TPixel> ShearX(ManagedSprite<TPixel> sprite,

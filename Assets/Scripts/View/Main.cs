@@ -1132,6 +1132,8 @@ public class Main : MonoBehaviour
         TextureByte.Pooler.Instance.FreeTexture(shearSprite3.mTexture);
         TextureByte.Pooler.Instance.FreeSprite(shearSprite3);
 
+        //var shearSprite4 = shearSprite1;
+
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
