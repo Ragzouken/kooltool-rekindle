@@ -3215,6 +3215,9 @@ MonoBehaviour:
   actorSetup:
     prefab: {fileID: 1125800758}
     parent: {fileID: 1509884782}
+  testSetup:
+    prefab: {fileID: 600304367}
+    parent: {fileID: 1685090853}
 --- !u!1 &283888057
 GameObject:
   m_ObjectHideFlags: 0
@@ -5798,7 +5801,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &596571365
 Transform:
   m_ObjectHideFlags: 0

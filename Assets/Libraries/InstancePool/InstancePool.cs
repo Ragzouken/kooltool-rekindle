@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Assertions;
+using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -158,86 +159,150 @@ public abstract class InstancePool<TConfig, TInstance>
     }
 }
 
-// TODO: thing to convert MonoBehaviour into IConfigView
-
-    /*
-public class AnonymousView<TConfig> : IConfigView<TConfig>
+[Serializable]
+public class InstancePoolSetup
 {
-    public TConfig config { get; protected set; }
+    public GameObject prefab;
+    public Transform parent;
 
-    protected Action DoConfigure;
-    protected Action DoCleanup;
-    protected Action DoRefresh;
-
-    public AnonymousView(Action DoConfigure = null, 
-                         Action DoCleanup = null,
-                         Action DoRefresh = null)
+    private TInstance GetConcretePrefab<TInstance>()
+        where TInstance : class
     {
-        this.DoConfigure = DoConfigure ?? delegate { };
-        this.DoCleanup   = DoCleanup ?? delegate { };
-        this.DoRefresh   = DoRefresh ?? delegate { };
+        var prefab = this.prefab.GetComponent<TInstance>();
+
+        Assert.IsNotNull(prefab, string.Format("Prefab {0} is missing {1} component", 
+                                               this.prefab.name,
+                                               typeof(TInstance).Name));
+
+        return prefab;
+    }
+
+    public InstancePool<TConfig> Finalise<TConfig>(bool sort=true)
+    {
+        var prefab = GetConcretePrefab<InstanceView<TConfig>>();
+
+        return new InstancePool<TConfig>(prefab, parent, sort: sort);
+    }
+
+    public AnonymousPool<TConfig, TInstance> Finalise<TConfig, TInstance>(Action<TConfig, TInstance> Configure = null,
+                                                                          Action<TConfig, TInstance> Refresh   = null,
+                                                                          Action<TInstance>          Cleanup   = null,
+                                                                          bool sort=true)
+        where TInstance : Component
+    {
+        var prefab = GetConcretePrefab<TInstance>();
+
+        return new AnonymousPool<TConfig, TInstance>(prefab,
+                                                     parent,
+                                                     Configure,
+                                                     Refresh,
+                                                     Cleanup,
+                                                     sort: sort);
+    }
+}
+
+public class AnonymousView<TConfig, TInstance> : IConfigView<TConfig>
+{
+    public TConfig config { get; private set; }
+    public TInstance instance { get; private set; }
+
+    private Action<TConfig, TInstance> DoConfigure;
+    private Action<TConfig, TInstance> DoRefresh;
+    private Action<TInstance> DoCleanup;
+
+    public AnonymousView(TInstance instance,
+                         Action<TConfig, TInstance> Configure = null,
+                         Action<TConfig, TInstance> Refresh   = null,
+                         Action<TInstance>          Cleanup   = null)
+    {
+        this.instance = instance;
+
+        DoConfigure = Configure ?? delegate { };
+        DoRefresh   = Refresh   ?? delegate { };
+        DoCleanup   = Cleanup   ?? delegate { };
     }
 
     public void SetConfig(TConfig config)
     {
         this.config = config;
 
-        DoConfigure();
-    }
-
-    public void Cleanup()
-    {
-        DoCleanup();
+        DoConfigure(config, instance);
     }
 
     public void Refresh()
     {
-        DoRefresh();
+        DoRefresh(config, instance);
     }
 
+    public void Cleanup()
+    {
+        DoCleanup(instance);
+    }
 }
 
-public class InstancePoolP<TConfig> : InstancePool<TConfig, AnonymousView<TConfig>>
+public class AnonymousPool<TConfig, TInstance> : InstancePool<TConfig, AnonymousView<TConfig, TInstance>>
+    where TInstance : Component
 {
-    protected MonoBehaviour prefab;
+    protected TInstance prefab;
     protected Transform parent;
     protected bool sort;
 
-    protected Func<AnonymousView<TConfig>> Instantiate;
+    protected Action<TConfig, TInstance> DoConfigure;
+    protected Action<TConfig, TInstance> DoRefresh;
+    protected Action<TInstance>          DoCleanup;
 
-    public InstancePoolP(MonoBehaviour prefab, 
-                         Transform parent, 
+    public AnonymousPool(TInstance prefab,
+                         Transform parent,
+                         Action<TConfig, TInstance> Configure = null,
+                         Action<TConfig, TInstance> Refresh   = null,
+                         Action<TInstance>          Cleanup   = null,
                          bool sort=true)
     {
         this.prefab = prefab;
         this.parent = parent;
         this.sort = sort;
+
+        DoConfigure = Configure ?? delegate { };
+        DoRefresh   = Refresh   ?? delegate { };
+        DoCleanup   = Cleanup   ?? delegate { };
     }
 
-    public void Finalise<TInstance>(TInstance prefab)
-        where TInstance : MonoBehaviour
+    protected override AnonymousView<TConfig, TInstance> CreateNew()
     {
+        var instance = UnityEngine.Object.Instantiate(prefab);
 
+        return new AnonymousView<TConfig, TInstance>(instance,
+                                                     DoConfigure,
+                                                     DoRefresh,
+                                                     DoCleanup);
     }
 
-    protected override AnonymousView<TConfig> CreateNew()
+    protected override void Configure(TConfig config, AnonymousView<TConfig, TInstance> instance)
     {
-        return Instantiate();
+        instance.instance.transform.SetParent(parent, false);
+        instance.instance.gameObject.SetActive(true);
+
+        base.Configure(config, instance);
     }
-}
-*/
 
-[System.Serializable]
-public class InstancePoolSetup
-{
-    public GameObject prefab;
-    public Transform parent;
-
-    public InstancePool<TConfig> Finalise<TConfig>(bool sort=true)
+    protected override void Cleanup(TConfig config, AnonymousView<TConfig, TInstance> instance)
     {
-        var prefab = this.prefab.GetComponent<InstanceView<TConfig>>();
+        instance.instance.gameObject.SetActive(false);
 
-        return new InstancePool<TConfig>(prefab, parent, sort: sort);
+        base.Cleanup(config, instance);
+    }
+
+    public override void SetActive(IEnumerable<TConfig> active)
+    {
+        base.SetActive(active);
+
+        if (sort)
+        {
+            foreach (TConfig shortcut in active)
+            {
+                Get(shortcut).instance.transform.SetAsLastSibling();
+            }
+        }
     }
 }
 
@@ -256,7 +321,7 @@ public class InstancePool<TConfig> : InstancePool<TConfig, InstanceView<TConfig>
 
     protected override InstanceView<TConfig> CreateNew()
     {
-        return Object.Instantiate(prefab);
+        return UnityEngine.Object.Instantiate(prefab);
     }
 
     protected override void Configure(TConfig config, InstanceView<TConfig> instance)

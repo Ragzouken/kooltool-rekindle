@@ -16,9 +16,16 @@ public class WorldView : InstanceView<World>
 
     public InstancePool<Actor> actors;
 
+    [SerializeField] private InstancePoolSetup testSetup;
+    public AnonymousPool<Color, SpriteRenderer> test;
+
     private void Awake()
     {
         actors = actorSetup.Finalise<Actor>(sort: false);
+
+        test = testSetup.Finalise<Color, SpriteRenderer>((c, r) => r.color = c);
+
+        test.SetActive(Enumerable.Range(0, 5).Select(i => Color.red * Random.value));
     }
 
     protected override void Configure()
