@@ -196,14 +196,6 @@ public class InstancePool<TConfig>
         this.parent = parent;
     }
 
-    public InstanceView<TConfig> this[TConfig config]
-    {
-        get
-        {
-            return Get(config);
-        }
-    }
-
     protected InstanceView<TConfig> New(TConfig config)
     {
         InstanceView<TConfig> instance;
@@ -231,7 +223,7 @@ public class InstancePool<TConfig>
         {
             instance = New(config);
         }
-
+        
         return instance;
     }
 
