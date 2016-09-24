@@ -25,7 +25,7 @@ public class WorldView : InstanceView<World>
 
         test = testSetup.Finalise<Color, SpriteRenderer>((c, r) => r.color = c);
 
-        test.SetActive(Enumerable.Range(0, 5).Select(i => Color.red * Random.value));
+        test.SetActive(Enumerable.Range(0, 5).Select(i => Color.red * Random.value).ToList());
     }
 
     protected override void Configure()
