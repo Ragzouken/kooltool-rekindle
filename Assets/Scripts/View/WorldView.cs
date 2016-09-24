@@ -15,11 +15,11 @@ public class WorldView : ViewComponent<World>
 
     [SerializeField] private ImageGridView backgroundView;
 
-    public PoolerPro<Actor, ActorView> actors;
+    public InstancePool<Actor, ActorView> actors;
 
     private void Awake()
     {
-        actors = new PoolerPro<Actor, ActorView>(spritePrefab, actorParent);
+        actors = new InstancePool<Actor, ActorView>(spritePrefab, actorParent);
     }
 
     public void Setup(World world)

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public class Trail : MonoBehaviour 
 {
-    private class Particle
+    public class Particle
     {
         public Vector3 position;
         public float lifetime;
@@ -17,9 +17,9 @@ public class Trail : MonoBehaviour
     public CameraController cam;
 
     [SerializeField] private Transform particleParent;
-    [SerializeField] private SpriteRenderer particlePrefab;
+    [SerializeField] private ParticleView particlePrefab;
 
-    private MonoBehaviourPooler<Particle, SpriteRenderer> renderers;
+    private InstancePool<Particle, ParticleView> particles_;
 
     private List<Particle> particles = new List<Particle>();
 
@@ -28,13 +28,8 @@ public class Trail : MonoBehaviour
 
     private void Awake()
     {
-        renderers = new MonoBehaviourPooler<Particle, SpriteRenderer>(particlePrefab,
-                                                                      particleParent,
-                                                                      (p, r) => 
-                                                                      {
-                                                                          r.transform.position = p.position;
-                                                                          r.GetComponent<CycleHue>().period = Random.value;
-                                                                      } );
+        particles_ = new InstancePool<Particle, ParticleView>(particlePrefab,
+                                                              particleParent);
 
         prev = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }
@@ -57,17 +52,8 @@ public class Trail : MonoBehaviour
         }
 
         particles.RemoveAll(p => p.lifetime <= 0);
-        renderers.SetActive(particles);
-        renderers.MapActive((p, r) =>
-        {
-            int size = Mathf.FloorToInt(p.lifetime) + 1;
-            r.sprite = Global.Instance.circles[size * 2];
-
-            var cycle = r.GetComponent<CycleHue>();
-
-            cycle.period = (p.offset + p.lifetime) % 1;
-            cycle.Lightness = (int) (75 + 25 * Mathf.PingPong(p.lifetime, 1));
-        });
+        particles_.SetActive(particles);
+        particles_.Refresh();
 
         float u = ((Time.timeSinceLevelLoad * 2) % 1);
         float angle = u * Mathf.PI * 2;
@@ -78,15 +64,15 @@ public class Trail : MonoBehaviour
 
         next = cam.focusTarget + offset * 8;
 
-        Bresenham.Line((int)prev.x, (int)prev.y, (int)next.x, (int)next.y, (x, y) =>
+        Bresenham.Line((int) prev.x, (int) prev.y, (int) next.x, (int) next.y, (Bresenham.PlotFunction)((x, y) =>
         {
-            particles.Add(new Particle
+            this.particles.Add(new Particle
             {
                 position = new Vector2(x, y),
                 lifetime = 4,
                 offset = Random.value,
             });
-        });
+        }));
 
         prev = next;
     }

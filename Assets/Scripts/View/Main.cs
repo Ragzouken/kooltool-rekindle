@@ -139,7 +139,7 @@ public class Main : MonoBehaviour
     [SerializeField]
     private BrushToggle stampPrefab;
 
-    private PoolerPro<Stamp, BrushToggle> stampsp;
+    private InstancePool<Stamp, BrushToggle> stampsp;
 
     public Sprite[] testbrushes;
     private ManagedSprite<byte> brushSpriteD;
@@ -186,7 +186,7 @@ public class Main : MonoBehaviour
             sprites[i].uSprite.name = "Costume " + i;
         }
 
-        stampsp = new PoolerPro<Stamp, BrushToggle>(stampPrefab, stampParent);
+        stampsp = new InstancePool<Stamp, BrushToggle>(stampPrefab, stampParent);
 
         foreach (var sprite in testbrushes)
         {
@@ -856,7 +856,7 @@ public class Main : MonoBehaviour
         nextCursor = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
 
-        worldView.actors.SetActive(project.world.actors);
+        worldView.actors.SetActive(project.world.actors, sort: false);
 
         CheckHotkeys();
 

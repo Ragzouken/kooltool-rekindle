@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class BrushToggle : PoolerInstance<Main.Stamp> 
+public class BrushToggle : InstanceView<Main.Stamp> 
 {
     [SerializeField] private Main main;
 
@@ -14,12 +14,12 @@ public class BrushToggle : PoolerInstance<Main.Stamp>
 
     private void Start()
     {
-        toggle.onValueChanged.AddListener(active => { if (active) main.SetStamp(shortcut); });
+        toggle.onValueChanged.AddListener(active => { if (active) main.SetStamp(config); });
     }
 
-    public override void SetShortcut(Main.Stamp stamp)
+    public override void Configure(Main.Stamp stamp)
     {
-        base.SetShortcut(stamp);
+        base.Configure(stamp);
 
         thumbnail.sprite = stamp.thumbnail;
     }

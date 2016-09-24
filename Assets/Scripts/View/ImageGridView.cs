@@ -2,23 +2,14 @@
 
 public class ImageGridView : ViewComponent<ImageGrid> 
 {
-    [SerializeField] private SpriteRenderer cellPrefab;
+    [SerializeField] private ImageCellView cellPrefab;
     [SerializeField] private Transform cellParent;
 
-    private MonoBehaviourPooler<IntVector2, SpriteRenderer> cells;
+    private InstancePool<IntVector2, ImageCellView> cells;
 
     private void Awake()
     {
-        cells = new MonoBehaviourPooler<IntVector2, SpriteRenderer>(cellPrefab,
-                                                               cellParent,
-                                                               InitCell);
-    }
-
-    private void InitCell(IntVector2 cell, SpriteRenderer renderer)
-    {
-        renderer.transform.localPosition = cell * model.cellSize;
-        renderer.sprite = model.cells[cell];
-        renderer.sortingLayerName = "World - Background";
+        cells = new InstancePool<IntVector2, ImageCellView>(cellPrefab, cellParent);
     }
 
     public void Setup(ImageGrid grid)
@@ -31,6 +22,6 @@ public class ImageGridView : ViewComponent<ImageGrid>
     public void Refresh()
     {
         cells.SetActive(model.cells.Keys);
-        cells.MapActive(InitCell);
+        cells.Refresh();
     }
 }

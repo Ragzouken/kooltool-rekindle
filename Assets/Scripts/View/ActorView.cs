@@ -5,14 +5,14 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class ActorView : PoolerInstance<Actor>
+public class ActorView : InstanceView<Actor>
 {
     [SerializeField] private new SpriteRenderer renderer;
 
     public override void Refresh()
     {
-        transform.position = shortcut.position.current;
-        renderer.sprite = shortcut.costume[shortcut.position.direction];
+        transform.position = config.position.current;
+        renderer.sprite = config.costume[config.position.direction];
         renderer.sortingLayerName = "World - Actors";
     }
 }
