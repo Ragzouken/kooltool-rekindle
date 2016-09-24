@@ -12,13 +12,6 @@ public class ImageGridView : InstanceView<ImageGrid>
         cells = new InstancePool<IntVector2, ImageCellView>(cellPrefab, cellParent);
     }
 
-    public override void Configure(ImageGrid grid)
-    {
-        base.Configure(grid);
-
-        Refresh();
-    }
-
     public override void Refresh()
     {
         cells.SetActive(config.cells.Keys);

@@ -10,10 +10,8 @@ public class ParticleView : InstanceView<Trail.Particle>
     [SerializeField] new private SpriteRenderer renderer;
     [SerializeField] private CycleHue cycle;
 
-    public override void Configure(Trail.Particle config)
+    protected override void Configure()
     {
-        base.Configure(config);
-
         transform.position = config.position;
         cycle.period = Random.value;
     }

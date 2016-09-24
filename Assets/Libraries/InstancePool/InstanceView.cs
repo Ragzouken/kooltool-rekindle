@@ -6,22 +6,18 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class InstanceView<TConfig> : MonoBehaviour
+public abstract class InstanceView<TConfig> : MonoBehaviour
 {
-    public TConfig config { get; protected set; }
+    public TConfig config { get; private set; }
 
-    public virtual void Configure(TConfig config)
+    public void SetConfig(TConfig config)
     {
         this.config = config;
+
+        Configure();
     }
 
-    public virtual void Cleanup()
-    {
-
-    }
-
-    public virtual void Refresh()
-    {
-
-    }
+    protected virtual void Configure() { Refresh(); }
+    public virtual void Cleanup() { }
+    public virtual void Refresh() { }
 }

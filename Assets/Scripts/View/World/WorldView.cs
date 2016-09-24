@@ -22,11 +22,9 @@ public class WorldView : InstanceView<World>
         actors = new InstancePool<Actor, ActorView>(actorPrefab, actorParent);
     }
 
-    public override void Configure(World world)
+    protected override void Configure()
     {
-        base.Configure(world);
-
-        backgroundView.Configure(world.background);
+        backgroundView.SetConfig(config.background);
     }
 
     public override void Refresh()

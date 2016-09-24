@@ -11,19 +11,14 @@ public class ImageCellView : InstanceView<IntVector2>
     [SerializeField] new private SpriteRenderer renderer;
     [SerializeField] private ImageGridView grid;
 
-    public override void Configure(IntVector2 cell)
+    protected override void Configure()
     {
-        base.Configure(cell);
-
-        renderer.transform.localPosition = cell * grid.model.cellSize;
-        renderer.sprite = grid.model.cells[cell];
-        renderer.sortingLayerName = "World - Background";
+        renderer.transform.localPosition = config * grid.config.cellSize;
+        renderer.sprite = grid.config.cells[config];
     }
 
     public override void Refresh()
     {
-        base.Refresh();
-
-        renderer.sprite = grid.model.cells[config];
+        renderer.sprite = grid.config.cells[config];
     }
 }

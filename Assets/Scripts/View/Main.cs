@@ -721,7 +721,7 @@ public class Main : MonoBehaviour
     {
         this.project = project;
 
-        worldView.Configure(project.world);
+        worldView.SetConfig(project.world);
         palettePanel.SetWorld(project.world);
 
         for (int i = 0; i < 16; ++i)

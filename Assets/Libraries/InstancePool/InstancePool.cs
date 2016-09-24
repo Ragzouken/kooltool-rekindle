@@ -95,7 +95,7 @@ public class InstancePool<TConfig, TInstance>
 
         instances.Add(config, instance);
 
-        instance.Configure(config);
+        instance.SetConfig(config);
     }
 
     protected virtual void Cleanup(TConfig config, TInstance instance)

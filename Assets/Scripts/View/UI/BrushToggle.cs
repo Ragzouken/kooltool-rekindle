@@ -17,10 +17,8 @@ public class BrushToggle : InstanceView<Main.Stamp>
         toggle.onValueChanged.AddListener(active => { if (active) main.SetStamp(config); });
     }
 
-    public override void Configure(Main.Stamp stamp)
+    protected override void Configure()
     {
-        base.Configure(stamp);
-
-        thumbnail.sprite = stamp.thumbnail;
+        thumbnail.sprite = config.thumbnail;
     }
 }
