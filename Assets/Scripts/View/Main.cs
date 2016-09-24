@@ -532,33 +532,6 @@ public class Main : MonoBehaviour
     {
         var pan = input.move.Value;
 
-        Position.Direction direction = Position.Direction.Down;
-        bool change = false;
-
-        if (Input.GetKey(KeyCode.RightArrow))
-        {
-            direction = Position.Direction.Right;
-            change = true;
-        }
-
-        if (Input.GetKey(KeyCode.LeftArrow))
-        {
-            direction = Position.Direction.Left;
-            change = true;
-        }
-
-        if (Input.GetKey(KeyCode.UpArrow))
-        {
-            direction = Position.Direction.Up;
-            change = true;
-        }
-
-        if (Input.GetKey(KeyCode.DownArrow))
-        {
-            direction = Position.Direction.Down;
-            change = true;
-        }
-
         /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
@@ -574,19 +547,6 @@ public class Main : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Slash))
         {
             //PerfTest();
-        }
-
-        if (possessed != null)
-        {
-            cameraController.focusTarget = worldView.actors.Get(possessed).transform.localPosition;
-
-            if (!possessed.position.moving)
-            {
-                possessed.position.next = possessed.position.prev + pan * 32;
-                if (change) possessed.position.direction = direction;
-            }
-
-            pan = Vector2.zero;
         }
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
@@ -661,32 +621,6 @@ public class Main : MonoBehaviour
         {
             Redo();
         }
-
-        if (input.cancel.WasPressed)
-        {
-            if (hud.mode == HUD.Mode.Draw)
-            {
-                if (palettePanel.mode == PalettePanel.Mode.Colors)
-                {
-                    palettePanel.SetMode(PalettePanel.Mode.Paint);
-                }
-                else if (palettePanel.mode == PalettePanel.Mode.Paint)
-                {
-                    hud.mode = HUD.Mode.Switch;
-                }
-            }
-            else if (hud.mode == HUD.Mode.Character)
-            {
-                hud.mode = HUD.Mode.Switch;
-            }
-        }
-
-        /*
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            TestCopy();
-        }
-        */
     }
 
     private void TestCopy()
@@ -1045,6 +979,12 @@ public class Main : MonoBehaviour
 
     private void UpdateColorsInput()
     {
+        if (input.cancel.WasPressed)
+        {
+            palettePanel.SetMode(PalettePanel.Mode.Colors);
+            return;
+        }
+
         if (!mouseOverUI)
         {
             SetCursorSprite(pickCursor);
@@ -1060,6 +1000,12 @@ public class Main : MonoBehaviour
 
     private void UpdatePaintInput()
     {
+        if (input.cancel.WasPressed)
+        {
+            hud.mode = HUD.Mode.Switch;
+            return;
+        }
+
         brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
 
@@ -1133,6 +1079,12 @@ public class Main : MonoBehaviour
 
     private void UpdateCharacterInput()
     {
+        if (input.cancel.WasPressed)
+        {
+            hud.mode = HUD.Mode.Switch;
+            return;
+        }
+
         Actor hoveredActor;
         
         project.world.TryGetActor(next, out hoveredActor, 0);
@@ -1145,6 +1097,36 @@ public class Main : MonoBehaviour
         if (possessedActor != null)
         {
             cameraController.focusTarget = possessedActor.position.current;
+
+            if (!possessedActor.position.moving)
+            {
+                var move = Vector2.zero;
+                var direction = possessedActor.position.direction;
+
+                if (input.move.Left.IsPressed)
+                {
+                    move = Vector2.left * 32;
+                    direction = Position.Direction.Left;
+                }
+                else if (input.move.Right.IsPressed)
+                {
+                    move = Vector2.right * 32;
+                    direction = Position.Direction.Right;
+                }
+                else if (input.move.Up.IsPressed)
+                {
+                    move = Vector2.up * 32;
+                    direction = Position.Direction.Up;
+                }
+                else if (input.move.Down.IsPressed)
+                {
+                    move = Vector2.down * 32;
+                    direction = Position.Direction.Down;
+                }
+
+                possessedActor.position.next = possessedActor.position.prev + move;
+                possessedActor.position.direction = direction;
+            }
         }
     }
 
