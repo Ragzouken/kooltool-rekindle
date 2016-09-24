@@ -160,6 +160,87 @@ public abstract class InstancePool<TConfig, TInstance>
 
 // TODO: thing to convert MonoBehaviour into IConfigView
 
+    /*
+public class AnonymousView<TConfig> : IConfigView<TConfig>
+{
+    public TConfig config { get; protected set; }
+
+    protected Action DoConfigure;
+    protected Action DoCleanup;
+    protected Action DoRefresh;
+
+    public AnonymousView(Action DoConfigure = null, 
+                         Action DoCleanup = null,
+                         Action DoRefresh = null)
+    {
+        this.DoConfigure = DoConfigure ?? delegate { };
+        this.DoCleanup   = DoCleanup ?? delegate { };
+        this.DoRefresh   = DoRefresh ?? delegate { };
+    }
+
+    public void SetConfig(TConfig config)
+    {
+        this.config = config;
+
+        DoConfigure();
+    }
+
+    public void Cleanup()
+    {
+        DoCleanup();
+    }
+
+    public void Refresh()
+    {
+        DoRefresh();
+    }
+
+}
+
+public class InstancePoolP<TConfig> : InstancePool<TConfig, AnonymousView<TConfig>>
+{
+    protected MonoBehaviour prefab;
+    protected Transform parent;
+    protected bool sort;
+
+    protected Func<AnonymousView<TConfig>> Instantiate;
+
+    public InstancePoolP(MonoBehaviour prefab, 
+                         Transform parent, 
+                         bool sort=true)
+    {
+        this.prefab = prefab;
+        this.parent = parent;
+        this.sort = sort;
+    }
+
+    public void Finalise<TInstance>(TInstance prefab)
+        where TInstance : MonoBehaviour
+    {
+
+    }
+
+    protected override AnonymousView<TConfig> CreateNew()
+    {
+        return Instantiate();
+    }
+}
+*/
+
+[System.Serializable]
+public class InstancePoolSetup
+{
+    public GameObject prefab;
+    public Transform parent;
+
+    public InstancePool<TConfig> Finalise<TConfig>(bool sort=true)
+    {
+        var prefab = this.prefab.GetComponent<InstanceView<TConfig>>();
+
+        return new InstancePool<TConfig>(prefab, parent, sort: sort);
+    }
+}
+
 public class InstancePool<TConfig> : InstancePool<TConfig, InstanceView<TConfig>>
 {
     protected InstanceView<TConfig> prefab;

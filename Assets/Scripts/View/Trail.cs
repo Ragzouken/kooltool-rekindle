@@ -16,8 +16,7 @@ public class Trail : MonoBehaviour
 
     public CameraController cam;
 
-    [SerializeField] private Transform particleParent;
-    [SerializeField] private ParticleView particlePrefab;
+    [SerializeField] private InstancePoolSetup particlesSetup;
 
     private InstancePool<Particle> particles_;
 
@@ -28,7 +27,7 @@ public class Trail : MonoBehaviour
 
     private void Awake()
     {
-        particles_ = new InstancePool<Particle>(particlePrefab, particleParent);
+        particles_ = particlesSetup.Finalise<Particle>(sort: false);
 
         prev = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }

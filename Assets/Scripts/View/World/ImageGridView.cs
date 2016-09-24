@@ -2,14 +2,13 @@
 
 public class ImageGridView : InstanceView<ImageGrid> 
 {
-    [SerializeField] private ImageCellView cellPrefab;
-    [SerializeField] private Transform cellParent;
+    [SerializeField] private InstancePoolSetup cellSetup;
 
     private InstancePool<IntVector2> cells;
 
     private void Awake()
     {
-        cells = new InstancePool<IntVector2>(cellPrefab, cellParent);
+        cells = cellSetup.Finalise<IntVector2>();
     }
 
     public override void Refresh()

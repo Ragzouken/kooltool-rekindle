@@ -7,19 +7,18 @@ using System.Collections.Generic;
 
 public class WorldView : InstanceView<World> 
 {
-    [SerializeField] private ActorView actorPrefab;
-
     [SerializeField] private Transform belowTileParent;
     [SerializeField] private Transform aboveTileParent;
-    [SerializeField] private Transform actorParent;
 
     [SerializeField] private ImageGridView backgroundView;
+
+    [SerializeField] private InstancePoolSetup actorSetup;
 
     public InstancePool<Actor> actors;
 
     private void Awake()
     {
-        actors = new InstancePool<Actor>(actorPrefab, actorParent, sort: false);
+        actors = actorSetup.Finalise<Actor>(sort: false);
     }
 
     protected override void Configure()
