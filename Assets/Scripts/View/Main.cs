@@ -842,6 +842,9 @@ public class Main : MonoBehaviour
         borderSprite1.mTexture.Apply();
     }
 
+    Vector2 prev, next;
+    bool mouseHold, mousePress;
+
     private void Update()
     {
         ///System.GC.Collect();
@@ -968,15 +971,16 @@ public class Main : MonoBehaviour
             nextCursor = ray.GetPoint(t);
         }
 
-        bool mouseHold  = Input.GetMouseButton(0);
-        bool mousePress = Input.GetMouseButtonDown(0) && !mouseOverUI;
+        mouseHold  = Input.GetMouseButton(0);
+        mousePress = Input.GetMouseButtonDown(0) && !mouseOverUI;
 
         bool mouse = Input.GetMouseButton(0) && !mouseOverUI;
         bool gamep = input.click.IsPressed && !hovering;
 
-        Vector2 prev = gamep ? prevCursor : prevMouse;
-        Vector2 next = gamep ? nextCursor : nextMouse;
+        prev = gamep ? prevCursor : prevMouse;
+        next = gamep ? nextCursor : nextMouse;
 
+        #region angle bullshit
         var delta2 = next - prev;
         if (delta2.magnitude > 1)
         {
@@ -990,40 +994,58 @@ public class Main : MonoBehaviour
 
         if (angles.Count > 3) angles.Dequeue();
         if (angles.Count > 0) angle = angles.Average();
+        #endregion
 
         prev.x = (int)prev.x;
         prev.y = (int)prev.y;
         next.x = (int)next.x;
         next.y = (int)next.y;
 
-        byte value = (byte) palettePanel.selected;
-        Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
-
-        Actor actor_;
-
-        bool draw = !mouseOverUI
-                 && hud.mode == HUD.Mode.Draw
-                 && palettePanel.mode == PalettePanel.Mode.Paint;
-
-        brushRenderer.gameObject.SetActive(draw);
-        brushRenderer.sprite = brushSpriteD.uSprite;
-        brushRenderer.transform.position = next;
-
-        RefreshBrushCursor();
-
-        if (project.world.TryGetActor(next, out actor_, 0))
+        SetCursorSprite(normalCursor);
+        
+        if (hud.mode == HUD.Mode.Draw && palettePanel.mode == PalettePanel.Mode.Paint)
         {
-            brushRenderer.sortingLayerName = "World - Actors";
-            brushRenderer.sortingOrder = 1;
+            UpdatePaintInput();
         }
         else
         {
-            brushRenderer.sortingLayerName = "World - Background";
-            brushRenderer.sortingOrder = 1;
+            CleanupPaint();
         }
 
-        if (!mouseOverUI
-         && palettePanel.mode == PalettePanel.Mode.Colors)
+        if (hud.mode == HUD.Mode.Draw && palettePanel.mode == PalettePanel.Mode.Colors)
+        {
+            UpdateColorsInput();
+        }
+
+        if (hud.mode == HUD.Mode.Character)
+        {
+            UpdateCharacterInput();
+        }
+        else
+        {
+            CleanupCharacter();
+        }
+
+        prevMouse = nextMouse;
+        prevCursor = nextCursor;
+    }
+
+    private void EndStroke()
+    {
+        dragging_ = false;
+        targetActor = null;
+        stippleOffset = 0;
+
+        if (changes != null)
+        {
+            Do(changes);
+            changes = null;
+        }
+    }
+
+    private void UpdateColorsInput()
+    {
+        if (!mouseOverUI)
         {
             SetCursorSprite(pickCursor);
 
@@ -1034,27 +1056,33 @@ public class Main : MonoBehaviour
                 palettePanel.SelectPaletteIndex(index);
             }
         }
+    }
+
+    private void UpdatePaintInput()
+    {
+        brushRenderer.sprite = brushSpriteD.uSprite;
+        brushRenderer.transform.position = next;
+
+        RefreshBrushCursor();
+
+        Actor actor;
+
+        if (project.world.TryGetActor(next, out actor, 0))
+        {
+            brushRenderer.sortingLayerName = "World - Actors";
+            brushRenderer.sortingOrder = 1;
+        }
         else
         {
-            if (mouseOverUI)
-            {
-                SetCursorSprite(normalCursor);
-            }
-            else if (stampToggle.isOn)
-            {
-                SetCursorSprite(stampCursor);
-            }
-            else
-            { 
-                SetCursorSprite(normalCursor);
-            }
+            brushRenderer.sortingLayerName = "World - Background";
+            brushRenderer.sortingOrder = 1;
         }
-        
+
+        brushRenderer.gameObject.SetActive(dragging_ || !mouseOverUI);
+
         bool mouseCounts = (dragging_ && mouseHold) || mousePress;
 
-        if ((mouseCounts || gamep) 
-         && hud.mode == HUD.Mode.Draw
-         && palettePanel.mode == PalettePanel.Mode.Paint)
+        if (mouseCounts)
         {
             if (!dragging_)
             {
@@ -1070,6 +1098,9 @@ public class Main : MonoBehaviour
                                                 (canvas, brush) => brush == 0 ? canvas : brush,
                                                 (int) stippleSlider.value,
                                                 ref stippleOffset);
+
+                byte value = (byte) palettePanel.selected;
+                Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
 
                 if (targetActor != null)
                 {
@@ -1088,18 +1119,38 @@ public class Main : MonoBehaviour
         }
         else
         {
-            dragging_ = false;
-            stippleOffset = 0;
+            EndStroke();
+        }
+    }
 
-            if (changes != null)
-            {
-                Do(changes);
-                changes = null;
-            }
+    private void CleanupPaint()
+    {
+        brushRenderer.gameObject.SetActive(false);
+        EndStroke();
+    }
+
+    private Actor possessedActor;
+
+    private void UpdateCharacterInput()
+    {
+        Actor hoveredActor;
+        
+        project.world.TryGetActor(next, out hoveredActor, 0);
+
+        if (mousePress && hoveredActor != null)
+        {
+            possessedActor = hoveredActor;
         }
 
-        prevMouse = nextMouse;
-        prevCursor = nextCursor;
+        if (possessedActor != null)
+        {
+            cameraController.focusTarget = possessedActor.position.current;
+        }
+    }
+
+    private void CleanupCharacter()
+    {
+        possessedActor = null;
     }
 
     private ManagedSprite<byte> shearSprite;
