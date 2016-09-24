@@ -721,7 +721,7 @@ public class Main : MonoBehaviour
     {
         this.project = project;
 
-        worldView.Setup(project.world);
+        worldView.Configure(project.world);
         palettePanel.SetWorld(project.world);
 
         for (int i = 0; i < 16; ++i)
@@ -872,6 +872,7 @@ public class Main : MonoBehaviour
         float interval = 0.1f;
 
         project.world.timer += Time.deltaTime;
+        worldView.Refresh();
 
         while (project.world.timer > interval)
         {

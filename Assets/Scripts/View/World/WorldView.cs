@@ -5,9 +5,9 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class WorldView : ViewComponent<World> 
+public class WorldView : InstanceView<World> 
 {
-    [SerializeField] private ActorView spritePrefab;
+    [SerializeField] private ActorView actorPrefab;
 
     [SerializeField] private Transform belowTileParent;
     [SerializeField] private Transform aboveTileParent;
@@ -19,17 +19,21 @@ public class WorldView : ViewComponent<World>
 
     private void Awake()
     {
-        actors = new InstancePool<Actor, ActorView>(spritePrefab, actorParent);
+        actors = new InstancePool<Actor, ActorView>(actorPrefab, actorParent);
     }
 
-    public void Setup(World world)
+    public override void Configure(World world)
     {
-        model = world;
-        backgroundView.Setup(world.background);
+        base.Configure(world);
+
+        backgroundView.Configure(world.background);
     }
 
-    private void Update()
+    public override void Refresh()
     {
+        base.Refresh();
+
+        actors.SetActive(config.actors);
         actors.Refresh();
 
         backgroundView.Refresh();

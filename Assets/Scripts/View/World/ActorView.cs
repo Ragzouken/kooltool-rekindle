@@ -13,6 +13,5 @@ public class ActorView : InstanceView<Actor>
     {
         transform.position = config.position.current;
         renderer.sprite = config.costume[config.position.direction];
-        renderer.sortingLayerName = "World - Actors";
     }
 }

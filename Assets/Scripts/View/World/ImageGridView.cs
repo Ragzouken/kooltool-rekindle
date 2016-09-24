@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-public class ImageGridView : ViewComponent<ImageGrid> 
+public class ImageGridView : InstanceView<ImageGrid> 
 {
     [SerializeField] private ImageCellView cellPrefab;
     [SerializeField] private Transform cellParent;
@@ -12,16 +12,16 @@ public class ImageGridView : ViewComponent<ImageGrid>
         cells = new InstancePool<IntVector2, ImageCellView>(cellPrefab, cellParent);
     }
 
-    public void Setup(ImageGrid grid)
+    public override void Configure(ImageGrid grid)
     {
-        model = grid;
+        base.Configure(grid);
 
         Refresh();
     }
 
-    public void Refresh()
+    public override void Refresh()
     {
-        cells.SetActive(model.cells.Keys);
+        cells.SetActive(config.cells.Keys);
         cells.Refresh();
     }
 }
