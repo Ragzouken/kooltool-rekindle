@@ -5,31 +5,16 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class InstancePool<TConfig, TInstance>
-    where TInstance : InstanceView<TConfig>
-{
-    protected TInstance prefab;
-    protected Transform parent;
-    
+public abstract class InstancePool<TConfig, TInstance>
+    where TInstance : IConfigView<TConfig>
+{    
     protected Dictionary<TConfig, TInstance> instances
         = new Dictionary<TConfig, TInstance>();
     protected List<TInstance> spare = new List<TInstance>();
 
-    public InstancePool(TInstance prefab, Transform parent, bool sort=true) 
-    {
-        this.prefab = prefab;
-        this.parent = parent;
-    }
+    protected abstract TInstance CreateNew();
 
-    public TInstance this[TConfig config]
-    {
-        get
-        {
-            return Get(config);
-        }
-    }
-
-    protected TInstance New(TConfig config)
+    protected TInstance FindNew(TConfig config)
     {
         TInstance instance;
 
@@ -40,7 +25,7 @@ public class InstancePool<TConfig, TInstance>
         }
         else
         {
-            instance = Object.Instantiate(prefab);
+            instance = CreateNew();
         }
 
         Configure(config, instance);
@@ -54,7 +39,7 @@ public class InstancePool<TConfig, TInstance>
 
         if (!instances.TryGetValue(config, out instance))
         {
-            instance = New(config);
+            instance = FindNew(config);
         }
 
         return instance;
@@ -90,18 +75,12 @@ public class InstancePool<TConfig, TInstance>
 
     protected virtual void Configure(TConfig config, TInstance instance)
     {
-        instance.transform.SetParent(parent, false);
-        instance.gameObject.SetActive(true);
-
         instances.Add(config, instance);
-
         instance.SetConfig(config);
     }
 
     protected virtual void Cleanup(TConfig config, TInstance instance)
     {
-        instance.gameObject.SetActive(false);
-
         instance.Cleanup();
     }
 
@@ -119,7 +98,7 @@ public class InstancePool<TConfig, TInstance>
     private HashSet<TConfig> setActiveTempSet = new HashSet<TConfig>();
     private List<TConfig> setActiveTempList = new List<TConfig>();
 
-    public void SetActive(IEnumerable<TConfig> active, bool sort=true)
+    public virtual void SetActive(IEnumerable<TConfig> active)
     {
         Assert.IsFalse(locked, "GC OPTIMISATION MEANS THESE CALLS CANNOT BE NESTED!!");
 
@@ -144,9 +123,7 @@ public class InstancePool<TConfig, TInstance>
 
         foreach (TConfig shortcut in active)
         {
-            var instance = Get(shortcut);
-
-            if (sort) instance.transform.SetAsLastSibling();
+            Get(shortcut);
         }
     }
 
@@ -181,11 +158,52 @@ public class InstancePool<TConfig, TInstance>
     }
 }
 
+// TODO: thing to convert MonoBehaviour into IConfigView
+
 public class InstancePool<TConfig> : InstancePool<TConfig, InstanceView<TConfig>>
 {
-    public InstancePool(InstanceView<TConfig> prefab, Transform parent) 
-        : base(prefab, parent)
+    protected InstanceView<TConfig> prefab;
+    protected Transform parent;
+    protected bool sort;
+
+    public InstancePool(InstanceView<TConfig> prefab, Transform parent, bool sort=true)
     {
+        this.prefab = prefab;
+        this.parent = parent;
+        this.sort = sort;
+    }
+
+    protected override InstanceView<TConfig> CreateNew()
+    {
+        return Object.Instantiate(prefab);
+    }
+
+    protected override void Configure(TConfig config, InstanceView<TConfig> instance)
+    {
+        instance.transform.SetParent(parent, false);
+        instance.gameObject.SetActive(true);
+
+        base.Configure(config, instance);
+    }
+
+    protected override void Cleanup(TConfig config, InstanceView<TConfig> instance)
+    {
+        instance.gameObject.SetActive(false);
+
+        base.Cleanup(config, instance);
+    }
+
+    public override void SetActive(IEnumerable<TConfig> active)
+    {
+        base.SetActive(active);
+
+        if (sort)
+        {
+            foreach (TConfig shortcut in active)
+            {
+                Get(shortcut).transform.SetAsLastSibling();
+            }
+        }
     }
 }
 

@@ -856,7 +856,7 @@ public class Main : MonoBehaviour
         nextCursor = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
 
-        worldView.actors.SetActive(project.world.actors, sort: false);
+        worldView.actors.SetActive(project.world.actors);
 
         CheckHotkeys();
 

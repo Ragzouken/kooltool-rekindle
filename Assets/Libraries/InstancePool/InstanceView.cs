@@ -31,34 +31,3 @@ public abstract class InstanceView<TConfig> : MonoBehaviour, IConfigView<TConfig
     public virtual void Refresh() { }
 }
 
-/*
-public class ComponentConfigView : MonoBehaviour
-{
-    private class StrongConfigView<TConfig, TInstance> : IConfigView<TConfig>
-    {
-        public Transform transform;
-
-        public TConfig config { get; private set; }
-
-        public void SetConfig(TConfig config)
-        {
-            this.config = config;
-
-            Configure();
-        }
-
-        protected virtual void Configure() { Refresh(); }
-        public virtual void Cleanup() { }
-        public virtual void Refresh() { }
-    }
-
-    public IConfigView<TConfig> Finalise<TConfig>()
-    {
-        var container = new StrongConfigView<TConfig>();
-
-        container.transform = transform;
-
-        return container;
-    }
-}
-*/

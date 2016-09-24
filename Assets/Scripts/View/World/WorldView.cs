@@ -19,7 +19,7 @@ public class WorldView : InstanceView<World>
 
     private void Awake()
     {
-        actors = new InstancePool<Actor>(actorPrefab, actorParent);
+        actors = new InstancePool<Actor>(actorPrefab, actorParent, sort: false);
     }
 
     protected override void Configure()
