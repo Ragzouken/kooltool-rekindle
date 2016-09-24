@@ -15,11 +15,11 @@ public class WorldView : InstanceView<World>
 
     [SerializeField] private ImageGridView backgroundView;
 
-    public InstancePool<Actor, ActorView> actors;
+    public InstancePool<Actor> actors;
 
     private void Awake()
     {
-        actors = new InstancePool<Actor, ActorView>(actorPrefab, actorParent);
+        actors = new InstancePool<Actor>(actorPrefab, actorParent);
     }
 
     protected override void Configure()

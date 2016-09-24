@@ -139,7 +139,7 @@ public class Main : MonoBehaviour
     [SerializeField]
     private BrushToggle stampPrefab;
 
-    private InstancePool<Stamp, BrushToggle> stampsp;
+    private InstancePool<Stamp> stampsp;
 
     public Sprite[] testbrushes;
     private ManagedSprite<byte> brushSpriteD;
@@ -186,7 +186,7 @@ public class Main : MonoBehaviour
             sprites[i].uSprite.name = "Costume " + i;
         }
 
-        stampsp = new InstancePool<Stamp, BrushToggle>(stampPrefab, stampParent);
+        stampsp = new InstancePool<Stamp>(stampPrefab, stampParent);
 
         foreach (var sprite in testbrushes)
         {

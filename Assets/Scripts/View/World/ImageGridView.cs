@@ -5,11 +5,11 @@ public class ImageGridView : InstanceView<ImageGrid>
     [SerializeField] private ImageCellView cellPrefab;
     [SerializeField] private Transform cellParent;
 
-    private InstancePool<IntVector2, ImageCellView> cells;
+    private InstancePool<IntVector2> cells;
 
     private void Awake()
     {
-        cells = new InstancePool<IntVector2, ImageCellView>(cellPrefab, cellParent);
+        cells = new InstancePool<IntVector2>(cellPrefab, cellParent);
     }
 
     public override void Refresh()

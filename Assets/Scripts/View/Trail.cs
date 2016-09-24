@@ -19,7 +19,7 @@ public class Trail : MonoBehaviour
     [SerializeField] private Transform particleParent;
     [SerializeField] private ParticleView particlePrefab;
 
-    private InstancePool<Particle, ParticleView> particles_;
+    private InstancePool<Particle> particles_;
 
     private List<Particle> particles = new List<Particle>();
 
@@ -28,8 +28,7 @@ public class Trail : MonoBehaviour
 
     private void Awake()
     {
-        particles_ = new InstancePool<Particle, ParticleView>(particlePrefab,
-                                                              particleParent);
+        particles_ = new InstancePool<Particle>(particlePrefab, particleParent);
 
         prev = Camera.main.ScreenToWorldPoint(Input.mousePosition);
     }

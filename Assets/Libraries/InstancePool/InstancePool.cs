@@ -180,3 +180,179 @@ public class InstancePool<TConfig, TInstance>
         }
     }
 }
+
+public class InstancePool<TConfig>
+{
+    protected InstanceView<TConfig> prefab;
+    protected Transform parent;
+    
+    protected Dictionary<TConfig, InstanceView<TConfig>> instances
+        = new Dictionary<TConfig, InstanceView<TConfig>>();
+    protected List<InstanceView<TConfig>> spare = new List<InstanceView<TConfig>>();
+
+    public InstancePool(InstanceView<TConfig> prefab, Transform parent) 
+    {
+        this.prefab = prefab;
+        this.parent = parent;
+    }
+
+    public InstanceView<TConfig> this[TConfig config]
+    {
+        get
+        {
+            return Get(config);
+        }
+    }
+
+    protected InstanceView<TConfig> New(TConfig config)
+    {
+        InstanceView<TConfig> instance;
+
+        if (spare.Count > 0)
+        {
+            instance = spare[spare.Count - 1];
+            spare.RemoveAt(spare.Count - 1);
+        }
+        else
+        {
+            instance = Object.Instantiate(prefab);
+        }
+
+        Configure(config, instance);
+
+        return instance;
+    }
+
+    public InstanceView<TConfig> Get(TConfig config)
+    {
+        InstanceView<TConfig> instance;
+
+        if (!instances.TryGetValue(config, out instance))
+        {
+            instance = New(config);
+        }
+
+        return instance;
+    }
+
+    public bool Discard(TConfig config)
+    {
+        InstanceView<TConfig> instance;
+
+        if (instances.TryGetValue(config, out instance))
+        {
+            instances.Remove(config);
+            spare.Add(instance);
+
+            Cleanup(config, instance);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public void Clear()
+    {
+        foreach (var pair in instances)
+        {
+            Cleanup(pair.Key, pair.Value);
+        }
+
+        spare.AddRange(instances.Values);
+        instances.Clear();
+    }
+
+    protected virtual void Configure(TConfig config, InstanceView<TConfig> instance)
+    {
+        instance.transform.SetParent(parent, false);
+        instance.gameObject.SetActive(true);
+
+        instances.Add(config, instance);
+
+        instance.SetConfig(config);
+    }
+
+    protected virtual void Cleanup(TConfig config, InstanceView<TConfig> instance)
+    {
+        instance.gameObject.SetActive(false);
+
+        instance.Cleanup();
+    }
+
+    public void Refresh()
+    {
+        MapActive(i => i.Refresh());
+    }
+
+    public void SetActive(params TConfig[] configs)
+    {
+        SetActive(configs);
+    }
+
+    private bool locked;
+    private HashSet<TConfig> setActiveTempSet = new HashSet<TConfig>();
+    private List<TConfig> setActiveTempList = new List<TConfig>();
+
+    public void SetActive(IEnumerable<TConfig> active, bool sort=true)
+    {
+        Assert.IsFalse(locked, "GC OPTIMISATION MEANS THESE CALLS CANNOT BE NESTED!!");
+
+        locked = true;
+        setActiveTempSet.Clear();
+        setActiveTempList.Clear();
+
+        var collection = setActiveTempSet;
+        var existing = setActiveTempList;
+
+        if (active.Any()) collection.UnionWith(active);
+        existing.AddRange(instances.Keys);
+
+        for (int i = 0; i < existing.Count; ++i)
+        {
+            TConfig config = setActiveTempList[i];
+
+            if (!collection.Contains(config)) Discard(config);
+        }
+
+        locked = false;
+
+        foreach (TConfig shortcut in active)
+        {
+            var instance = Get(shortcut);
+
+            if (sort) instance.transform.SetAsLastSibling();
+        }
+    }
+
+    public void MapActive(System.Action<InstanceView<TConfig>> action)
+    {
+        foreach (InstanceView<TConfig> instance in instances.Values)
+        {
+            action(instance);
+        }
+    }
+
+    public bool IsActive(TConfig shortcut)
+    {
+        return instances.ContainsKey(shortcut);
+    }
+
+    public bool DoIfActive(TConfig shortcut, 
+                           System.Action<InstanceView<TConfig>> action)
+    {
+        InstanceView<TConfig> instance;
+
+        if (instances.TryGetValue(shortcut, out instance))
+        {
+            action(instance);
+
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+}
+
