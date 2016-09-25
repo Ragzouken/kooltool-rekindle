@@ -39,7 +39,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Image brightImage;
     [SerializeField] private Slider brightSlider;
-    [SerializeField] private PalettePanel palettePanel;
+    [SerializeField] private DrawHUD drawHUD;
 
     [SerializeField] private Material material1;
     [SerializeField] private Material material2;
@@ -229,7 +229,7 @@ public class Main : MonoBehaviour
 
         SetStamp(stamps[0]);
 
-        palettePanel.OnPaletteIndexSelected += i => RefreshBrushCursor();
+        drawHUD.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
         var res = new TextureResource(test);
 
@@ -682,7 +682,7 @@ public class Main : MonoBehaviour
         this.project = project;
 
         worldView.SetConfig(project.world);
-        palettePanel.SetWorld(project.world);
+        drawHUD.SetWorld(project.world);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -963,7 +963,12 @@ public class Main : MonoBehaviour
 
         SetCursorSprite(normalCursor);
         
-        if (hud.mode == HUD.Mode.Draw && palettePanel.mode == PalettePanel.Mode.Paint)
+        if (hud.mode != HUD.Mode.Draw)
+        {
+            drawHUD.expanded = false;
+        }
+
+        if (hud.mode == HUD.Mode.Draw && drawHUD.mode == DrawHUD.Mode.Paint)
         {
             UpdatePaintInput();
         }
@@ -972,7 +977,7 @@ public class Main : MonoBehaviour
             CleanupPaint();
         }
 
-        if (hud.mode == HUD.Mode.Draw && palettePanel.mode == PalettePanel.Mode.Colors)
+        if (hud.mode == HUD.Mode.Draw && drawHUD.mode == DrawHUD.Mode.Colors)
         {
             UpdateColorsInput();
         }
@@ -1007,7 +1012,7 @@ public class Main : MonoBehaviour
     {
         if (input.cancel.WasPressed)
         {
-            palettePanel.SetMode(PalettePanel.Mode.Paint);
+            drawHUD.SetMode(DrawHUD.Mode.Paint);
             return;
         }
 
@@ -1019,7 +1024,7 @@ public class Main : MonoBehaviour
             {
                 int index = project.world.GetPixel(next);
 
-                palettePanel.SelectPaletteIndex(index);
+                drawHUD.SelectPaletteIndex(index);
             }
         }
     }
@@ -1028,6 +1033,12 @@ public class Main : MonoBehaviour
     {
         if (input.cancel.WasPressed)
         {
+            if (drawHUD.expanded)
+            {
+                drawHUD.expanded = false;
+                return;
+            }
+
             hud.mode = HUD.Mode.Switch;
             return;
         }
@@ -1071,7 +1082,7 @@ public class Main : MonoBehaviour
                                                 (int) stippleSlider.value,
                                                 ref stippleOffset);
 
-                byte value = (byte) palettePanel.selected;
+                byte value = (byte) drawHUD.selected;
                 Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
 
                 if (targetActor != null)
@@ -1230,7 +1241,7 @@ public class Main : MonoBehaviour
         float beta = Mathf.Sin(angle);
 
         //var shearSprite4 = TextureByte.Pooler.Instance.ShearX(stamp.brush, Time.timeSinceLevelLoad % 1);
-        byte value = (byte) palettePanel.selected;
+        byte value = (byte) drawHUD.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
         brushSpriteD.Clear(0);

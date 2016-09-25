@@ -5,7 +5,7 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class PalettePanel : MonoBehaviour 
+public class DrawHUD : MonoBehaviour 
 {
     public enum Mode
     {
@@ -108,6 +108,26 @@ public class PalettePanel : MonoBehaviour
         this.mode = mode;
 
         animator.SetInteger("Mode", (int) mode);
+        if (mode != Mode.Paint)
+            expanded = false;
+    }
+
+    public bool expanded
+    {
+        set
+        {
+            animator.SetBool("Expand Brush", value);
+        }
+
+        get
+        {
+            return animator.GetBool("Expand Brush");
+        }
+    }
+
+    public void ToggleExpanded()
+    {
+        expanded = !expanded;
     }
 
     public void SelectPaletteIndex(int index)

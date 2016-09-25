@@ -6616,7 +6616,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1735958119}
+      - m_Target: {fileID: 0}
         m_MethodName: Toggle
         m_Mode: 1
         m_Arguments:
@@ -9136,8 +9136,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1735958119}
-        m_MethodName: Toggle
+      - m_Target: {fileID: 1735958120}
+        m_MethodName: ToggleExpanded
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -13044,7 +13044,6 @@ GameObject:
   - 222: {fileID: 1209457934}
   - 114: {fileID: 1209457933}
   - 114: {fileID: 1209457935}
-  - 114: {fileID: 1209457936}
   - 114: {fileID: 1209457938}
   - 114: {fileID: 1209457937}
   m_Layer: 0
@@ -13157,57 +13156,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AllowSwitchOff: 0
---- !u!114 &1209457936
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1209457930}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 415282ee6686e7f4794030a14cab3883, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  main: {fileID: 2018536469}
-  animator: {fileID: 1735958118}
-  colorToggles:
-  - {fileID: 379537370}
-  - {fileID: 1455667725}
-  - {fileID: 1292736267}
-  - {fileID: 1188659448}
-  - {fileID: 1480121969}
-  - {fileID: 1197179362}
-  - {fileID: 1876725884}
-  - {fileID: 1781439016}
-  - {fileID: 107164663}
-  - {fileID: 2054919092}
-  - {fileID: 1132585883}
-  - {fileID: 440069666}
-  - {fileID: 526420258}
-  - {fileID: 1595726832}
-  - {fileID: 1174666278}
-  - {fileID: 155288539}
-  colorImages:
-  - {fileID: 379537368}
-  - {fileID: 1455667723}
-  - {fileID: 1292736265}
-  - {fileID: 1188659446}
-  - {fileID: 1480121967}
-  - {fileID: 1197179360}
-  - {fileID: 1876725882}
-  - {fileID: 1781439014}
-  - {fileID: 107164661}
-  - {fileID: 2054919090}
-  - {fileID: 1132585881}
-  - {fileID: 440069664}
-  - {fileID: 526420256}
-  - {fileID: 1595726830}
-  - {fileID: 1174666276}
-  - {fileID: 155288537}
-  group: {fileID: 1209457935}
-  brightnessSlider: {fileID: 1965543894}
-  hueSaturationSlider: {fileID: 1740641099}
-  tooltip: {fileID: 1344759522}
 --- !u!114 &1209457937
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -18231,7 +18179,7 @@ GameObject:
   - 222: {fileID: 1735958117}
   - 114: {fileID: 1735958116}
   - 95: {fileID: 1735958118}
-  - 114: {fileID: 1735958119}
+  - 114: {fileID: 1735958120}
   m_Layer: 0
   m_Name: Draw + Colours
   m_TagString: Untagged
@@ -18313,7 +18261,7 @@ Animator:
   m_WarningMessage: 
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
---- !u!114 &1735958119
+--- !u!114 &1735958120
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
@@ -18321,12 +18269,49 @@ MonoBehaviour:
   m_GameObject: {fileID: 1735958114}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6710f03ffa3a16d44a8eabec845cdc90, type: 3}
+  m_Script: {fileID: 11500000, guid: 415282ee6686e7f4794030a14cab3883, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  main: {fileID: 2018536469}
   animator: {fileID: 1735958118}
-  parameter: Expand Brush
-  value: 0
+  colorToggles:
+  - {fileID: 379537370}
+  - {fileID: 1455667725}
+  - {fileID: 1292736267}
+  - {fileID: 1188659448}
+  - {fileID: 1480121969}
+  - {fileID: 1197179362}
+  - {fileID: 1876725884}
+  - {fileID: 1781439016}
+  - {fileID: 107164663}
+  - {fileID: 2054919092}
+  - {fileID: 1132585883}
+  - {fileID: 440069666}
+  - {fileID: 526420258}
+  - {fileID: 1595726832}
+  - {fileID: 1174666278}
+  - {fileID: 155288539}
+  colorImages:
+  - {fileID: 379537368}
+  - {fileID: 1455667723}
+  - {fileID: 1292736265}
+  - {fileID: 1188659446}
+  - {fileID: 1480121967}
+  - {fileID: 1197179360}
+  - {fileID: 1876725882}
+  - {fileID: 1781439014}
+  - {fileID: 107164661}
+  - {fileID: 2054919090}
+  - {fileID: 1132585881}
+  - {fileID: 440069664}
+  - {fileID: 526420256}
+  - {fileID: 1595726830}
+  - {fileID: 1174666276}
+  - {fileID: 155288537}
+  group: {fileID: 1209457935}
+  brightnessSlider: {fileID: 1965543894}
+  hueSaturationSlider: {fileID: 1740641099}
+  tooltip: {fileID: 1344759522}
 --- !u!1 &1740641095
 GameObject:
   m_ObjectHideFlags: 0
@@ -20853,7 +20838,7 @@ MonoBehaviour:
   cursor: {fileID: 1195106870}
   brightImage: {fileID: 1740641097}
   brightSlider: {fileID: 1965543894}
-  palettePanel: {fileID: 1209457936}
+  drawHUD: {fileID: 1735958120}
   material1: {fileID: 2100000, guid: 531857e83c0e1da43b2779690eeab983, type: 2}
   material2: {fileID: 2100000, guid: c64b630203b47dd44a7df60c2557c8b8, type: 2}
   saveBlocker: {fileID: 498776473}
