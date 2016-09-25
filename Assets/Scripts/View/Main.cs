@@ -321,6 +321,7 @@ public class Main : MonoBehaviour
 
         public PlayerAction expand;
         public PlayerTwoAxisAction move;
+        public PlayerOneAxisAction turn;
         public PlayerTwoAxisAction cursor;
         public PlayerAction click;
 
@@ -355,6 +356,16 @@ public class Main : MonoBehaviour
                 right.AddDefaultBinding(InputControlType.LeftStickRight);
 
                 move = CreateTwoAxisPlayerAction(left, right, down, up);
+            }
+
+            {
+                var cw = CreatePlayerAction("Turn CW");
+                var acw = CreatePlayerAction("Turn ACW");
+
+                cw.AddDefaultBinding(Key.E);
+                acw.AddDefaultBinding(Key.Q);
+
+                turn = CreateOneAxisPlayerAction(cw, acw);
             }
 
             {
@@ -1097,6 +1108,20 @@ public class Main : MonoBehaviour
         if (possessedActor != null)
         {
             cameraController.focusTarget = possessedActor.position.current;
+
+            if (input.turn.WasPressed)
+            {
+                var pos = possessedActor.position;
+
+                if (input.turn.Value > 0)
+                {
+                    pos.direction = (Position.Direction) (((int) pos.direction + 3) % 4);
+                }
+                else if (input.turn.Value < 0)
+                {
+                    pos.direction = (Position.Direction) (((int) pos.direction + 1) % 4);
+                }
+            }
 
             if (!possessedActor.position.moving)
             {
