@@ -34,7 +34,6 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Slider zoomSlider;
     [SerializeField] private Texture2D costumeTexture;
-    [SerializeField] private ManagedSprite<byte>[] sprites;
 
     [SerializeField] private RectTransform cursor;
 
@@ -144,6 +143,40 @@ public class Main : MonoBehaviour
     public Sprite[] testbrushes;
     private ManagedSprite<byte> brushSpriteD;
 
+    [Header("Character Toggles")]
+    [SerializeField]
+    private Toggle addCharacter;
+    [SerializeField]
+    private Toggle removeCharacter;
+
+    private Costume NewCostume()
+    {
+        var texture = new TextureByte(test.width, test.height);
+        texture.SetPixels(test.pixels);
+        texture.Apply();
+
+        var sprites = new ManagedSprite<byte>[4];
+
+        for (int i = 0; i < 4; ++i)
+        {
+            var rect = new Rect(0, 32 * (3 - i), 32, 32);
+
+            sprites[i] = new ManagedSprite<byte>(texture, rect, IntVector2.one * 16);
+        }
+
+        var res = new TextureResource(texture);
+
+        var costume = new Costume
+        {
+            right = new SpriteResource(res, sprites[0]),
+            down = new SpriteResource(res, sprites[1]),
+            left = new SpriteResource(res, sprites[2]),
+            up = new SpriteResource(res, sprites[3]),
+        };
+
+        return costume;
+    }
+
     private void Start()
     { 
         freeToggle.isOn = true;
@@ -176,16 +209,6 @@ public class Main : MonoBehaviour
         var script = ScriptFromCSV(File.ReadAllText(path));
         */
 
-        sprites = new ManagedSprite<byte>[4];
-
-        for (int i = 0; i < 4; ++i)
-        {
-            var rect = new Rect(0, 32 * (3 - i), 32, 32);
-
-            sprites[i] = new ManagedSprite<byte>(test, rect, IntVector2.one * 16);
-            sprites[i].uSprite.name = "Costume " + i;
-        }
-
         stampsp = new InstancePool<Stamp>(stampPrefab, stampParent);
 
         foreach (var sprite in testbrushes)
@@ -212,13 +235,7 @@ public class Main : MonoBehaviour
 
         var res = new TextureResource(test);
 
-        var costume = new Costume
-        {
-            right = new SpriteResource(res, sprites[0]),
-            down = new SpriteResource(res, sprites[1]),
-            left = new SpriteResource(res, sprites[2]),
-            up = new SpriteResource(res, sprites[3]),
-        };
+        var costume = NewCostume();
 
         var p = new Project();
         var w = new World();
@@ -244,7 +261,7 @@ public class Main : MonoBehaviour
             var next = Vector2.right * Random.Range(-4, 4) * 32
                      + Vector2.up    * Random.Range(-4, 4) * 32;
 
-            ///*
+            /*
             project.world.actors.Add(new Actor
             {
                 world = project.world,
@@ -258,7 +275,7 @@ public class Main : MonoBehaviour
                     progress = 0,
                 },
             });
-            //*/
+            */
         }
 
         saved = project.world.Copy();
@@ -992,7 +1009,7 @@ public class Main : MonoBehaviour
     {
         if (input.cancel.WasPressed)
         {
-            palettePanel.SetMode(PalettePanel.Mode.Colors);
+            palettePanel.SetMode(PalettePanel.Mode.Paint);
             return;
         }
 
@@ -1093,8 +1110,12 @@ public class Main : MonoBehaviour
         if (input.cancel.WasPressed)
         {
             hud.mode = HUD.Mode.Switch;
+            CleanupCharacter();
             return;
         }
+
+        if (removeCharacter.isOn)
+            possessedActor = null;
 
         Actor hoveredActor;
         
@@ -1102,7 +1123,31 @@ public class Main : MonoBehaviour
 
         if (mousePress && hoveredActor != null)
         {
-            possessedActor = hoveredActor;
+            if (removeCharacter.isOn)
+            {
+                project.world.actors.Remove(hoveredActor);
+            }
+            else
+            {
+                possessedActor = hoveredActor;
+            }
+        }
+        else if (mousePress && addCharacter.isOn)
+        {
+            var pos = ((IntVector2) next).CellCoords(32) * 32 + IntVector2.one * 16;
+
+            project.world.actors.Add(new Actor
+            {
+                world = project.world,
+                costume = NewCostume(),
+                state = new State { fragment = "start", line = 0 },
+                position = new Position
+                {
+                    prev = pos,
+                    next = pos,
+                    progress = 0,
+                },
+            });
         }
 
         if (possessedActor != null)
@@ -1158,6 +1203,8 @@ public class Main : MonoBehaviour
     private void CleanupCharacter()
     {
         possessedActor = null;
+        addCharacter.isOn = false;
+        removeCharacter.isOn = false;
     }
 
     private ManagedSprite<byte> shearSprite;

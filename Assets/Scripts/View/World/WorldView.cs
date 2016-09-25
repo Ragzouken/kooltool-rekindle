@@ -25,8 +25,6 @@ public class WorldView : InstanceView<World>
 
     public override void Refresh()
     {
-        base.Refresh();
-
         actors.SetActive(config.actors);
         actors.Refresh();
 
