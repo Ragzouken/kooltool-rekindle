@@ -30,7 +30,7 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
-    [SerializeField] private Toggle freeToggle, stampToggle;
+    [SerializeField] private Toggle followToggle;
 
     [SerializeField] private Slider zoomSlider;
     [SerializeField] private Texture2D costumeTexture;
@@ -179,8 +179,6 @@ public class Main : MonoBehaviour
 
     private void Start()
     { 
-        freeToggle.isOn = true;
-
         Cursor.visible = false;
 
         {
@@ -1232,29 +1230,36 @@ public class Main : MonoBehaviour
         float beta = Mathf.Sin(angle);
 
         //var shearSprite4 = TextureByte.Pooler.Instance.ShearX(stamp.brush, Time.timeSinceLevelLoad % 1);
-
-        var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, rots);
-        //var shearSprite1 = TextureByte.Pooler.Instance.Copy(stamp.brush);
-        var shearSprite2 = TextureByte.Pooler.Instance.ShearX(shearSprite1, alpha);
-        TextureByte.Pooler.Instance.FreeTexture(shearSprite1.mTexture);
-        TextureByte.Pooler.Instance.FreeSprite(shearSprite1);
-        var shearSprite3 = TextureByte.Pooler.Instance.ShearY(shearSprite2, beta);
-        TextureByte.Pooler.Instance.FreeTexture(shearSprite2.mTexture);
-        TextureByte.Pooler.Instance.FreeSprite(shearSprite2);
-        var shearSprite4 = TextureByte.Pooler.Instance.ShearX(shearSprite3, alpha);
-        TextureByte.Pooler.Instance.FreeTexture(shearSprite3.mTexture);
-        TextureByte.Pooler.Instance.FreeSprite(shearSprite3);
-
-        ////var shearSprite4 = shearSprite1;
-
         byte value = (byte) palettePanel.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
 
         brushSpriteD.Clear(0);
-        brushSpriteD.Blend(shearSprite4, blend_);
-        TextureByte.Pooler.Instance.FreeTexture(shearSprite4.mTexture);
-        TextureByte.Pooler.Instance.FreeSprite(shearSprite4);
-        //brushSpriteD.Blend(stamp.brush, blend_);
+
+        if (followToggle.isOn)
+        {
+            var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, rots);
+            //var shearSprite1 = TextureByte.Pooler.Instance.Copy(stamp.brush);
+            var shearSprite2 = TextureByte.Pooler.Instance.ShearX(shearSprite1, alpha);
+            TextureByte.Pooler.Instance.FreeTexture(shearSprite1.mTexture);
+            TextureByte.Pooler.Instance.FreeSprite(shearSprite1);
+            var shearSprite3 = TextureByte.Pooler.Instance.ShearY(shearSprite2, beta);
+            TextureByte.Pooler.Instance.FreeTexture(shearSprite2.mTexture);
+            TextureByte.Pooler.Instance.FreeSprite(shearSprite2);
+            var shearSprite4 = TextureByte.Pooler.Instance.ShearX(shearSprite3, alpha);
+            TextureByte.Pooler.Instance.FreeTexture(shearSprite3.mTexture);
+            TextureByte.Pooler.Instance.FreeSprite(shearSprite3);
+
+            ////var shearSprite4 = shearSprite1;
+
+            brushSpriteD.Blend(shearSprite4, blend_);
+            TextureByte.Pooler.Instance.FreeTexture(shearSprite4.mTexture);
+            TextureByte.Pooler.Instance.FreeSprite(shearSprite4);
+        }
+        else
+        {
+            brushSpriteD.Blend(stamp.brush, blend_);
+        }
+
         brushSpriteD.mTexture.Apply();
     }
 
