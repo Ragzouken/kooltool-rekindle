@@ -49,7 +49,7 @@ TextureImporter:
   bumpmap:
     convertToNormalMap: 0
     externalNormalMap: 0
-    heightScale: .25
+    heightScale: 0.25
     normalMapFilter: 0
   isReadable: 0
   grayScaleToAlpha: 0
@@ -72,17 +72,20 @@ TextureImporter:
   allowsAlphaSplitting: 0
   spriteMode: 2
   spriteExtrude: 1
-  spriteMeshType: 1
+  spriteMeshType: 0
   alignment: 0
-  spritePivot: {x: .5, y: .5}
+  spritePivot: {x: 0.5, y: 0.5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spritePixelsToUnits: 1
   alphaIsTransparency: 1
-  textureType: 8
+  spriteTessellationDetail: -1
+  textureType: 5
   buildTargetSettings: []
   spriteSheet:
+    serializedVersion: 2
     sprites:
-    - name: 01
+    - serializedVersion: 2
+      name: 01
       rect:
         serializedVersion: 2
         x: 0
@@ -90,9 +93,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 02
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 02
       rect:
         serializedVersion: 2
         x: 32
@@ -100,9 +106,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 03
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 03
       rect:
         serializedVersion: 2
         x: 64
@@ -110,9 +119,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 04
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 04
       rect:
         serializedVersion: 2
         x: 96
@@ -120,9 +132,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 05
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 05
       rect:
         serializedVersion: 2
         x: 0
@@ -130,9 +145,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 06
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 06
       rect:
         serializedVersion: 2
         x: 32
@@ -140,9 +158,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 07
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 07
       rect:
         serializedVersion: 2
         x: 64
@@ -150,9 +171,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 08
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 08
       rect:
         serializedVersion: 2
         x: 96
@@ -160,9 +184,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 09
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 09
       rect:
         serializedVersion: 2
         x: 0
@@ -170,9 +197,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 14
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 14
       rect:
         serializedVersion: 2
         x: 32
@@ -180,9 +210,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 10
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 10
       rect:
         serializedVersion: 2
         x: 32
@@ -190,9 +223,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 11
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 11
       rect:
         serializedVersion: 2
         x: 64
@@ -200,9 +236,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 12
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 12
       rect:
         serializedVersion: 2
         x: 96
@@ -210,9 +249,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 13
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 13
       rect:
         serializedVersion: 2
         x: 0
@@ -220,9 +262,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 15
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 15
       rect:
         serializedVersion: 2
         x: 64
@@ -230,9 +275,12 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
-    - name: 16
+      outline: []
+      tessellationDetail: -1
+    - serializedVersion: 2
+      name: 16
       rect:
         serializedVersion: 2
         x: 96
@@ -240,8 +288,11 @@ TextureImporter:
         width: 32
         height: 32
       alignment: 0
-      pivot: {x: .5, y: .5}
+      pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
+      outline: []
+      tessellationDetail: -1
+    outline: []
   spritePackingTag: ui
   userData: 
   assetBundleName: 
