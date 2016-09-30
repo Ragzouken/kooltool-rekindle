@@ -42,6 +42,7 @@
 			float4 _MainTex_ST;
 			float _Cutout;
 
+			float _Cycle;
 			fixed4 _Palette00;
 			fixed4 _Palette01;
 			fixed4 _Palette02;
@@ -73,8 +74,10 @@
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, i.uv);
 				
-				int c = floor(col.a * 256);
+				int c = floor(col.a * 256) % 16;
 				//half cut = col.g;
+
+				if (c != 0) c = (c + floor(_Cycle)) % 16;
 
 				if (c ==  0) col = _Palette00;
 				if (c ==  1) col = _Palette01;

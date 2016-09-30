@@ -51,6 +51,9 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite pickCursor, stampCursor;
 
     [SerializeField] private SpriteRenderer borderTest;
+    [SerializeField] private SpriteRenderer cellCursor;
+    [SerializeField] private SpriteRenderer regCursor;
+    [SerializeField] private Sprite cellBorder;
 
     public Project project { get; private set; }
     private World saved;
@@ -176,6 +179,8 @@ public class Main : MonoBehaviour
 
         return costume;
     }
+
+    private Costume defaultCostume;
 
     private void Start()
     { 
@@ -311,6 +316,8 @@ public class Main : MonoBehaviour
 
         borderSprite0 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
         borderSprite1 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
+
+        defaultCostume = NewCostume();
 
 #if UNITY_WEBGL
         Debug.Log("Location: " + GetWindowSearch());
@@ -1114,8 +1121,32 @@ public class Main : MonoBehaviour
 
     private Actor possessedActor;
 
+    private MaterialPropertyBlock cursorBlock;
+
     private void UpdateCharacterInput()
     {
+        IntVector2 cell = ((IntVector2) next).CellCoords(32);
+
+        if (addCharacter.isOn)
+        {
+            cellCursor.gameObject.SetActive(true);
+            regCursor.gameObject.SetActive(false);
+            cellCursor.transform.localPosition = cell * 32 + IntVector2.one * 16;
+
+            cursorBlock = cursorBlock ?? new MaterialPropertyBlock();
+            cellCursor.GetPropertyBlock(cursorBlock);
+
+            cursorBlock.SetFloat("_Cycle", Time.timeSinceLevelLoad * 12);
+            cellCursor.SetPropertyBlock(cursorBlock);
+            cellCursor.sprite = defaultCostume.down;
+        }
+        else
+        {
+            cellCursor.gameObject.SetActive(false);
+            regCursor.gameObject.SetActive(true);
+            regCursor.transform.localPosition = cell * 32 + IntVector2.one * 16;
+        }
+
         if (input.cancel.WasPressed)
         {
             hud.mode = HUD.Mode.Switch;
@@ -1127,7 +1158,7 @@ public class Main : MonoBehaviour
             possessedActor = null;
 
         Actor hoveredActor;
-        
+            
         project.world.TryGetActor(next, out hoveredActor, 0);
 
         if (mousePress && hoveredActor != null)
@@ -1214,6 +1245,8 @@ public class Main : MonoBehaviour
         possessedActor = null;
         addCharacter.isOn = false;
         removeCharacter.isOn = false;
+        cellCursor.gameObject.SetActive(false);
+        regCursor.gameObject.SetActive(false);
     }
 
     private ManagedSprite<byte> shearSprite;
