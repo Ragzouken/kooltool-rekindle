@@ -14,6 +14,7 @@ using UnityEngine.EventSystems;
 using UnityEditor;
 #endif
 
+using InputField = TMPro.TMP_InputField;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
 public class Main : MonoBehaviour
@@ -151,6 +152,10 @@ public class Main : MonoBehaviour
     private Toggle addCharacter;
     [SerializeField]
     private Toggle removeCharacter;
+    [SerializeField]
+    private InputField characterDialogue;
+    [SerializeField]
+    private Sprite characterSelectCursor;
 
     private Costume NewCostume()
     {
@@ -975,6 +980,8 @@ public class Main : MonoBehaviour
             drawHUD.expanded = false;
         }
 
+        UpdateCharacterMovement();
+
         if (hud.mode == HUD.Mode.Draw && drawHUD.mode == DrawHUD.Mode.Paint)
         {
             UpdatePaintInput();
@@ -1046,7 +1053,7 @@ public class Main : MonoBehaviour
                 return;
             }
 
-            hud.mode = HUD.Mode.Switch;
+            //hud.mode = HUD.Mode.Switch;
             return;
         }
 
@@ -1057,7 +1064,7 @@ public class Main : MonoBehaviour
 
         Actor actor;
 
-        if (project.world.TryGetActor(next, out actor, 0))
+        if (project.world.TryGetActor(next, out actor, 3))
         {
             brushRenderer.sortingLayerName = "World - Actors";
             brushRenderer.sortingOrder = 1;
@@ -1078,7 +1085,7 @@ public class Main : MonoBehaviour
             {
                 dragging_ = true;
                 changes = new Changes();
-                project.world.TryGetActor(next, out targetActor, 0);
+                project.world.TryGetActor(next, out targetActor, 3);
             }
             else
             {
@@ -1127,10 +1134,13 @@ public class Main : MonoBehaviour
     {
         IntVector2 cell = ((IntVector2) next).CellCoords(32);
 
+        regCursor.gameObject.SetActive(true);
+        regCursor.transform.localPosition = cell * 32 + IntVector2.one * 16;
+
         if (addCharacter.isOn)
         {
             cellCursor.gameObject.SetActive(true);
-            regCursor.gameObject.SetActive(false);
+            
             cellCursor.transform.localPosition = cell * 32 + IntVector2.one * 16;
 
             cursorBlock = cursorBlock ?? new MaterialPropertyBlock();
@@ -1143,40 +1153,63 @@ public class Main : MonoBehaviour
         else
         {
             cellCursor.gameObject.SetActive(false);
-            regCursor.gameObject.SetActive(true);
-            regCursor.transform.localPosition = cell * 32 + IntVector2.one * 16;
         }
 
         if (input.cancel.WasPressed)
         {
-            hud.mode = HUD.Mode.Switch;
+            hud.mode = HUD.Mode.Draw;
             CleanupCharacter();
             return;
         }
 
-        if (removeCharacter.isOn)
-            possessedActor = null;
+        characterDialogue.interactable = possessedActor != null;
+        characterDialogue.text = possessedActor == null ? "NO CHARACTER SELECTED" : characterDialogue.text;
+
+        if (possessedActor != null)
+        {
+            possessedActor.dialogue = characterDialogue.text;
+        }
 
         Actor hoveredActor;
             
         project.world.TryGetActor(next, out hoveredActor, 0);
+
+        if (hoveredActor != null)
+        {
+            SetCursorSprite(characterSelectCursor);
+        }
 
         if (mousePress && hoveredActor != null)
         {
             if (removeCharacter.isOn)
             {
                 project.world.actors.Remove(hoveredActor);
+
+                if (possessedActor == hoveredActor)
+                    possessedActor = null;
+
+                var changes = new Changes();
+                changes.GetChange(hoveredActor, () => new ActorRemovedChange { world = project.world, actor = hoveredActor });
+                Do(changes);
             }
             else
             {
-                possessedActor = hoveredActor;
+                if (possessedActor == hoveredActor)
+                {
+                    possessedActor = null;
+                }
+                else
+                {
+                    possessedActor = hoveredActor;
+                    characterDialogue.text = possessedActor.dialogue;
+                }
             }
         }
         else if (mousePress && addCharacter.isOn)
         {
             var pos = ((IntVector2) next).CellCoords(32) * 32 + IntVector2.one * 16;
 
-            project.world.actors.Add(new Actor
+            var actor = new Actor
             {
                 world = project.world,
                 costume = NewCostume(),
@@ -1187,9 +1220,18 @@ public class Main : MonoBehaviour
                     next = pos,
                     progress = 0,
                 },
-            });
-        }
+            };
 
+            project.world.actors.Add(actor);
+
+            var changes = new Changes();
+            changes.GetChange(actor, () => new ActorAddedChange { world = project.world, actor = actor });
+            Do(changes);
+        }
+    }
+
+    private void UpdateCharacterMovement()
+    {
         if (possessedActor != null)
         {
             cameraController.focusTarget = possessedActor.position.current;
@@ -1242,7 +1284,6 @@ public class Main : MonoBehaviour
 
     private void CleanupCharacter()
     {
-        possessedActor = null;
         addCharacter.isOn = false;
         removeCharacter.isOn = false;
         cellCursor.gameObject.SetActive(false);
@@ -1253,8 +1294,12 @@ public class Main : MonoBehaviour
     private float angle;
     private Queue<float> angles = new Queue<float>();
 
+    private MaterialPropertyBlock drawCursorBlock;
+
     private void RefreshBrushCursor()
     {
+        drawCursorBlock = drawCursorBlock ?? new MaterialPropertyBlock();
+
         float quarter = Mathf.PI * 0.5f;
 
         this.angle = (this.angle + Mathf.PI * 2) % (Mathf.PI * 2);
@@ -1274,8 +1319,24 @@ public class Main : MonoBehaviour
         float beta = Mathf.Sin(angle);
 
         //var shearSprite4 = TextureByte.Pooler.Instance.ShearX(stamp.brush, Time.timeSinceLevelLoad % 1);
+
         byte value = (byte) drawHUD.selected;
         Blend<byte> blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : value;
+
+        brushRenderer.GetPropertyBlock(drawCursorBlock);
+
+        if (value == 0)
+        {
+            drawCursorBlock.SetFloat("_Cycle", Time.timeSinceLevelLoad * 16);
+            
+            blend_ = (canvas, brush) => brush == 0 ? (byte) 0 : (byte) 1;
+        }
+        else
+        {
+            drawCursorBlock.SetFloat("_Cycle", 0);
+        }
+
+        brushRenderer.SetPropertyBlock(drawCursorBlock);
 
         brushSpriteD.Clear(0);
 

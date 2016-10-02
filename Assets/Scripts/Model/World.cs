@@ -396,6 +396,38 @@ public class Changes
     }
 }
 
+public class ActorAddedChange : IChange
+{
+    public World world;
+    public Actor actor;
+
+    void IChange.Redo(Changes changes)
+    {
+        world.actors.Add(actor);
+    }
+
+    void IChange.Undo(Changes changes)
+    {
+        world.actors.Remove(actor);
+    }
+}
+
+public class ActorRemovedChange : IChange
+{
+    public World world;
+    public Actor actor;
+
+    void IChange.Redo(Changes changes)
+    {
+        world.actors.Remove(actor);
+    }
+
+    void IChange.Undo(Changes changes)
+    {
+        world.actors.Add(actor);
+    }
+}
+
 public class ImageGrid : ICopyable<ImageGrid>
 {
     public class Change : IChange
@@ -560,6 +592,8 @@ public class Actor : ICopyable<Actor>
 
     public Position position;
     public State state;
+
+    public string dialogue = "";
 
     public void Copy(Copier copier, Actor copy)
     {
