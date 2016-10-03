@@ -156,6 +156,11 @@ public class Main : MonoBehaviour
     private InputField characterDialogue;
     [SerializeField]
     private Sprite characterSelectCursor;
+    [SerializeField]
+    private AudioSource characterPlaceSound;
+
+    [SerializeField]
+    private Sprite enterActorCursor, exitActorCursor;
 
     private Costume NewCostume()
     {
@@ -446,7 +451,7 @@ public class Main : MonoBehaviour
         undos.Push(change);
     }
 
-    private void Undo()
+    public void Undo()
     {
         if (undos.Count == 0) return;
 
@@ -457,7 +462,7 @@ public class Main : MonoBehaviour
         redos.Push(change);
     }
 
-    private void Redo()
+    public void Redo()
     {
         if (redos.Count == 0) return;
 
@@ -968,10 +973,10 @@ public class Main : MonoBehaviour
         if (angles.Count > 0) angle = angles.Average();
         #endregion
 
-        prev.x = (int)prev.x;
-        prev.y = (int)prev.y;
-        next.x = (int)next.x;
-        next.y = (int)next.y;
+        prev.x = Mathf.FloorToInt(prev.x);
+        prev.y = Mathf.FloorToInt(prev.y);
+        next.x = Mathf.FloorToInt(next.x);
+        next.y = Mathf.FloorToInt(next.y);
 
         SetCursorSprite(normalCursor);
         
@@ -1176,7 +1181,14 @@ public class Main : MonoBehaviour
 
         if (hoveredActor != null)
         {
-            SetCursorSprite(characterSelectCursor);
+            if (hoveredActor == possessedActor)
+            {
+                SetCursorSprite(exitActorCursor);
+            }
+            else
+            {
+                SetCursorSprite(enterActorCursor);
+            }
         }
 
         if (mousePress && hoveredActor != null)
@@ -1191,12 +1203,15 @@ public class Main : MonoBehaviour
                 var changes = new Changes();
                 changes.GetChange(hoveredActor, () => new ActorRemovedChange { world = project.world, actor = hoveredActor });
                 Do(changes);
+
+                removeCharacter.isOn = false;
             }
             else
             {
                 if (possessedActor == hoveredActor)
                 {
                     possessedActor = null;
+                    cameraController.focusTarget = hoveredActor.position.current - Vector2.one * 16;
                 }
                 else
                 {
@@ -1227,6 +1242,10 @@ public class Main : MonoBehaviour
             var changes = new Changes();
             changes.GetChange(actor, () => new ActorAddedChange { world = project.world, actor = actor });
             Do(changes);
+
+            characterPlaceSound.Play();
+            addCharacter.isOn = false;
+            possessedActor = actor;
         }
     }
 
@@ -1235,6 +1254,9 @@ public class Main : MonoBehaviour
         if (possessedActor != null)
         {
             cameraController.focusTarget = possessedActor.position.current;
+
+            if (characterDialogue.isFocused)
+                return;
 
             if (input.turn.WasPressed)
             {
@@ -1288,6 +1310,7 @@ public class Main : MonoBehaviour
         removeCharacter.isOn = false;
         cellCursor.gameObject.SetActive(false);
         regCursor.gameObject.SetActive(false);
+        characterDialogue.DeactivateInputField();
     }
 
     private ManagedSprite<byte> shearSprite;
