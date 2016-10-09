@@ -258,7 +258,7 @@ public class Project : ICopyable<Project>
         copy.world = copier.Copy(world);
         // every resource should have already been copied, if not then it
         // doesn't matter that we can't copy it anyway...
-        copy.resources = new HashSet<IResource>(resources.Select(resource => copier.CopyFake(resource)));
+        //copy.resources = new HashSet<IResource>(resources.Select(resource => copier.CopyFake(resource)));
     }
 }
 
@@ -598,6 +598,7 @@ public class Actor : ICopyable<Actor>
     public void Copy(Copier copier, Actor copy)
     {
         copy.world = copier.Copy(world);
+        copy.dialogue = dialogue;
         copy.costume = costume;
         copy.script = script;
         copy.position = copier.Copy(position);

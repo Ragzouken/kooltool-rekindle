@@ -31,6 +31,7 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
+    [SerializeField] private DialogueBox dialogueBox;
     [SerializeField] private Toggle followToggle;
 
     [SerializeField] private Slider zoomSlider;
@@ -162,6 +163,24 @@ public class Main : MonoBehaviour
     [SerializeField]
     private Sprite enterActorCursor, exitActorCursor;
 
+    public bool playing
+    {
+        get
+        {
+            return playProject != null;
+        }
+    }
+
+    private Actor dialogueActor;
+
+    public bool dialogue
+    {
+        get
+        {
+            return dialogueActor != null;
+        }
+    }
+    
     private Costume NewCostume()
     {
         var texture = new TextureByte(test.width, test.height);
@@ -250,24 +269,24 @@ public class Main : MonoBehaviour
 
         var costume = NewCostume();
 
-        var p = new Project();
+        editProject = new Project();
         var w = new World();
         res.dirty = true;
-        p.resources.Add(res);
-        p.resources.Add(costume.right);
-        p.resources.Add(costume.left);
-        p.resources.Add(costume.down);
-        p.resources.Add(costume.up);
+        editProject.resources.Add(res);
+        editProject.resources.Add(costume.right);
+        editProject.resources.Add(costume.left);
+        editProject.resources.Add(costume.down);
+        editProject.resources.Add(costume.up);
 
         for (int i = 1; i < 16; ++i)
         {
             w.palette[i] = new Color(Random.value, Random.value, Random.value, 1f);
         }
 
-        p.world = w;
-        w.background.project = p;
+        editProject.world = w;
+        w.background.project = editProject;
         w.background.cellSize = 256;
-        SetProject(p);
+        SetProject(editProject);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -655,6 +674,10 @@ public class Main : MonoBehaviour
             if (dragging == raycasts[0].gameObject) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.pointerClickHandler);
         }
 
+        if (playing)
+            return;
+
+        /*
         if (Input.GetKeyDown(KeyCode.Z))
         {
             Undo();
@@ -664,34 +687,33 @@ public class Main : MonoBehaviour
         {
             Redo();
         }
+        */
     }
 
-    private void TestCopy()
+    private Project editProject;
+    private Project playProject;
+
+    public void EnterPlayMode()
     {
-        List<object> memory = new List<object>();
+        hud.mode = HUD.Mode.Play;
 
-        var timer = Stopwatch.StartNew();
+        var copier = new Copier();
 
-        for (int i = 0; i < 512; ++i)
-        {
-            var copier = new Copier();
-            memory.Add(copier.Copy(project));
-        }
+        playProject = copier.Copy(editProject);
 
-        timer.Stop();
+        SetProject(playProject);
 
-        Debug.Log("Copies in " + timer.Elapsed.TotalSeconds);
+        possessedActor = playProject.world.actors.FirstOrDefault(actor => actor.dialogue.StartsWith("player"));
+    }
 
-        timer = Stopwatch.StartNew();
+    public void ExitPlayMode()
+    {
+        hud.mode = HUD.Mode.Draw;
 
-        for (int i = 0; i < 512; ++i)
-        {
-            memory.Add(JSON.Serialise(project));
-        }
+        playProject = null;
+        possessedActor = null;
 
-        timer.Stop();
-
-        Debug.Log("Encodes in " + timer.Elapsed.TotalSeconds);
+        SetProject(editProject);
     }
 
     private void SetProject(Project project)
@@ -827,6 +849,17 @@ public class Main : MonoBehaviour
         ///System.GC.Collect();
 
         if (locked) return;
+
+        if (dialogue)
+        {
+            dialogueBox.Show(dialogueActor.dialogue);
+
+            if (Input.anyKeyDown)
+            {
+                dialogueActor = null;
+                dialogueBox.Hide();
+            }
+        }
 
         var color = Color.white * brightSlider.value;
         color.a = 1;
@@ -987,12 +1020,21 @@ public class Main : MonoBehaviour
 
         UpdateCharacterMovement();
 
+        if (hud.mode == HUD.Mode.Play)
+        {
+            UpdatePlayInput();
+        }
+        else
+        { 
+            CleanupPlay();
+        }
+
         if (hud.mode == HUD.Mode.Draw && drawHUD.mode == DrawHUD.Mode.Paint)
         {
             UpdatePaintInput();
         }
         else
-        {
+        { 
             CleanupPaint();
         }
 
@@ -1048,6 +1090,19 @@ public class Main : MonoBehaviour
         }
     }
 
+    private void UpdatePlayInput()
+    {
+        if (input.cancel.WasPressed)
+        {
+            ExitPlayMode();
+        }
+    }
+
+    private void CleanupPlay()
+    {
+
+    }
+
     private void UpdatePaintInput()
     {
         if (input.cancel.WasPressed)
@@ -1064,8 +1119,6 @@ public class Main : MonoBehaviour
 
         brushRenderer.sprite = brushSpriteD.uSprite;
         brushRenderer.transform.position = next;
-
-        RefreshBrushCursor();
 
         Actor actor;
 
@@ -1123,6 +1176,8 @@ public class Main : MonoBehaviour
         {
             EndStroke();
         }
+
+        RefreshBrushCursor();
     }
 
     private void CleanupPaint()
@@ -1255,6 +1310,9 @@ public class Main : MonoBehaviour
         {
             cameraController.focusTarget = possessedActor.position.current;
 
+            if (dialogue)
+                return;
+
             if (characterDialogue.isFocused)
                 return;
 
@@ -1298,7 +1356,22 @@ public class Main : MonoBehaviour
                     direction = Position.Direction.Down;
                 }
 
-                possessedActor.position.next = possessedActor.position.prev + move;
+                Vector2 next = possessedActor.position.prev + move;
+                Actor collider = null;
+
+                bool blocked = playing 
+                            && playProject.world.TryGetActor(next, out collider)
+                            && collider != possessedActor;
+
+                if (!blocked)
+                {
+                    possessedActor.position.next = next;
+                }
+                else
+                {
+                    dialogueActor = collider;
+                }
+
                 possessedActor.position.direction = direction;
             }
         }
@@ -1386,6 +1459,18 @@ public class Main : MonoBehaviour
         else
         {
             brushSpriteD.Blend(stamp.brush, blend_);
+        }
+
+        Actor actor = targetActor;
+
+        if (project == null)
+            return;
+
+        if (actor != null || project.world.TryGetActor(next, out actor, 3))
+        {
+            brushSpriteD.Crop(actor.costume[actor.position.direction].sprite8,
+                              canvasPosition: next, 
+                              brushPosition: actor.position.current);
         }
 
         brushSpriteD.mTexture.Apply();

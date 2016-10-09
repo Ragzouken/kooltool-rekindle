@@ -121,7 +121,7 @@ public abstract class ManagedTexture<TPixel>
 
     public void Clear(TPixel value, IntRect rect)
     {
-        int stride = uTexture.width;
+        int stride = width;
 
         int xmin = rect.xMin;
         int ymin = rect.yMin;
@@ -253,6 +253,66 @@ public class ManagedSprite<TPixel> : IDisposable
         canvas.mTexture.Blend(brush.mTexture, blend, local_rect_canvas, local_rect_brush);
 
         return true;
+    }
+
+    public bool Crop(ManagedSprite<TPixel> bounds,
+                     IntVector2 canvasPosition = default(IntVector2),
+                     IntVector2 brushPosition = default(IntVector2))
+    {
+        var canvas = this;
+
+        var b_offset = brushPosition - bounds.pivot;
+        var c_offset = canvasPosition - canvas.pivot;
+
+        var world_rect_brush = new IntRect(b_offset.x,
+                                           b_offset.y,
+                                           bounds.rect.width,
+                                           bounds.rect.height);
+
+        var world_rect_canvas = new IntRect(c_offset.x,
+                                            c_offset.y,
+                                            canvas.rect.width,
+                                            canvas.rect.height);
+
+        var activeRect = world_rect_brush.Intersect(world_rect_canvas);
+
+        if (activeRect.width < 1 || activeRect.height < 1)
+        {
+            return false;
+        }
+
+        IntRect local_rect_canvas = activeRect;
+        local_rect_canvas.Move(-world_rect_canvas.xMin + canvas.rect.xMin,
+                               -world_rect_canvas.yMin + canvas.rect.yMin);
+
+        canvas.Crop(local_rect_canvas);
+
+        return true;
+    }
+
+    private void Crop(IntRect bounds)
+    {
+        int stride = mTexture.width;
+
+        int xmin = rect.xMin;
+        int ymin = rect.yMin;
+        int xmax = rect.xMax;
+        int ymax = rect.yMax;
+
+        for (int y = ymin; y < ymax; ++y)
+        {
+            for (int x = xmin; x < xmax; ++x)
+            {
+                if (!bounds.Contains(x, y))
+                {
+                    int i = y * stride + x;
+
+                    mTexture.pixels[i] = default(TPixel);
+                }
+            }
+        }
+
+        mTexture.dirty = true;
     }
 
     public void Clear(TPixel value)

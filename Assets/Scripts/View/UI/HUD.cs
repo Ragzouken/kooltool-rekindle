@@ -12,7 +12,7 @@ public class HUD : MonoBehaviour
 
     public enum Mode
     {
-        Switch,
+        Play,
         Draw,
         Character,
     }
