@@ -16,8 +16,10 @@ public interface ICopyable<T>
 public class Copier : Dictionary<object, object>
 {
     public T Copy<T>(T original)
-        where T : ICopyable<T>, new()
+        where T : class, ICopyable<T>, new()
     {
+        if (original == null) return null; 
+
         object copy;
 
         if (!TryGetValue(original, out copy))
@@ -679,6 +681,20 @@ public class Position : ICopyable<Position>
         {
             return prev != next;
         }
+    }
+
+    public Position() { }
+
+    public Position(IntVector2 position)
+        : this(position, position)
+    {
+    }
+
+    public Position(IntVector2 prev, IntVector2 next, float progress=0)
+    {
+        this.prev = prev;
+        this.next = next;
+        this.progress = progress;
     }
 
     public void Copy(Copier copier, Position copy)

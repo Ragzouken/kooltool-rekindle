@@ -159,6 +159,8 @@ public class Main : MonoBehaviour
     private Sprite characterSelectCursor;
     [SerializeField]
     private AudioSource characterPlaceSound;
+    [SerializeField]
+    private AudioSource undoSound;
 
     [SerializeField]
     private Sprite enterActorCursor, exitActorCursor;
@@ -181,6 +183,23 @@ public class Main : MonoBehaviour
         }
     }
     
+    private void FillSimpleProject()
+    {
+        var costume = NewSimpleCostume();
+
+        var actor = new Actor
+        {
+            costume = costume,
+            world = project.world,
+            dialogue = "player",
+            position = new Position(IntVector2.one * 16),
+        };
+
+        project.world.actors.Add(actor);
+
+        possessedActor = actor;
+    }
+
     private Costume NewCostume()
     {
         var texture = new TextureByte(test.width, test.height);
@@ -204,6 +223,29 @@ public class Main : MonoBehaviour
             down = new SpriteResource(res, sprites[1]),
             left = new SpriteResource(res, sprites[2]),
             up = new SpriteResource(res, sprites[3]),
+        };
+
+        return costume;
+    }
+
+    private Costume NewSimpleCostume()
+    {
+        var rect = new IntRect(0, 0, 32, 32);
+
+        var texture = new TextureByte(32, 32);
+        texture.SetPixels(test.GetPixels(new IntRect(0, 64, 32, 32)));
+        texture.Apply();
+
+        var res = new TextureResource(texture);
+        var spr = new ManagedSprite<byte>(texture, rect, IntVector2.one * 16);
+        var res2 = new SpriteResource(res, spr);
+
+        var costume = new Costume
+        {
+            right = res2,
+            down = res2,
+            left = res2,
+            up = res2,
         };
 
         return costume;
@@ -265,18 +307,8 @@ public class Main : MonoBehaviour
 
         drawHUD.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
-        var res = new TextureResource(test);
-
-        var costume = NewCostume();
-
         editProject = new Project();
         var w = new World();
-        res.dirty = true;
-        editProject.resources.Add(res);
-        editProject.resources.Add(costume.right);
-        editProject.resources.Add(costume.left);
-        editProject.resources.Add(costume.down);
-        editProject.resources.Add(costume.up);
 
         for (int i = 1; i < 16; ++i)
         {
@@ -347,6 +379,8 @@ public class Main : MonoBehaviour
         borderSprite1 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
 
         defaultCostume = NewCostume();
+
+        FillSimpleProject();
 
 #if UNITY_WEBGL
         Debug.Log("Location: " + GetWindowSearch());
@@ -479,6 +513,8 @@ public class Main : MonoBehaviour
         change.Undo();
 
         redos.Push(change);
+
+        undoSound.Play();
     }
 
     public void Redo()
@@ -873,15 +909,6 @@ public class Main : MonoBehaviour
 
         CheckHotkeys();
 
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            foreach (Actor actor in project.world.actors)
-            {
-                actor.state.fragment = "bump";
-                actor.state.line = 0;
-            }
-        }
-
         float interval = 0.1f;
 
         project.world.timer += Time.deltaTime;
@@ -1223,11 +1250,21 @@ public class Main : MonoBehaviour
         }
 
         characterDialogue.interactable = possessedActor != null;
-        characterDialogue.text = possessedActor == null ? "NO CHARACTER SELECTED" : characterDialogue.text;
 
         if (possessedActor != null)
         {
-            possessedActor.dialogue = characterDialogue.text;
+            if (characterDialogue.isFocused)
+            {
+                possessedActor.dialogue = characterDialogue.text;
+            }
+            else
+            {
+                characterDialogue.text = possessedActor.dialogue;
+            }
+        }
+        else
+        {
+            characterDialogue.text = "NO CHARACTER SELECTED";
         }
 
         Actor hoveredActor;
@@ -1282,7 +1319,7 @@ public class Main : MonoBehaviour
             var actor = new Actor
             {
                 world = project.world,
-                costume = NewCostume(),
+                costume = NewSimpleCostume(),
                 state = new State { fragment = "start", line = 0 },
                 position = new Position
                 {
