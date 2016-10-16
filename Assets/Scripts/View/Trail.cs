@@ -23,7 +23,7 @@ public class Trail : MonoBehaviour
     private List<Particle> particles = new List<Particle>();
 
     private Vector2 prev;
-    private Vector2 next;
+    public Vector2 next;
 
     private void Awake()
     {
@@ -60,9 +60,9 @@ public class Trail : MonoBehaviour
 
         //offset = Border(u);
 
-        next = cam.focusTarget + offset * 8;
+        //next = transform.position; //cam.focusTarget + offset * 8;
 
-        Bresenham.Line((int) prev.x, (int) prev.y, (int) next.x, (int) next.y, (Bresenham.PlotFunction)((x, y) =>
+        Bresenham.Line((int) prev.x, (int) prev.y, (int) next.x, (int) next.y, (x, y) =>
         {
             this.particles.Add(new Particle
             {
@@ -70,7 +70,7 @@ public class Trail : MonoBehaviour
                 lifetime = 4,
                 offset = Random.value,
             });
-        }));
+        });
 
         prev = next;
     }

@@ -31,6 +31,10 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
+    [SerializeField] private SpriteRenderer pointerRenderer;
+    [SerializeField] private Sprite pointerSprite;
+    [SerializeField] private Trail trail;
+
     [SerializeField] private DialogueBox dialogueBox;
     [SerializeField] private Toggle followToggle;
 
@@ -200,6 +204,8 @@ public class Main : MonoBehaviour
         possessedActor = actor;
     }
 
+
+
     private Costume NewCostume()
     {
         var texture = new TextureByte(test.width, test.height);
@@ -253,9 +259,18 @@ public class Main : MonoBehaviour
 
     private Costume defaultCostume;
 
+    private ManagedSprite<Color32> pointerMSprite;
+
     private void Start()
     { 
         Cursor.visible = false;
+
+        {
+            var texture = new TextureColor32(19, 19);
+            pointerMSprite = new ManagedSprite<Color32>(texture, new IntRect(0, 0, 19, 19), new IntVector2(10, 10));
+
+            pointerMSprite.SetPixels(pointerSprite.texture.GetPixels32());
+        }
 
         {
             test = new TextureByte(128, 128);
@@ -1046,6 +1061,41 @@ public class Main : MonoBehaviour
         }
 
         UpdateCharacterMovement();
+
+        if (possessedActor != null)
+        {
+            var view = worldView.actors.Get(possessedActor);
+
+            //pointerRenderer.gameObject.SetActive(true);
+            trail.gameObject.SetActive(true);
+            
+
+            float angle1 = (Time.timeSinceLevelLoad * 3) % (2 * Mathf.PI);
+            float ox = Mathf.Cos(angle1) * 24;
+            float oy = Mathf.Sin(angle1) * 24;
+
+            trail.next = (Vector2) view.transform.position
+                       + new Vector2(ox, oy);
+
+            /*
+            float angle2 = angle1 * Mathf.Rad2Deg + 180;
+            int rots = (int) (angle2 + 45) / 90;
+
+            var spr = TextureColor32.Pooler.Instance.Rotated(pointerMSprite, rots);
+            spr.mTexture.Apply();
+
+            pointerRenderer.sprite = spr.uSprite;
+
+            pointerRenderer.transform.position = view.transform.position
+                                               + new Vector3(ox, oy);
+            //pointerRenderer.transform.localEulerAngles = Vector3.forward * (angle1 * Mathf.Rad2Deg + 180);
+            */
+        }
+        else
+        {
+            pointerRenderer.gameObject.SetActive(false);
+            trail.gameObject.SetActive(false);
+        }
 
         if (hud.mode == HUD.Mode.Play)
         {
