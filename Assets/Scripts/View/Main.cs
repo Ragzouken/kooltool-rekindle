@@ -549,9 +549,6 @@ public class Main : MonoBehaviour
     private static extern void UpdateGistID(string id);
 
     [System.Runtime.InteropServices.DllImport("__Internal")]
-    private static extern string GetGistID();
-
-    [System.Runtime.InteropServices.DllImport("__Internal")]
     private static extern string GetWindowSearch();
 
     private void FromGist(string id)
@@ -659,7 +656,10 @@ public class Main : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Slash))
         {
-            //PerfTest();
+            string text = JSON.Serialise(new[] { test, test, test });
+            var textures = JSON.Deserialise<TextureByte[]>(text);
+
+            Debug.Log(text);
         }
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;

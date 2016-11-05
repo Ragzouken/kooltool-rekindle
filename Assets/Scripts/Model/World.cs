@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 
 public interface ICopyable<T>
@@ -18,16 +19,22 @@ public class Copier : Dictionary<object, object>
     public T Copy<T>(T original)
         where T : class, ICopyable<T>, new()
     {
+        // a null is a null!
         if (original == null) return null; 
 
+        // if we already copied this, use the existing copy
         object copy;
 
         if (!TryGetValue(original, out copy))
         {
+            // otherwise, construct a blank instance and save it
             copy = new T();
 
             this[original] = copy;
 
+            // perform the copying after we've saved the new (incomplete) copy
+            // this way any circular references to the currently copying object
+            // can be resolved by just returning our incomplete copy
             original.Copy(this, (T) copy);
         }
 
@@ -44,6 +51,51 @@ public class Copier : Dictionary<object, object>
         }
 
         return (T) copy;
+    }
+}
+
+public class ByteTextureConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(TextureByte);
+    }
+
+    public override object ReadJson(JsonReader reader, 
+                                    Type objectType, 
+                                    object existingValue, 
+                                    JsonSerializer serializer)
+    {
+        var dimensions = JArray.Load(reader);
+
+        var texture = new TextureByte(dimensions[0].Value<int>(), 
+                                      dimensions[1].Value<int>());
+        
+        return texture;
+    }
+
+    public override void WriteJson(JsonWriter writer, 
+                                   object value, 
+                                   JsonSerializer serializer)
+    {
+        var texture = (TextureByte) value;
+
+        writer.WriteStartArray();
+        writer.WriteValue(texture.width);
+        writer.WriteValue(texture.height);
+        writer.WriteEndArray();
+    }
+}
+
+public class KoolTexture : TextureByte, ICopyable<KoolTexture>
+{
+    public KoolTexture(int width, int height) : base(width, height) { }
+
+    public void Copy(Copier copier, KoolTexture copy)
+    {
+        //var copy = new KoolTexture(width, height);
+        //Array.Copy(pixels, copy.pixels, pixels.Length);
+        //copy.dirty = true;
     }
 }
 

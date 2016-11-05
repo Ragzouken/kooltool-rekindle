@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 
+[Newtonsoft.Json.JsonConverter(typeof(TextureByteConverter))]
 public class TextureByte : ManagedTexture<byte>
 {
     public class Pooler : ManagedPooler<Pooler, byte>
