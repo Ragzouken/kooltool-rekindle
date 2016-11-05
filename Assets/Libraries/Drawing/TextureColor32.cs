@@ -39,6 +39,8 @@ public class TextureColor32 : ManagedTexture<Color32>
 
     public override void Apply()
     {
+        base.Apply();
+
         if (dirty)
         {
             uTexture.SetPixels32(pixels);

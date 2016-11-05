@@ -31,6 +31,8 @@ public class TextureByte : ManagedTexture<byte>
 
     public override void Apply()
     {
+        base.Apply();
+
         if (dirty)
         {
             uTexture.LoadRawTextureData(pixels);

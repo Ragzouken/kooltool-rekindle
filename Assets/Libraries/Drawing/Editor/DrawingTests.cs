@@ -57,14 +57,14 @@ public class DrawingTests
     private void SaveOut(Sprite sprite, string name)
     {
         sprite.texture.Apply();
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/" + name + ".png", sprite.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Libraries/Drawing/Editor/Output/" + name + ".png", sprite.texture.EncodeToPNG());
         AssetDatabase.Refresh();
     }
 
     private void SaveOut<TPixel>(ManagedSprite<TPixel> sprite, string name)
     {
         sprite.mTexture.Apply();
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Drawing/Editor/Output/" + name + ".png", sprite.mTexture.uTexture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Libraries/Drawing/Editor/Output/" + name + ".png", sprite.mTexture.uTexture.EncodeToPNG());
         AssetDatabase.Refresh();
     }
 

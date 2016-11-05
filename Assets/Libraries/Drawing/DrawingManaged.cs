@@ -8,6 +8,7 @@ public abstract class ManagedTexture<TPixel>
 {
     public int width;
     public int height;
+    public TextureFormat format;
 
     public Texture2D uTexture;
     public TPixel[] pixels;
@@ -18,14 +19,27 @@ public abstract class ManagedTexture<TPixel>
         return new ManagedSprite<TPixel>(this, new IntRect(0, 0, width, height), pivot);
     }
 
+    protected ManagedTexture() { }
+
     protected ManagedTexture(int width, int height, TextureFormat format)
+    {
+        Reformat(width, height, format);
+    }
+
+    public void Reformat(int width, int height, TextureFormat format)
     {
         this.width = width;
         this.height = height;
+        this.format = format;
 
-        uTexture = Texture2DExtensions.Blank(width, height, format);
         pixels = new TPixel[width * height];
         dirty = true;
+
+        if (uTexture != null)
+        {
+            UnityEngine.Object.Destroy(uTexture);
+            uTexture = null;
+        }
     }
 
     public void Blend(ManagedTexture<TPixel> brush,
@@ -163,7 +177,13 @@ public abstract class ManagedTexture<TPixel>
         dirty = true;
     }
 
-    public abstract void Apply();
+    public virtual void Apply()
+    {
+        if (uTexture == null)
+        {
+            uTexture = Texture2DExtensions.Blank(width, height, format);
+        }
+    }
 }
 
 public class ManagedSprite<TPixel> : IDisposable
