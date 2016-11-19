@@ -511,6 +511,11 @@ public class Position : ICopyable<Position>
         copy.progress = progress;
         copy.direction = direction;
     }
+
+    public override string ToString()
+    {
+        return string.Format("{0} -> {1} ({2:0.00}%)", prev, next, progress);
+    }
 }
 
 public class Script

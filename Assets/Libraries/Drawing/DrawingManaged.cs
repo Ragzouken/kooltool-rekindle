@@ -206,7 +206,7 @@ public class ManagedSprite<TPixel> : IDisposable
                 piv.x = pivot.x / (float) rect.width;
                 piv.y = pivot.y / (float) rect.height;
 
-                uSprite = Sprite.Create(mTexture.uTexture, rect, piv, 1, 0, SpriteMeshType.FullRect);
+                _uSprite = Sprite.Create(mTexture.uTexture, rect, piv, 1, 0, SpriteMeshType.FullRect);
             }
 
             return _uSprite;

@@ -220,7 +220,7 @@ public class Main : MonoBehaviour
     {
         var rect = new IntRect(0, 0, 32, 32);
 
-        var texture = new KoolTexture(32, 32);
+        var texture = project.CreateTexture(32, 32);
         texture.SetPixels(test.GetPixels(new IntRect(0, 64, 32, 32)));
         texture.Apply();
 
@@ -732,7 +732,7 @@ public class Main : MonoBehaviour
 
     private void LoadGistAgain()
     {
-        StartCoroutine(Gist.Download("0a3f88ac668f435dff26250390cda2e2", gist =>
+        StartCoroutine(Gist.Download("3ab7702e55a58fd822d25d79281b83ce", gist =>
         {
             SetProject(Project.FromGist(gist));
         }));

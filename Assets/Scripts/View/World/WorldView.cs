@@ -23,6 +23,8 @@ public class WorldView : InstanceView<Scene>
     protected override void Configure()
     {
         backgroundView.SetConfig(config.background);
+
+        Refresh();
     }
 
     public override void Refresh()
