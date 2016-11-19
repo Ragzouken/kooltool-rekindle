@@ -11,6 +11,7 @@ using System;
 
 using kooltool;
 
+/*
 public class TextureByteConverter : JsonConverter
 {
     public override bool CanConvert(Type objectType)
@@ -23,10 +24,10 @@ public class TextureByteConverter : JsonConverter
                                     object existingValue, 
                                     JsonSerializer serializer)
     {
-        var dimensions = JArray.Load(reader);
+        var obj = JObject.Load(reader);
 
-        var texture = new TextureByte(dimensions[0].Value<int>(), 
-                                      dimensions[1].Value<int>());
+        var texture = new TextureByte(obj.GetValue("width").Value<int>(), 
+                                      obj.GetValue("height").Value<int>());
         
         return texture;
     }
@@ -37,18 +38,29 @@ public class TextureByteConverter : JsonConverter
     {
         var texture = (TextureByte) value;
 
-        writer.WriteStartArray();
-        writer.WriteValue(texture.width);
-        writer.WriteValue(texture.height);
-        writer.WriteEndArray();
+        var obj = new JObject();
+
+        obj.Add("width",  texture.width);
+        obj.Add("height", texture.height);
+
+        obj.WriteTo(writer);
     }
 }
+*/
 
-[JsonConverter(typeof(TextureByteConverter))]
+//[JsonConverter(typeof(TextureByteConverter))]
+[JsonObject(MemberSerialization = MemberSerialization.OptIn,
+            IsReference = true)]
 public class KoolTexture : TextureByte, ICopyable<KoolTexture>
 {
+    [JsonProperty]
+    public new int width { get { return base.width; } }
+    [JsonProperty]
+    public new int height { get { return base.height; } }
+
     public KoolTexture() : base() { }
 
+    [JsonConstructor]
     public KoolTexture(int width, int height) : base(width, height) { }
 
     public void Copy(Copier copier, KoolTexture copy)
@@ -59,6 +71,43 @@ public class KoolTexture : TextureByte, ICopyable<KoolTexture>
     }
 }
 
+public class KoolSpriteConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(KoolSprite);
+    }
+
+    public override object ReadJson(JsonReader reader, 
+                                    Type objectType, 
+                                    object existingValue, 
+                                    JsonSerializer serializer)
+    {
+        var obj = JObject.Load(reader);
+
+        var sprite = new KoolSprite(obj["texture"].ToObject<KoolTexture>(serializer), 
+                                    obj["rect"].ToObject<IntRect>(serializer),
+                                    obj["pivot"].ToObject<IntVector2>(serializer));
+        
+        return sprite;
+    }
+
+    public override void WriteJson(JsonWriter writer, 
+                                   object value, 
+                                   JsonSerializer serializer)
+    {
+        var sprite = (KoolSprite) value;
+        var obj = new JObject();
+
+        obj.Add("texture", JToken.FromObject(sprite.mTexture, serializer));
+        obj.Add("rect",    JToken.FromObject(sprite.rect,     serializer));
+        obj.Add("pivot",   JToken.FromObject(sprite.pivot,    serializer));
+
+        obj.WriteTo(writer);
+    }
+}
+
+[JsonConverter(typeof(KoolSpriteConverter))]
 public class KoolSprite : ManagedSprite<byte>, ICopyable<KoolSprite>
 {
     public KoolSprite() : base() { }
@@ -100,230 +149,6 @@ public class KoolSpriteChange : IChange
         sprite.GetPixels(after);
         sprite.SetPixels(before);
     }
-}
-
-public class TextureResource : IResource, ICopyable<TextureResource>
-{
-    public string id = "";
-    [JsonIgnore]
-    public bool dirty = false;
-    public TextureByte texture8;
-
-    [JsonIgnore]
-    public Texture2D uTexture
-    {
-        get
-        {
-            return texture8.uTexture;
-        }
-    }
-
-    [JsonIgnore]
-    public string path
-    {
-        get
-        {
-            return Application.persistentDataPath + "/texture" + id + ".png";
-        }
-    }
-
-    bool IResource.LoadFinalisable(ProjectOld project)
-    {
-        return true;
-    }
-
-    void IResource.LoadFinalise(ProjectOld project)
-    {
-        var tex = Texture2DExtensions.Blank(1, 1);
-        tex.LoadImage(System.IO.File.ReadAllBytes(path));
-
-        texture8.SetPixels32(tex.GetPixels32());
-        texture8.Apply();
-    }
-
-    void IResource.SaveFinalise(ProjectOld project)
-    {
-        if (!dirty) return;
-
-        id = id == "" ? Guid.NewGuid().ToString() : id;
-
-        System.IO.File.WriteAllBytes(path, texture8.uTexture.EncodeToPNG());
-    }
-
-    public TextureResource() { }
-
-    public TextureResource(TextureByte texture8)
-    {
-        this.texture8 = texture8;
-    }
-
-    public static implicit operator Texture2D(TextureResource resource)
-    {
-        return resource.uTexture;
-    }
-
-    public void Copy(Copier copier, TextureResource copy)
-    {
-        copy.texture8 = new TextureByte(texture8.uTexture.width, texture8.uTexture.height);
-        Array.Copy(texture8.pixels, copy.texture8.pixels, texture8.pixels.Length);
-        copy.texture8.dirty = true;
-
-        copy.id = id;
-    }
-}
-
-public class SpriteResource : IResource, ICopyable<SpriteResource>
-{
-    public class Change : IChange
-    {
-        public SpriteResource sprite;
-        public byte[] before, after;
-
-        public Change(SpriteResource sprite)
-        {
-            this.sprite = sprite;
-
-            before = sprite.sprite8.GetPixels();
-            after = new byte[sprite.sprite8.rect.width * sprite.sprite8.rect.height];
-        }
-
-        void IChange.Redo(Changes changes)
-        {
-            sprite.sprite8.SetPixels(after);
-        }
-
-        void IChange.Undo(Changes changes)
-        {
-            sprite.sprite8.GetPixels(after);
-            sprite.sprite8.SetPixels(before);
-        }
-    }
-
-    public TextureResource texture;
-    public Vector2 pivot;
-    public Rect rect;
-
-    [JsonIgnore]
-    public ManagedSprite<byte> sprite8;
-
-    [JsonIgnore]
-    public Sprite uSprite
-    {
-        get
-        {
-            return sprite8.uSprite;
-        }
-    }
-
-    bool IResource.LoadFinalisable(ProjectOld project)
-    {
-        return project.LoadFinalised(texture);
-    }
-
-    void IResource.LoadFinalise(ProjectOld project)
-    {
-        sprite8 = new ManagedSprite<byte>(texture.texture8, rect, pivot);
-    }
-
-    void IResource.SaveFinalise(ProjectOld project)
-    {
-    }
-
-    public SpriteResource() { }
-
-    public SpriteResource(TextureResource texture, Sprite sprite)
-    {
-        this.sprite8 = new ManagedSprite<byte>(texture.texture8, sprite);
-        this.texture = texture;
-
-        pivot = sprite.pivot;
-        rect = sprite.textureRect;
-    }
-
-    public SpriteResource(TextureResource texture, ManagedSprite<byte> sprite8)
-    {
-        this.sprite8 = sprite8;
-        this.texture = texture;
-
-        pivot = sprite8.pivot;
-        rect = sprite8.rect;
-    }
-
-    public static implicit operator Sprite(SpriteResource resource)
-    {
-        return resource.sprite8.uSprite;
-    }
-
-    public void Copy(Copier copier, SpriteResource copy)
-    {
-        copy.texture = copier.Copy(texture);
-        copy.pivot = pivot;
-        copy.rect = rect;
-        copy.sprite8 = new ManagedSprite<byte>(copy.texture.texture8, rect, pivot);
-    }
-}
-
-public class ProjectOld : ICopyable<ProjectOld>
-{
-    public HashSet<IResource> resources = new HashSet<IResource>();
-    public Scene world;
-
-    private HashSet<IResource> unfinalised = new HashSet<IResource>();
-
-    public IEnumerator SaveFinalise()
-    {
-        foreach (IResource resource in resources)
-        {
-            resource.SaveFinalise(this);
-
-            yield return null;
-        }
-    }
-
-    public IEnumerator LoadFinalise()
-    {
-        unfinalised.UnionWith(resources);
-
-        var ready = new List<IResource>();
-
-        do
-        {
-            ready.Clear();
-            ready.AddRange(unfinalised.Where(resource => resource.LoadFinalisable(this)));
-
-            foreach (var resource in ready)
-            {
-                resource.LoadFinalise(this);
-
-                yield return null;
-            }
-
-            unfinalised.ExceptWith(ready);
-        }
-        while (ready.Any());
-
-        Assert.IsFalse(unfinalised.Any(), "Didn't finalise all IResources!");
-    }
-
-    public bool LoadFinalised(params IResource[] dependencies)
-    {
-        return !dependencies.Intersect(unfinalised).Any();
-    }
-
-    public void Copy(Copier copier, ProjectOld copy)
-    {
-        copy.world = copier.Copy(world);
-        // every resource should have already been copied, if not then it
-        // doesn't matter that we can't copy it anyway...
-        //copy.resources = new HashSet<IResource>(resources.Select(resource => copier.CopyFake(resource)));
-    }
-}
-
-public interface IResource
-{
-    bool LoadFinalisable(ProjectOld project);
-    void LoadFinalise(ProjectOld project);
-    void SaveFinalise(ProjectOld project);
 }
 
 public interface IChange

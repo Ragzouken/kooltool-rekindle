@@ -302,21 +302,21 @@ public class Main : MonoBehaviour
 
         drawHUD.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
-        editProject = new Project();
+        project = new Project();
         var w = new Scene();
 
         var palette = new Palette();
-        editProject.AddPalette(palette);
+        project.AddPalette(palette);
 
         for (int i = 1; i < 16; ++i)
         {
             palette.colors[i] = new Color(Random.value, Random.value, Random.value, 1f);
         }
 
-        editProject.AddScene(w);
-        w.background.project = editProject;
+        project.AddScene(w);
+        w.background.project = project;
         w.background.cellSize = 256;
-        SetProject(editProject);
+        SetProject(project);
 
         for (int i = 0; i < 16; ++i)
         {
@@ -379,6 +379,8 @@ public class Main : MonoBehaviour
         defaultCostume = NewCostume();
 
         FillSimpleProject();
+
+        LoadGistAgain();
 
 #if UNITY_WEBGL
         Debug.Log("Location: " + GetWindowSearch());
@@ -536,9 +538,9 @@ public class Main : MonoBehaviour
 
     private void FromGist(string id)
     {
-        StartCoroutine(Gist.Download(id, dict =>
+        StartCoroutine(Gist.Download(id, (System.Action<Dictionary<string, string>>)((Dictionary<string, string> dict) =>
         {
-            var scene = project.scenes.First();
+            var scene = Enumerable.First<Scene>(this.project.scenes);
 
             //scene.palette = BytesToColors(FromBase64(dict["palette"]));
 
@@ -557,8 +559,8 @@ public class Main : MonoBehaviour
                 //c.mTexture.DecodeFromPNG(data);
             }
 
-            SetProject(project);
-        }));
+            SetProject((Project) this.project);
+        })));
     }
 
     private string ToBase64(byte[] bytes)
@@ -728,7 +730,23 @@ public class Main : MonoBehaviour
         */
     }
 
-    private Project editProject;
+    private void LoadGistAgain()
+    {
+        StartCoroutine(Gist.Download("0a3f88ac668f435dff26250390cda2e2", gist =>
+        {
+            SetProject(Project.FromGist(gist));
+        }));
+    }
+
+    private void SaveGistAgain()
+    {
+        var gist = project.ToGist();
+
+        StartCoroutine(Gist.Create("test gist",
+                       project.ToGist(),
+                       id => Debug.Log(id)));
+    }
+
     private Scene editScene;
     private Scene playScene;
 
@@ -743,10 +761,7 @@ public class Main : MonoBehaviour
 
         possessedActor = playScene.actors.FirstOrDefault(actor => actor.dialogue.StartsWith("player"));
 
-        foreach (var pair in editProject.ToGist())
-        {
-            Debug.LogFormat("{0} => {1}", pair.Key, pair.Value);
-        }
+        SaveGistAgain();
     }
 
     public void ExitPlayMode()

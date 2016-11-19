@@ -23,8 +23,8 @@ public static class JSON
         settings.Converters.Add(new RectConverter());
         settings.Converters.Add(new ColorConverter());
         settings.Converters.Add(new ByteSetConverter());
-        settings.Converters.Add(new PointConverter());
-        settings.Converters.Add(new TextureByteConverter());
+        settings.Converters.Add(new IntVector2Converter());
+        settings.Converters.Add(new IntRectConverter());
         settings.ObjectCreationHandling = ObjectCreationHandling.Replace;
         settings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
     }
@@ -119,7 +119,7 @@ public class RectConverter : JsonConverter
     }
 }
 
-public class PointConverter : JsonConverter
+public class IntVector2Converter : JsonConverter
 {
     public override bool CanConvert(Type objectType)
     {
@@ -131,11 +131,10 @@ public class PointConverter : JsonConverter
                                     object existingValue,
                                     JsonSerializer serializer)
     {
-        int x = (int) reader.ReadAsDecimal().GetValueOrDefault();
-        int y = (int) reader.ReadAsDecimal().GetValueOrDefault();
-        reader.Read();
+        var array = JToken.ReadFrom(reader);
 
-        return new IntVector2(x, y);
+        return new IntVector2(array[0].Value<float>(), 
+                              array[1].Value<float>());
     }
 
     public override void WriteJson(JsonWriter writer,
@@ -143,11 +142,44 @@ public class PointConverter : JsonConverter
                                    JsonSerializer serializer)
     {
         IntVector2 point = (IntVector2) value;
+        
+        var values = new JArray(point.x, point.y);
 
-        writer.WriteStartArray();
-        writer.WriteValue(point.x);
-        writer.WriteValue(point.y);
-        writer.WriteEndArray();
+        values.WriteTo(writer);
+    }
+}
+
+public class IntRectConverter : JsonConverter
+{
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(IntRect);
+    }
+
+    public override object ReadJson(JsonReader reader,
+                                    Type objectType,
+                                    object existingValue,
+                                    JsonSerializer serializer)
+    {
+        var rect = new IntRect();
+        var array = JToken.ReadFrom(reader);
+
+        rect.xMin = array[0].Value<int>();
+        rect.yMin = array[1].Value<int>();
+        rect.xMax = array[2].Value<int>();
+        rect.yMax = array[3].Value<int>();
+
+        return rect;
+    }
+
+    public override void WriteJson(JsonWriter writer,
+                                   object value,
+                                   JsonSerializer serializer)
+    {
+        var rect = (IntRect) value;
+        var obj = new JArray(rect.xMin, rect.yMin, rect.xMax, rect.yMax);
+
+        obj.WriteTo(writer);
     }
 }
 

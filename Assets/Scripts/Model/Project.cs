@@ -9,8 +9,11 @@ using System.Collections.Generic;
 
 using Random = UnityEngine.Random;
 
+using Newtonsoft.Json;
+
 namespace kooltool
 {
+    [JsonObject(IsReference = false)]
     public partial class Project
     {
         public HashSet<KoolTexture> textures = new HashSet<KoolTexture>();
@@ -72,10 +75,29 @@ namespace kooltool
 
     public partial class Project
     {
+        [JsonObject(IsReference = false)]
         public class ProjectSave
         {
+            [JsonArray]
+            public class Index : Dictionary<object, string> { }
+
             public Project project;
-            public Dictionary<object, string> resources = new Dictionary<object, string>();
+            public Index resources = new Index();
+        }
+
+        public static Project FromGist(Dictionary<string, string> gist)
+        {
+            var data = Encoding.UTF8.GetString(Convert.FromBase64String(gist["project"]));
+            var save = JSON.Deserialise<ProjectSave>(data);
+
+            foreach (var pair in save.resources)
+            {
+                byte[] tex = Convert.FromBase64String(gist[pair.Value]);
+
+                (pair.Key as KoolTexture).DecodeFromPNG(tex);
+            }
+
+            return save.project;
         }
 
         public Dictionary<string, string> ToGist()
@@ -93,6 +115,8 @@ namespace kooltool
             }
 
             string serialized = JSON.Serialise(save);
+
+            Debug.Log(serialized);
 
             gist.Add("project", Convert.ToBase64String(Encoding.UTF8.GetBytes(serialized)));
 
