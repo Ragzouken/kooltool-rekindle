@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using UnityEngine.Assertions;
 using System;
+using System.Text;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -66,6 +67,36 @@ namespace kooltool
             AddCostume(costume);
 
             return costume;
+        }
+    }
+
+    public partial class Project
+    {
+        public class ProjectSave
+        {
+            public Project project;
+            public Dictionary<object, string> resources = new Dictionary<object, string>();
+        }
+
+        public Dictionary<string, string> ToGist()
+        {
+            var gist = new Dictionary<string, string>();
+            var save = new ProjectSave { project = this, };
+
+            foreach (var texture in textures)
+            {
+                string id = Guid.NewGuid().ToString();
+                byte[] data = texture.uTexture.EncodeToPNG();
+
+                save.resources.Add(texture, id);
+                gist.Add(id, Convert.ToBase64String(data));
+            }
+
+            string serialized = JSON.Serialise(save);
+
+            gist.Add("project", Convert.ToBase64String(Encoding.UTF8.GetBytes(serialized)));
+
+            return gist;
         }
     }
 }

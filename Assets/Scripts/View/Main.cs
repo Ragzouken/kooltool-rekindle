@@ -742,6 +742,11 @@ public class Main : MonoBehaviour
         SetScene(playScene);
 
         possessedActor = playScene.actors.FirstOrDefault(actor => actor.dialogue.StartsWith("player"));
+
+        foreach (var pair in editProject.ToGist())
+        {
+            Debug.LogFormat("{0} => {1}", pair.Key, pair.Value);
+        }
     }
 
     public void ExitPlayMode()
