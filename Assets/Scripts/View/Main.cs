@@ -17,6 +17,8 @@ using UnityEditor;
 using InputField = TMPro.TMP_InputField;
 using Stopwatch = System.Diagnostics.Stopwatch;
 
+using kooltool;
+
 public class Main : MonoBehaviour
 {
 #if UNITY_EDITOR
@@ -62,7 +64,7 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite cellBorder;
 
     public Project project { get; private set; }
-    private World saved;
+    private Scene saved;
 
     private Actor possessed;
 
@@ -173,7 +175,7 @@ public class Main : MonoBehaviour
     {
         get
         {
-            return playProject != null;
+            return playScene != null;
         }
     }
 
@@ -190,46 +192,26 @@ public class Main : MonoBehaviour
     private void FillSimpleProject()
     {
         var costume = NewSimpleCostume();
-
+        var scene = project.scenes.First();
+        
         var actor = new Actor
         {
             costume = costume,
-            world = project.world,
+            world = scene,
             dialogue = "player",
             position = new Position(IntVector2.one * 16),
         };
 
-        project.world.actors.Add(actor);
+        scene.actors.Add(actor);
 
         possessedActor = actor;
     }
 
-
-
     private Costume NewCostume()
     {
-        var texture = new TextureByte(test.width, test.height);
-        texture.SetPixels(test.pixels);
-        texture.Apply();
-
-        var sprites = new ManagedSprite<byte>[4];
-
-        for (int i = 0; i < 4; ++i)
-        {
-            var rect = new Rect(0, 32 * (3 - i), 32, 32);
-
-            sprites[i] = new ManagedSprite<byte>(texture, rect, IntVector2.one * 16);
-        }
-
-        var res = new TextureResource(texture);
-
-        var costume = new Costume
-        {
-            right = new SpriteResource(res, sprites[0]),
-            down = new SpriteResource(res, sprites[1]),
-            left = new SpriteResource(res, sprites[2]),
-            up = new SpriteResource(res, sprites[3]),
-        };
+        var costume = project.CreateCostume4d1();
+        costume.down.mTexture.SetPixels(test.pixels);
+        costume.down.mTexture.Apply();
 
         return costume;
     }
@@ -238,20 +220,18 @@ public class Main : MonoBehaviour
     {
         var rect = new IntRect(0, 0, 32, 32);
 
-        var texture = new TextureByte(32, 32);
+        var texture = new KoolTexture(32, 32);
         texture.SetPixels(test.GetPixels(new IntRect(0, 64, 32, 32)));
         texture.Apply();
 
-        var res = new TextureResource(texture);
-        var spr = new ManagedSprite<byte>(texture, rect, IntVector2.one * 16);
-        var res2 = new SpriteResource(res, spr);
+        var spr = new KoolSprite(texture, new IntRect(0, 0, 32, 32), IntVector2.one * 16);
 
         var costume = new Costume
         {
-            right = res2,
-            down = res2,
-            left = res2,
-            up = res2,
+            right = spr,
+            down  = spr,
+            left  = spr,
+            up    = spr,
         };
 
         return costume;
@@ -323,14 +303,17 @@ public class Main : MonoBehaviour
         drawHUD.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
         editProject = new Project();
-        var w = new World();
+        var w = new Scene();
+
+        var palette = new Palette();
+        editProject.AddPalette(palette);
 
         for (int i = 1; i < 16; ++i)
         {
-            w.palette[i] = new Color(Random.value, Random.value, Random.value, 1f);
+            palette.colors[i] = new Color(Random.value, Random.value, Random.value, 1f);
         }
 
-        editProject.world = w;
+        editProject.AddScene(w);
         w.background.project = editProject;
         w.background.cellSize = 256;
         SetProject(editProject);
@@ -357,7 +340,7 @@ public class Main : MonoBehaviour
             */
         }
 
-        saved = project.world.Copy();
+        saved = Copier.EZCopy(project.scenes.First());
 
         //Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
 
@@ -555,7 +538,9 @@ public class Main : MonoBehaviour
     {
         StartCoroutine(Gist.Download(id, dict =>
         {
-            project.world.palette = BytesToColors(FromBase64(dict["palette"]));
+            var scene = project.scenes.First();
+
+            //scene.palette = BytesToColors(FromBase64(dict["palette"]));
 
             dict.Remove("palette");
 
@@ -567,8 +552,9 @@ public class Main : MonoBehaviour
 
                 byte[] data = System.Convert.FromBase64String(pair.Value);
 
-                var c = project.world.background.AddCell(new IntVector2(x, y));
-                c.texture.texture8.DecodeFromPNG(data);
+                var c = scene.background.AddCell(new IntVector2(x, y));
+                // TODO: loading
+                //c.mTexture.DecodeFromPNG(data);
             }
 
             SetProject(project);
@@ -621,10 +607,11 @@ public class Main : MonoBehaviour
 
     public void GISTSAVE()
     {
-        var background = project.world.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
-                                                                     p => ToBase64(p.Value.texture.uTexture.EncodeToPNG()));
+        var scene = project.scenes.First();
+        var background = scene.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
+                                                             p => ToBase64(p.Value.mTexture.uTexture.EncodeToPNG()));
 
-        background["palette"] = ToBase64(ColorsToBytes(project.world.palette));
+        background["palette"] = ToBase64(ColorsToBytes(project.palettes.Single().colors));
 
         StartCoroutine(Gist.Create("test gist",
             background,
@@ -742,42 +729,48 @@ public class Main : MonoBehaviour
     }
 
     private Project editProject;
-    private Project playProject;
+    private Scene editScene;
+    private Scene playScene;
 
     public void EnterPlayMode()
     {
         hud.mode = HUD.Mode.Play;
 
-        var copier = new Copier();
+        playScene = Copier.EZCopy(editScene);
 
-        playProject = copier.Copy(editProject);
+        timer = 0;
+        SetScene(playScene);
 
-        SetProject(playProject);
-
-        possessedActor = playProject.world.actors.FirstOrDefault(actor => actor.dialogue.StartsWith("player"));
+        possessedActor = playScene.actors.FirstOrDefault(actor => actor.dialogue.StartsWith("player"));
     }
 
     public void ExitPlayMode()
     {
         hud.mode = HUD.Mode.Draw;
 
-        playProject = null;
+        playScene = null;
         possessedActor = null;
 
-        SetProject(editProject);
+        SetScene(editScene);
     }
 
     private void SetProject(Project project)
     {
         this.project = project;
 
-        worldView.SetConfig(project.world);
-        drawHUD.SetWorld(project.world);
+        editScene = project.scenes.Single();
+        SetScene(editScene);
 
         for (int i = 0; i < 16; ++i)
         {
             RefreshPalette(i);
         }
+    }
+
+    private void SetScene(Scene scene)
+    {
+        worldView.SetConfig(scene);
+        drawHUD.SetWorld(scene);
     }
 
     private Stamp stamp;
@@ -791,7 +784,7 @@ public class Main : MonoBehaviour
 
     public void EditPalette(int i, Color color)
     {
-        project.world.palette[i] = color;
+        project.palettes.Single().colors[i] = color;
 
         RefreshPalette(i);
     }
@@ -826,9 +819,11 @@ public class Main : MonoBehaviour
     private void RefreshPalette(int i)
     {
         string name = string.Format("_Palette{0:D2}", i);
+        
+        var palette = project.palettes.Single();
 
-        material1.SetColor(name, project.world.palette[i]);
-        material2.SetColor(name, project.world.palette[i]);
+        material1.SetColor(name, palette.colors[i]);
+        material2.SetColor(name, palette.colors[i]);
     }
 
     private GameObject hovering;
@@ -860,8 +855,7 @@ public class Main : MonoBehaviour
         borderTest.transform.localPosition = actor.position.current;
 
         borderSprite0.Clear(0);
-        borderSprite0.Blend(actor.costume[actor.position.direction].sprite8,
-                            TextureByte.mask);
+        borderSprite0.Blend(actor.costume[actor.position.direction], TextureByte.mask);
 
         int w = borderSprite0.mTexture.width;
         int h = borderSprite0.mTexture.height;
@@ -894,6 +888,7 @@ public class Main : MonoBehaviour
 
     Vector2 prev, next;
     bool mouseHold, mousePress;
+    float timer;
 
     private void Update()
     {
@@ -920,20 +915,20 @@ public class Main : MonoBehaviour
         nextCursor = new Vector2((cursor.localPosition.x / 256f + 0.5f) * Screen.width,
                                  (cursor.localPosition.y / 256f + 0.5f) * Screen.height);
 
-        worldView.actors.SetActive(project.world.actors);
-
         CheckHotkeys();
 
         float interval = 0.1f;
 
-        project.world.timer += Time.deltaTime;
+        var scene = playScene ?? editScene;
+
+        timer += Time.deltaTime;
         worldView.Refresh();
 
-        while (project.world.timer > interval)
+        while (timer > interval)
         {
-            project.world.timer -= interval;
+            timer -= interval;
 
-            foreach (Actor actor in project.world.actors)
+            foreach (Actor actor in scene.actors)
             {
                 if (actor.position.moving) continue;
 
@@ -973,7 +968,7 @@ public class Main : MonoBehaviour
             }
         }
 
-        foreach (Actor actor in project.world.actors)
+        foreach (Actor actor in scene.actors)
         {
             if (!actor.position.moving) continue;
 
@@ -1160,7 +1155,7 @@ public class Main : MonoBehaviour
 
             if ((Input.GetMouseButtonDown(0) || input.click.WasPressed))
             {
-                int index = project.world.GetPixel(next);
+                int index = project.scenes.First().GetPixel(next);
 
                 drawHUD.SelectPaletteIndex(index);
             }
@@ -1199,7 +1194,9 @@ public class Main : MonoBehaviour
 
         Actor actor;
 
-        if (project.world.TryGetActor(next, out actor, 3))
+        var scene = project.scenes.First();
+
+        if (scene.TryGetActor(next, out actor, 3))
         {
             brushRenderer.sortingLayerName = "World - Actors";
             brushRenderer.sortingOrder = 1;
@@ -1220,7 +1217,7 @@ public class Main : MonoBehaviour
             {
                 dragging_ = true;
                 changes = new Changes();
-                project.world.TryGetActor(next, out targetActor, 3);
+                scene.TryGetActor(next, out targetActor, 3);
             }
             else
             {
@@ -1240,7 +1237,7 @@ public class Main : MonoBehaviour
                 }
                 else
                 {
-                    project.world.background.Blend(changes, line, IntVector2.zero, blend_);
+                    scene.background.Blend(changes, line, IntVector2.zero, blend_);
                 }
 
                 TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
@@ -1285,7 +1282,7 @@ public class Main : MonoBehaviour
 
             cursorBlock.SetFloat("_Cycle", Time.timeSinceLevelLoad * 12);
             cellCursor.SetPropertyBlock(cursorBlock);
-            cellCursor.sprite = defaultCostume.down;
+            cellCursor.sprite = defaultCostume.down.uSprite;
         }
         else
         {
@@ -1318,8 +1315,10 @@ public class Main : MonoBehaviour
         }
 
         Actor hoveredActor;
-            
-        project.world.TryGetActor(next, out hoveredActor, 0);
+
+        var scene = project.scenes.First();    
+
+        scene.TryGetActor(next, out hoveredActor, 0);
 
         if (hoveredActor != null)
         {
@@ -1337,13 +1336,13 @@ public class Main : MonoBehaviour
         {
             if (removeCharacter.isOn)
             {
-                project.world.actors.Remove(hoveredActor);
+                scene.actors.Remove(hoveredActor);
 
                 if (possessedActor == hoveredActor)
                     possessedActor = null;
 
                 var changes = new Changes();
-                changes.GetChange(hoveredActor, () => new ActorRemovedChange { world = project.world, actor = hoveredActor });
+                changes.GetChange(hoveredActor, () => new ActorRemovedChange { world = scene, actor = hoveredActor });
                 Do(changes);
 
                 removeCharacter.isOn = false;
@@ -1368,7 +1367,7 @@ public class Main : MonoBehaviour
 
             var actor = new Actor
             {
-                world = project.world,
+                world = scene,
                 costume = NewSimpleCostume(),
                 state = new State { fragment = "start", line = 0 },
                 position = new Position
@@ -1379,10 +1378,10 @@ public class Main : MonoBehaviour
                 },
             };
 
-            project.world.actors.Add(actor);
+            scene.actors.Add(actor);
 
             var changes = new Changes();
-            changes.GetChange(actor, () => new ActorAddedChange { world = project.world, actor = actor });
+            changes.GetChange(actor, () => new ActorAddedChange { world = scene, actor = actor });
             Do(changes);
 
             characterPlaceSound.Play();
@@ -1446,8 +1445,10 @@ public class Main : MonoBehaviour
                 Vector2 next = possessedActor.position.prev + move;
                 Actor collider = null;
 
+                var scene = playScene;
+
                 bool blocked = playing 
-                            && playProject.world.TryGetActor(next, out collider)
+                            && scene.TryGetActor(next, out collider)
                             && collider != possessedActor;
 
                 if (!blocked)
@@ -1553,9 +1554,11 @@ public class Main : MonoBehaviour
         if (project == null)
             return;
 
-        if (actor != null || project.world.TryGetActor(next, out actor, 3))
+        var scene = project.scenes.First();
+
+        if (actor != null || scene.TryGetActor(next, out actor, 3))
         {
-            brushSpriteD.Crop(actor.costume[actor.position.direction].sprite8,
+            brushSpriteD.Crop(actor.costume[actor.position.direction],
                               canvasPosition: next, 
                               brushPosition: actor.position.current);
         }
@@ -1590,7 +1593,8 @@ public class Main : MonoBehaviour
 
         var p = JSON.Deserialise<Project>(File.ReadAllText(path));
 
-        yield return StartCoroutine(p.LoadFinalise());
+        // TODO: fix
+        //yield return StartCoroutine(p.LoadFinalise());
 
         timer.Stop();
         Debug.Log("Loaded in " + timer.Elapsed.TotalSeconds);
@@ -1614,8 +1618,10 @@ public class Main : MonoBehaviour
         string path = Application.persistentDataPath + "/test.json.txt";
 
         var timer = Stopwatch.StartNew();
-            
-        yield return StartCoroutine(project.SaveFinalise());
+
+        yield return null;
+           // TODO: fix
+        //yield return StartCoroutine(project.SaveFinalise());
 
         File.WriteAllText(path, JSON.Serialise(project));
 

@@ -14,11 +14,11 @@ public class ImageCellView : InstanceView<IntVector2>
     protected override void Configure()
     {
         renderer.transform.localPosition = config * grid.config.cellSize;
-        renderer.sprite = grid.config.cells[config];
+        renderer.sprite = grid.config.cells[config].uSprite;
     }
 
     public override void Refresh()
     {
-        renderer.sprite = grid.config.cells[config];
+        renderer.sprite = grid.config.cells[config].uSprite;
     }
 }

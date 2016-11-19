@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public delegate TPixel Blend<TPixel>(TPixel canvas, TPixel brush);
 
-public abstract class ManagedTexture<TPixel>
+public abstract class ManagedTexture<TPixel> : IDisposable
 {
     public int width;
     public int height;
@@ -184,6 +184,11 @@ public abstract class ManagedTexture<TPixel>
             uTexture = Texture2DExtensions.Blank(width, height, format);
         }
     }
+
+    public virtual void Dispose()
+    {
+        UnityEngine.Object.Destroy(uTexture);
+    }
 }
 
 public class ManagedSprite<TPixel> : IDisposable
@@ -215,6 +220,8 @@ public class ManagedSprite<TPixel> : IDisposable
 
     public IntRect rect;
     public IntVector2 pivot;
+
+    protected ManagedSprite() { }
 
     public ManagedSprite(ManagedTexture<TPixel> mTexture,
                          IntRect rect,

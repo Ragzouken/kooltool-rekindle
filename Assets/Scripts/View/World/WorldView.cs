@@ -5,7 +5,9 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-public class WorldView : InstanceView<World> 
+using kooltool;
+
+public class WorldView : InstanceView<Scene> 
 {
     [SerializeField] private ImageGridView backgroundView;
     

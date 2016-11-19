@@ -12,6 +12,6 @@ public class ActorView : InstanceView<Actor>
     public override void Refresh()
     {
         transform.position = config.position.current;
-        renderer.sprite = config.costume[config.position.direction];
+        renderer.sprite = config.costume[config.position.direction].uSprite;
     }
 }

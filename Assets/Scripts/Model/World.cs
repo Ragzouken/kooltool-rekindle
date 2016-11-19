@@ -9,52 +9,9 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 
-public interface ICopyable<T>
-{
-    void Copy(Copier copier, T copy);
-}
+using kooltool;
 
-public class Copier : Dictionary<object, object>
-{
-    public T Copy<T>(T original)
-        where T : class, ICopyable<T>, new()
-    {
-        // a null is a null!
-        if (original == null) return null; 
-
-        // if we already copied this, use the existing copy
-        object copy;
-
-        if (!TryGetValue(original, out copy))
-        {
-            // otherwise, construct a blank instance and save it
-            copy = new T();
-
-            this[original] = copy;
-
-            // perform the copying after we've saved the new (incomplete) copy
-            // this way any circular references to the currently copying object
-            // can be resolved by just returning our incomplete copy
-            original.Copy(this, (T) copy);
-        }
-
-        return (T) copy;
-    }
-
-    public T CopyFake<T>(T original)
-    {
-        object copy;
-
-        if (!TryGetValue(original, out copy))
-        {
-            Debug.LogError("Don't know how to create copy of abstract type!");
-        }
-
-        return (T) copy;
-    }
-}
-
-public class ByteTextureConverter : JsonConverter
+public class TextureByteConverter : JsonConverter
 {
     public override bool CanConvert(Type objectType)
     {
@@ -87,15 +44,61 @@ public class ByteTextureConverter : JsonConverter
     }
 }
 
+[JsonConverter(typeof(TextureByteConverter))]
 public class KoolTexture : TextureByte, ICopyable<KoolTexture>
 {
+    public KoolTexture() : base() { }
+
     public KoolTexture(int width, int height) : base(width, height) { }
 
     public void Copy(Copier copier, KoolTexture copy)
     {
-        //var copy = new KoolTexture(width, height);
-        //Array.Copy(pixels, copy.pixels, pixels.Length);
-        //copy.dirty = true;
+        copy.Reformat(width, height, format);
+        Array.Copy(pixels, copy.pixels, pixels.Length);
+        copy.dirty = true;
+    }
+}
+
+public class KoolSprite : ManagedSprite<byte>, ICopyable<KoolSprite>
+{
+    public KoolSprite() : base() { }
+
+    public KoolSprite(KoolTexture mTexture,
+                      IntRect rect,
+                      IntVector2 pivot)
+        : base(mTexture, rect, pivot)
+    { }
+
+    public void Copy(Copier copier, KoolSprite copy)
+    {
+        copy.mTexture = copier.Copy(mTexture as KoolTexture);
+        copy.rect = rect;
+        copy.pivot = pivot;
+    }
+}
+
+public class KoolSpriteChange : IChange
+{
+    public KoolSprite sprite;
+    public byte[] before, after;
+
+    public KoolSpriteChange(KoolSprite sprite)
+    {
+        this.sprite = sprite;
+
+        before = sprite.GetPixels();
+        after = new byte[sprite.rect.width * sprite.rect.height];
+    }
+
+    void IChange.Redo(Changes changes)
+    {
+        sprite.SetPixels(after);
+    }
+
+    void IChange.Undo(Changes changes)
+    {
+        sprite.GetPixels(after);
+        sprite.SetPixels(before);
     }
 }
 
@@ -124,12 +127,12 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         }
     }
 
-    bool IResource.LoadFinalisable(Project project)
+    bool IResource.LoadFinalisable(ProjectOld project)
     {
         return true;
     }
 
-    void IResource.LoadFinalise(Project project)
+    void IResource.LoadFinalise(ProjectOld project)
     {
         var tex = Texture2DExtensions.Blank(1, 1);
         tex.LoadImage(System.IO.File.ReadAllBytes(path));
@@ -138,7 +141,7 @@ public class TextureResource : IResource, ICopyable<TextureResource>
         texture8.Apply();
     }
 
-    void IResource.SaveFinalise(Project project)
+    void IResource.SaveFinalise(ProjectOld project)
     {
         if (!dirty) return;
 
@@ -212,17 +215,17 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
         }
     }
 
-    bool IResource.LoadFinalisable(Project project)
+    bool IResource.LoadFinalisable(ProjectOld project)
     {
         return project.LoadFinalised(texture);
     }
 
-    void IResource.LoadFinalise(Project project)
+    void IResource.LoadFinalise(ProjectOld project)
     {
         sprite8 = new ManagedSprite<byte>(texture.texture8, rect, pivot);
     }
 
-    void IResource.SaveFinalise(Project project)
+    void IResource.SaveFinalise(ProjectOld project)
     {
     }
 
@@ -260,10 +263,10 @@ public class SpriteResource : IResource, ICopyable<SpriteResource>
     }
 }
 
-public class Project : ICopyable<Project>
+public class ProjectOld : ICopyable<ProjectOld>
 {
     public HashSet<IResource> resources = new HashSet<IResource>();
-    public World world;
+    public Scene world;
 
     private HashSet<IResource> unfinalised = new HashSet<IResource>();
 
@@ -307,7 +310,7 @@ public class Project : ICopyable<Project>
         return !dependencies.Intersect(unfinalised).Any();
     }
 
-    public void Copy(Copier copier, Project copy)
+    public void Copy(Copier copier, ProjectOld copy)
     {
         copy.world = copier.Copy(world);
         // every resource should have already been copied, if not then it
@@ -318,76 +321,9 @@ public class Project : ICopyable<Project>
 
 public interface IResource
 {
-    bool LoadFinalisable(Project project);
-    void LoadFinalise(Project project);
-    void SaveFinalise(Project project);
-}
-
-public class World : ICopyable<World>
-{
-    public Color[] palette = new Color[16];
-
-    public float timer;
-    public List<Actor> actors = new List<Actor>();
-    public ImageGrid background = new ImageGrid();
-
-    public World Copy()
-    {
-        var copier = new Copier();
-
-        return copier.Copy(this);
-    }
-
-    public void Copy(Copier copier, World copy)
-    {
-        palette.CopyTo(copy.palette, 0);
-
-        copy.timer = timer;
-
-        copy.actors.AddRange(actors.Select(actor => copier.Copy(actor)));
-        copy.background = copier.Copy(background);
-    }
-
-    public bool TryGetActor(IntVector2 position, 
-                            out Actor actor,
-                            int range=0)
-    {
-        for (int i = 0; i < actors.Count; ++i)
-        {
-            actor = actors[i];
-
-            var rect = actor.GetWorldRect();
-            rect.Expand(range);
-
-            if (rect.Contains(position))
-            {
-                for (int y = position.y - range; y < position.y + range + 1; ++y)
-                {
-                    for (int x = position.x - range; x < position.x + range + 1; ++x)
-                    {
-                        if (actor.GetPixel(new IntVector2(x, y)) > 0) return true;
-                    }
-                }
-            }
-        }
-
-        actor = default(Actor);
-        return false;
-    }
-
-    public byte GetPixel(IntVector2 position)
-    {
-        Actor actor;
-
-        if (TryGetActor(position, out actor))
-        {
-            return actor.GetPixel(position);
-        }
-        else
-        {
-            return background.GetPixel(position);
-        }
-    }
+    bool LoadFinalisable(ProjectOld project);
+    void LoadFinalise(ProjectOld project);
+    void SaveFinalise(ProjectOld project);
 }
 
 public interface IChange
@@ -452,7 +388,7 @@ public class Changes
 
 public class ActorAddedChange : IChange
 {
-    public World world;
+    public Scene world;
     public Actor actor;
 
     void IChange.Redo(Changes changes)
@@ -468,7 +404,7 @@ public class ActorAddedChange : IChange
 
 public class ActorRemovedChange : IChange
 {
-    public World world;
+    public Scene world;
     public Actor actor;
 
     void IChange.Redo(Changes changes)
@@ -489,10 +425,10 @@ public class ImageGrid : ICopyable<ImageGrid>
         public ImageGrid grid;
         public Dictionary<IntVector2, IChange> sprites 
             = new Dictionary<IntVector2, IChange>();
-        public Dictionary<IntVector2, SpriteResource> added 
-            = new Dictionary<IntVector2, SpriteResource>();
+        public Dictionary<IntVector2, KoolSprite> added 
+            = new Dictionary<IntVector2, KoolSprite>();
 
-        public void Added(IntVector2 point, SpriteResource sprite)
+        public void Added(IntVector2 point, KoolSprite sprite)
         {
             added.Add(point, sprite);
         }
@@ -501,7 +437,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         {
             if (!sprites.ContainsKey(point))
             {
-                sprites[point] = new SpriteResource.Change(grid.cells[point]);
+                sprites[point] = new KoolSpriteChange(grid.cells[point]);
             }
         }
 
@@ -532,13 +468,13 @@ public class ImageGrid : ICopyable<ImageGrid>
         }
     }
 
-    public Project project;
+    public kooltool.Project project;
 
     [JsonArray]
-    public class GridDict : Dictionary<IntVector2, SpriteResource>
+    public class GridDict : Dictionary<IntVector2, KoolSprite>
     {
         public GridDict() : base() { }
-        public GridDict(Dictionary<IntVector2, SpriteResource> dict) : base(dict) { }
+        public GridDict(Dictionary<IntVector2, KoolSprite> dict) : base(dict) { }
     };
 
     public int cellSize;
@@ -551,16 +487,13 @@ public class ImageGrid : ICopyable<ImageGrid>
                                                      pair => copier.Copy(pair.Value)));
     }
 
-    public SpriteResource AddCell(IntVector2 cell)
+    public KoolSprite AddCell(IntVector2 cell)
     {
-        var texture = new TextureResource(new TextureByte(cellSize, cellSize));
-        texture.texture8.Clear(0);
-        var sprite = new SpriteResource(texture, texture.uTexture.FullSprite(pixelsPerUnit: 1));
+        var texture = project.CreateTexture(cellSize, cellSize);
+        var sprite = new KoolSprite(texture, new IntRect(0, 0, cellSize, cellSize), IntVector2.zero);
 
-        texture.texture8.Apply();
-
-        project.resources.Add(texture);
-        project.resources.Add(sprite);
+        texture.Clear(0);
+        texture.Apply();
 
         cells[cell] = sprite;
 
@@ -570,7 +503,7 @@ public class ImageGrid : ICopyable<ImageGrid>
     public void Blend(Changes changes, ManagedSprite<byte> sprite8, IntVector2 brushPosition, Blend<byte> blend)
     {
         IntVector2 cell;
-        SpriteResource sprite;
+        KoolSprite sprite;
 
         // find the rectangle of cells that contains the brush
         IntVector2 brushMin = brushPosition - sprite8.pivot;
@@ -598,10 +531,9 @@ public class ImageGrid : ICopyable<ImageGrid>
 
                 chang.Changed(cell);
 
-                sprite.sprite8.Blend(sprite8, blend, brushPosition: brushPosition, canvasPosition: cell * cellSize);
-                sprite.texture.dirty = true;
-
-                changes.sprites.Add(sprite.sprite8);
+                sprite.Blend(sprite8, blend, brushPosition: brushPosition, canvasPosition: cell * cellSize);
+                
+                changes.sprites.Add(sprite);
             }
         }
     }
@@ -609,22 +541,21 @@ public class ImageGrid : ICopyable<ImageGrid>
     public byte GetPixel(IntVector2 position, byte @default = 0)
     {
         IntVector2 cell, local;
-        SpriteResource sprite;
+        KoolSprite sprite;
 
         position.GridCoords(cellSize, out cell, out local);
 
         return cells.TryGetValue(cell, out sprite)
-             ? sprite.sprite8.GetPixel(local.x, local.y)
+             ? sprite.GetPixel(local.x, local.y)
              : @default;
     }
 }
 
 public class Costume
 {
-    public World world;
-    public SpriteResource up, down, left, right;
+    public KoolSprite up, down, left, right;
 
-    public SpriteResource this[Position.Direction direction]
+    public KoolSprite this[Position.Direction direction]
     {
         get
         {
@@ -640,7 +571,7 @@ public class Costume
 
 public class Actor : ICopyable<Actor>
 {
-    public World world;
+    public Scene world;
     public Costume costume;
     public Script script;
 
@@ -664,15 +595,14 @@ public class Actor : ICopyable<Actor>
         //chang.Changed(cell);
 
         var sprite = costume[position.direction];
-        var change = changes.GetChange(sprite, () => new SpriteResource.Change(sprite));
+        var change = changes.GetChange(sprite, () => new KoolSpriteChange(sprite));
 
-        sprite.sprite8.Blend(sprite8, 
-                             blend, 
-                             brushPosition: brushPosition, 
-                             canvasPosition: position.current);
-        sprite.texture.dirty = true;
+        sprite.Blend(sprite8, 
+                     blend, 
+                     brushPosition: brushPosition, 
+                     canvasPosition: position.current);
 
-        changes.sprites.Add(sprite.sprite8);
+        changes.sprites.Add(sprite);
     }
 
     public IntRect GetWorldRect()
@@ -681,7 +611,7 @@ public class Actor : ICopyable<Actor>
 
         IntRect rect = sprite.rect;
         rect.Move(-rect.x, -rect.y);
-        rect.Move(position.current - sprite.pivot);
+        rect.Move((IntVector2) position.current - sprite.pivot);
 
         return rect;
     }
@@ -697,7 +627,7 @@ public class Actor : ICopyable<Actor>
 
         position -= (IntVector2) this.position.current;
 
-        return sprite.sprite8.GetPixel(position.x, position.y);
+        return sprite.GetPixel(position.x, position.y);
     }
 }
 

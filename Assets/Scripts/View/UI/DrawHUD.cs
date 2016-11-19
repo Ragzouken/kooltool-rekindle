@@ -5,6 +5,8 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
+using kooltool;
+
 public class DrawHUD : MonoBehaviour 
 {
     public enum Mode
@@ -32,7 +34,7 @@ public class DrawHUD : MonoBehaviour
     public Mode mode { get; private set; }
     public int selected { get; private set; }
 
-    private World world;
+    private Scene world;
 
     private void Awake()
     {
@@ -43,7 +45,7 @@ public class DrawHUD : MonoBehaviour
         {
             inside = false;
 
-            main.RecordPaletteHistory(selected, original, main.project.world.palette[selected]);
+            main.RecordPaletteHistory(selected, original, main.project.palettes.Single().colors[selected]);
         });
 
         for (int i = 0; i < colorToggles.Length; ++i)
@@ -77,7 +79,7 @@ public class DrawHUD : MonoBehaviour
         if (!inside)
         {
             inside = true;
-            original = main.project.world.palette[selected];
+            original = main.project.palettes.Single().colors[selected];
         }
 
         main.EditPalette(selected, Color.HSVToRGB(hueSaturationSlider.value.x, 
@@ -85,7 +87,7 @@ public class DrawHUD : MonoBehaviour
                                                   brightnessSlider.value));
     }
 
-    public void SetWorld(World world)
+    public void SetWorld(Scene world)
     {
         this.world = world;
 
@@ -136,9 +138,10 @@ public class DrawHUD : MonoBehaviour
 
         selected = index;
 
-        float h, s, v;
+        float h=0, s=0, v=0;
 
-        Color.RGBToHSV(world.palette[index], out h, out s, out v);
+        // TODO: fix this
+        //Color.RGBToHSV(world.palette[index], out h, out s, out v);
 
         ignoreUI = true;
         hueSaturationSlider.value = new Vector2(h, s);

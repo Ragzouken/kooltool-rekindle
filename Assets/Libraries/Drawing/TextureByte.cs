@@ -24,6 +24,8 @@ public class TextureByte : ManagedTexture<byte>
         temporary = Texture2DExtensions.Blank(1, 1);
     }
 
+    public TextureByte() : base() { }
+
     public TextureByte(int width, int height) 
         : base(width, height, TextureFormat.Alpha8)
     {
