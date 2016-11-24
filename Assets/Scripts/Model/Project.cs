@@ -78,7 +78,8 @@ namespace kooltool
         [JsonObject(IsReference = false)]
         public class ProjectSave
         {
-            [JsonArray]
+            [JsonConverter(typeof(DictionarySerializer<object, string, Index>))]
+            //[JsonArray]
             public class Index : Dictionary<object, string> { }
 
             public Project project;
@@ -88,14 +89,22 @@ namespace kooltool
         public static Project FromGist(Dictionary<string, string> gist)
         {
             var data = Encoding.UTF8.GetString(Convert.FromBase64String(gist["project"]));
+
+            Debug.Log(data);
+
             var save = JSON.Deserialise<ProjectSave>(data);
 
-            foreach (var pair in save.resources)
-            {
-                byte[] tex = Convert.FromBase64String(gist[pair.Value]);
+            Debug.Log("Finished deserialize");
 
-                (pair.Key as KoolTexture).DecodeFromPNG(tex);
+            foreach (var texture in save.project.textures)
+            {
+                string id = save.resources[texture];
+                byte[] tex = Convert.FromBase64String(gist[id]);
+
+                texture.DecodeFromPNG(tex);
             }
+
+            Debug.Log("finished png loading");
 
             return save.project;
         }
@@ -114,13 +123,35 @@ namespace kooltool
                 gist.Add(id, Convert.ToBase64String(data));
             }
 
-            string serialized = JSON.Serialise(save);
+            string serialized = JSON.Serialise(save, true);
 
             Debug.Log(serialized);
 
             gist.Add("project", Convert.ToBase64String(Encoding.UTF8.GetBytes(serialized)));
 
             return gist;
+        }
+
+        public void ToDisk()
+        {
+            var save = new ProjectSave { project = this, };
+
+            foreach (var texture in textures)
+            {
+                string id = Guid.NewGuid().ToString();
+                byte[] data = texture.uTexture.EncodeToPNG();
+                string dest = string.Format("{0}/{1}.png",
+                                            Application.persistentDataPath,
+                                            id);
+
+                save.resources.Add(texture, id);
+                System.IO.File.WriteAllBytes(dest, data);
+            }
+
+            string serialized = JSON.Serialise(save);
+            string dest2 = string.Format("{0}/project.json.txt", Application.persistentDataPath);
+
+            System.IO.File.WriteAllText(dest2, serialized);
         }
     }
 }

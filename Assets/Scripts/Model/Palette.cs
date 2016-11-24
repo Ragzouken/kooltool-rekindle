@@ -12,6 +12,6 @@ namespace kooltool
 {
     public class Palette
     {
-        public Color[] colors = new Color[16];
+        public List<Color> colors = new List<Color>(Enumerable.Repeat(default(Color), 16));
     }
 }

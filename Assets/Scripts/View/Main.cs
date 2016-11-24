@@ -380,8 +380,6 @@ public class Main : MonoBehaviour
 
         FillSimpleProject();
 
-        LoadGistAgain();
-
 #if UNITY_WEBGL
         Debug.Log("Location: " + GetWindowSearch());
 
@@ -389,7 +387,7 @@ public class Main : MonoBehaviour
         {
             string id = GetWindowSearch().Split('=')[1];
 
-            FromGist(id);
+            LoadGistAgain(id);
 
         }
         catch (System.Exception e)
@@ -536,97 +534,6 @@ public class Main : MonoBehaviour
     [System.Runtime.InteropServices.DllImport("__Internal")]
     private static extern string GetWindowSearch();
 
-    private void FromGist(string id)
-    {
-        StartCoroutine(Gist.Download(id, (System.Action<Dictionary<string, string>>)((Dictionary<string, string> dict) =>
-        {
-            var scene = Enumerable.First<Scene>(this.project.scenes);
-
-            //scene.palette = BytesToColors(FromBase64(dict["palette"]));
-
-            dict.Remove("palette");
-
-            foreach (var pair in dict)
-            {
-                string[] coords = pair.Key.Split(',');
-                int x = int.Parse(coords[0]);
-                int y = int.Parse(coords[1]);
-
-                byte[] data = System.Convert.FromBase64String(pair.Value);
-
-                var c = scene.background.AddCell(new IntVector2(x, y));
-                // TODO: loading
-                //c.mTexture.DecodeFromPNG(data);
-            }
-
-            SetProject((Project) this.project);
-        })));
-    }
-
-    private string ToBase64(byte[] bytes)
-    {
-        return System.Convert.ToBase64String(bytes);
-    }
-
-    private byte[] FromBase64(string data)
-    {
-        return System.Convert.FromBase64String(data);
-    }
-
-    private byte[] ColorsToBytes(Color[] colors)
-    {
-        var bytes = new byte[colors.Length * 4];
-
-        for (int i = 0; i < colors.Length; ++i)
-        {
-            var color = (Color32) colors[i];
-
-            bytes[i * 4 + 0] = color.a;
-            bytes[i * 4 + 1] = color.r;
-            bytes[i * 4 + 2] = color.g;
-            bytes[i * 4 + 3] = color.b;
-        }
-
-        return bytes;
-    }
-
-    private Color[] BytesToColors(byte[] bytes)
-    {
-        var colors = new Color[bytes.Length / 4];
-
-        for (int i = 0; i < colors.Length; ++i)
-        {
-            var color = new Color32(bytes[i * 4 + 1],
-                                    bytes[i * 4 + 2],
-                                    bytes[i * 4 + 3],
-                                    bytes[i * 4 + 0]);
-
-            colors[i] = color;
-        }
-
-        return colors;
-    }
-
-    public void GISTSAVE()
-    {
-        var scene = project.scenes.First();
-        var background = scene.background.cells.ToDictionary(p => string.Format("{0},{1}", p.Key.x, p.Key.y),
-                                                             p => ToBase64(p.Value.mTexture.uTexture.EncodeToPNG()));
-
-        background["palette"] = ToBase64(ColorsToBytes(project.palettes.Single().colors));
-
-        StartCoroutine(Gist.Create("test gist",
-            background,
-            id =>
-            {
-                Debug.Log(id);
-
-#if UNITY_WEBGL
-                    UpdateGistID(id);
-#endif
-            }));
-    }
-
     private void CheckHotkeys()
     {
         var pan = input.move.Value;
@@ -642,14 +549,6 @@ public class Main : MonoBehaviour
             StartCoroutine(SaveProject());
         }
         */
-
-        if (Input.GetKeyDown(KeyCode.Slash))
-        {
-            string text = JSON.Serialise(new[] { test, test, test });
-            var textures = JSON.Deserialise<TextureByte[]>(text);
-
-            Debug.Log(text);
-        }
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
         cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
@@ -714,6 +613,12 @@ public class Main : MonoBehaviour
             if (dragging == raycasts[0].gameObject) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.pointerClickHandler);
         }
 
+        if (Input.GetKeyDown(KeyCode.Slash))
+        {
+            //project.ToDisk();
+            LoadGistAgain("59bcc864c66e2994da018fa093efcc2c");
+        }
+
         if (playing)
             return;
 
@@ -730,21 +635,26 @@ public class Main : MonoBehaviour
         */
     }
 
-    private void LoadGistAgain()
+    private void LoadGistAgain(string id)
     {
-        StartCoroutine(Gist.Download("3ab7702e55a58fd822d25d79281b83ce", gist =>
+        StartCoroutine(Gist.Download(id, gist =>
         {
             SetProject(Project.FromGist(gist));
         }));
     }
 
-    private void SaveGistAgain()
+    public void SaveGistAgain()
     {
-        var gist = project.ToGist();
-
         StartCoroutine(Gist.Create("test gist",
                        project.ToGist(),
-                       id => Debug.Log(id)));
+                       id => 
+                       {
+                           Debug.Log(id);
+
+#if UNITY_WEBGL
+                            UpdateGistID(id);
+#endif
+                       }));
     }
 
     private Scene editScene;
@@ -780,6 +690,7 @@ public class Main : MonoBehaviour
 
         editScene = project.scenes.Single();
         SetScene(editScene);
+        possessedActor = null;
 
         for (int i = 0; i < 16; ++i)
         {

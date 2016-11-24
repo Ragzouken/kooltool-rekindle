@@ -61,7 +61,10 @@ public class KoolTexture : TextureByte, ICopyable<KoolTexture>
     public KoolTexture() : base() { }
 
     [JsonConstructor]
-    public KoolTexture(int width, int height) : base(width, height) { }
+    public KoolTexture(int width, int height) : base(width, height)
+    {
+        Debug.Log("Construct KOOLTEXTURE");
+    }
 
     public void Copy(Copier copier, KoolTexture copy)
     {
@@ -83,12 +86,16 @@ public class KoolSpriteConverter : JsonConverter
                                     object existingValue, 
                                     JsonSerializer serializer)
     {
+        Debug.Log("KOOLSPRITE");
+
         var obj = JObject.Load(reader);
 
         var sprite = new KoolSprite(obj["texture"].ToObject<KoolTexture>(serializer), 
                                     obj["rect"].ToObject<IntRect>(serializer),
                                     obj["pivot"].ToObject<IntVector2>(serializer));
-        
+
+        Debug.Log("END KOOLSPRITE");
+
         return sprite;
     }
 
@@ -248,6 +255,7 @@ public class ImageGrid : ICopyable<ImageGrid>
     public class Change : IChange
     {
         public ImageGrid grid;
+        
         public Dictionary<IntVector2, IChange> sprites 
             = new Dictionary<IntVector2, IChange>();
         public Dictionary<IntVector2, KoolSprite> added 
@@ -295,7 +303,7 @@ public class ImageGrid : ICopyable<ImageGrid>
 
     public kooltool.Project project;
 
-    [JsonArray]
+    [JsonConverter(typeof(DictionarySerializer<IntVector2, KoolSprite, GridDict>))]
     public class GridDict : Dictionary<IntVector2, KoolSprite>
     {
         public GridDict() : base() { }

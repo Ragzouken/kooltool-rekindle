@@ -19,7 +19,7 @@ public static class JSON
         settings.TypeNameHandling = TypeNameHandling.Auto;
         settings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
         settings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
-        settings.Converters.Add(new Vector2Converter());
+        //settings.Converters.Add(new Vector2Converter());
         settings.Converters.Add(new RectConverter());
         settings.Converters.Add(new ColorConverter());
         settings.Converters.Add(new ByteSetConverter());
@@ -36,14 +36,66 @@ public static class JSON
         return returnObject;
     }
 
-    public static string Serialise<T>(T obj)
+    public static string Serialise<T>(T obj, bool pretty=false)
     {
-        return JsonConvert.SerializeObject(obj, Formatting.Indented, settings);
+        return JsonConvert.SerializeObject(obj, pretty ? Formatting.Indented : Formatting.None, settings);
     }
 
     public static T Copy<T>(T obj)
     {
         return Deserialise<T>(Serialise(obj));
+    }
+}
+
+/// <summary>
+/// More compact serialization of Dictionaries in JSON.NET
+/// </summary>
+/// <typeparam name="K">Key</typeparam>
+/// <typeparam name="V">Value</typeparam>
+/// <typeparam name="T">Type (subclass of Dictionary<K, V>)</typeparam>
+public class DictionarySerializer<K, V, T> : JsonConverter
+    where T : Dictionary<K, V>, new()
+{
+    public override void WriteJson(JsonWriter writer,
+                                   object value,
+                                   JsonSerializer serializer)
+    {
+        var map = value as T;
+
+        writer.WriteStartArray();
+        foreach (var pair in map)
+        {
+            writer.WriteStartArray();
+            JToken.FromObject(pair.Key, serializer).WriteTo(writer);
+            JToken.FromObject(pair.Value, serializer).WriteTo(writer);
+            writer.WriteEndArray();
+        }
+        writer.WriteEndArray();
+    }
+
+    public override object ReadJson(JsonReader reader,
+                                    Type objectType,
+                                    object existingValue,
+                                    JsonSerializer serializer)
+    {
+        var map = new T();
+
+        var array = JArray.Load(reader);
+
+        foreach (var item in array.Children<JArray>())
+        {
+            var key = item[0].ToObject<K>(serializer);
+            var val = item[1].ToObject<V>(serializer);
+
+            map[key] = val; 
+        }
+
+        return map;
+    }
+
+    public override bool CanConvert(Type objectType)
+    {
+        return typeof(T).IsAssignableFrom(objectType);
     }
 }
 
@@ -59,13 +111,10 @@ public class Vector2Converter : JsonConverter
                                     object existingValue, 
                                     JsonSerializer serializer)
     {
-        Vector2 vector = new Vector2();
+        var array = JToken.ReadFrom(reader);
 
-        vector.x = (float) reader.ReadAsDecimal().GetValueOrDefault();
-        vector.y = (float) reader.ReadAsDecimal().GetValueOrDefault();
-        reader.Read();
-
-        return vector;
+        return new Vector2(array[0].Value<float>(),
+                           array[1].Value<float>());
     }
 
     public override void WriteJson(JsonWriter writer, 
@@ -196,6 +245,8 @@ public class ColorConverter : JsonConverter
                                     object existingValue,
                                     JsonSerializer serializer)
     {
+        Debug.Log("READ COLOR");
+
         Color32 color = new Color32();
 
         color.r = (byte) reader.ReadAsDecimal().GetValueOrDefault();
