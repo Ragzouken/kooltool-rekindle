@@ -613,11 +613,13 @@ public class Main : MonoBehaviour
             if (dragging == raycasts[0].gameObject) ExecuteEvents.ExecuteHierarchy(dragging, pointer, ExecuteEvents.pointerClickHandler);
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.Slash))
         {
             //project.ToDisk();
             LoadGistAgain("59bcc864c66e2994da018fa093efcc2c");
         }
+        */
 
         if (playing)
             return;
@@ -670,8 +672,6 @@ public class Main : MonoBehaviour
         SetScene(playScene);
 
         possessedActor = playScene.actors.FirstOrDefault(actor => actor.dialogue.StartsWith("player"));
-
-        SaveGistAgain();
     }
 
     public void ExitPlayMode()
@@ -701,7 +701,7 @@ public class Main : MonoBehaviour
     private void SetScene(Scene scene)
     {
         worldView.SetConfig(scene);
-        drawHUD.SetWorld(scene);
+        drawHUD.SetProject(project);
     }
 
     private Stamp stamp;

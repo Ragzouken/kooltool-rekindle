@@ -90,11 +90,9 @@ namespace kooltool
         {
             var data = Encoding.UTF8.GetString(Convert.FromBase64String(gist["project"]));
 
-            Debug.Log(data);
+            //Debug.Log(data);
 
             var save = JSON.Deserialise<ProjectSave>(data);
-
-            Debug.Log("Finished deserialize");
 
             foreach (var texture in save.project.textures)
             {
@@ -103,8 +101,6 @@ namespace kooltool
 
                 texture.DecodeFromPNG(tex);
             }
-
-            Debug.Log("finished png loading");
 
             return save.project;
         }
@@ -121,13 +117,21 @@ namespace kooltool
 
                 save.resources.Add(texture, id);
                 gist.Add(id, Convert.ToBase64String(data));
+
+                GC.Collect();
             }
 
             string serialized = JSON.Serialise(save, true);
 
-            Debug.Log(serialized);
+            GC.Collect();
 
-            gist.Add("project", Convert.ToBase64String(Encoding.UTF8.GetBytes(serialized)));
+            byte[] bytes = Encoding.UTF8.GetBytes(serialized);
+
+            GC.Collect();
+
+            gist.Add("project", Convert.ToBase64String(bytes));
+
+            GC.Collect();
 
             return gist;
         }

@@ -32,14 +32,15 @@ public static class Gist
         fileString.AppendLine("}");
 
         var encoding = new UTF8Encoding();
-        var json = @"{
-                        ""description"":""" + description + @""",
-                        ""public"":true,
-                        ""files"": " + fileString.ToString() + @"
-                        }";
+        var jsonBuilder = new StringBuilder();
+        jsonBuilder.Append(@"{ ""description"":""");
+        jsonBuilder.Append(description);
+        jsonBuilder.Append(@""", ""public"":true, ""files"": ");
+        jsonBuilder.Append(fileString.ToString());
+        jsonBuilder.Append(@"}");
 
         var request = new WWW("https://api.github.com/gists", 
-                                encoding.GetBytes(json));
+                                encoding.GetBytes(jsonBuilder.ToString()));
 
         yield return request;
 

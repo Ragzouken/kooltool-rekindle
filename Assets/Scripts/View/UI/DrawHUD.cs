@@ -34,7 +34,7 @@ public class DrawHUD : MonoBehaviour
     public Mode mode { get; private set; }
     public int selected { get; private set; }
 
-    private Scene world;
+    private Project project;
 
     private void Awake()
     {
@@ -87,9 +87,9 @@ public class DrawHUD : MonoBehaviour
                                                   brightnessSlider.value));
     }
 
-    public void SetWorld(Scene world)
+    public void SetProject(Project project)
     {
-        this.world = world;
+        this.project = project;
 
         for (int i = 0; i < 16; ++i)
         {
@@ -141,7 +141,7 @@ public class DrawHUD : MonoBehaviour
         float h=0, s=0, v=0;
 
         // TODO: fix this
-        //Color.RGBToHSV(world.palette[index], out h, out s, out v);
+        Color.RGBToHSV(project.palettes.Single().colors[index], out h, out s, out v);
 
         ignoreUI = true;
         hueSaturationSlider.value = new Vector2(h, s);
