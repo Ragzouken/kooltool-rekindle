@@ -237,6 +237,24 @@ public class Main : MonoBehaviour
         return costume;
     }
 
+    private Tile AddNewSimpleTile()
+    {
+        var texture = project.CreateTexture(32, 32);
+        var sprite = new KoolSprite(texture, new IntRect(0, 0, 32, 32));
+        var tile = new Tile
+        {
+            name = "Test Tile " + Random.Range(0, 256),
+            sprites = new List<KoolSprite> { sprite },
+        };
+
+        project.tiles.Add(tile);
+
+        sprite.Clear((byte) Random.Range(1, 16));
+        sprite.mTexture.Apply();
+
+        return tile;
+    }
+
     private Costume defaultCostume;
 
     private ManagedSprite<Color32> pointerMSprite;
@@ -304,6 +322,24 @@ public class Main : MonoBehaviour
 
         project = new Project();
         var w = new Scene();
+
+        var a = AddNewSimpleTile();
+        var b = AddNewSimpleTile();
+
+        foreach (int x in Enumerable.Range(-4, 9))
+        {
+            foreach (int y in Enumerable.Range(-4, 9))
+            {
+                if (Random.value < 0.33f)
+                {
+                    w.tilemap.tiles[new IntVector2(x, y)] = a;
+                }
+                else if (Random.value < 0.5f)
+                {
+                    w.tilemap.tiles[new IntVector2(x, y)] = b;
+                }
+            }
+        }
 
         var palette = new Palette();
         project.AddPalette(palette);
@@ -655,6 +691,8 @@ public class Main : MonoBehaviour
 
 #if UNITY_WEBGL
                             UpdateGistID(id);
+#else
+                           Application.OpenURL(@"http://kooltool.nice.lgbt/?id=" + id);
 #endif
                        }));
     }
@@ -715,7 +753,7 @@ public class Main : MonoBehaviour
 
     public void EditPalette(int i, Color color)
     {
-        project.palettes.Single().colors[i] = color;
+        project.palettes[0].colors[i] = color;
 
         RefreshPalette(i);
     }
@@ -751,7 +789,7 @@ public class Main : MonoBehaviour
     {
         string name = string.Format("_Palette{0:D2}", i);
         
-        var palette = project.palettes.Single();
+        var palette = project.palettes[0];
 
         material1.SetColor(name, palette.colors[i]);
         material2.SetColor(name, palette.colors[i]);

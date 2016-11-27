@@ -13,6 +13,7 @@ namespace kooltool
     public partial class Scene : ICopyable<Scene>
     {
         public ImageGrid background = new ImageGrid();
+        public TileMap tilemap = new TileMap();
         public HashSet<Actor> actors = new HashSet<Actor>();
 
         public void Copy(Copier copier, Scene copy)

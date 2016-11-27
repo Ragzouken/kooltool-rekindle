@@ -16,10 +16,11 @@ namespace kooltool
     [JsonObject(IsReference = false)]
     public partial class Project
     {
-        public HashSet<KoolTexture> textures = new HashSet<KoolTexture>();
+        public List<KoolTexture> textures = new List<KoolTexture>();
         public HashSet<Costume> costumes = new HashSet<Costume>();
         public HashSet<Scene> scenes = new HashSet<Scene>();
-        public HashSet<Palette> palettes = new HashSet<Palette>();
+        public List<Palette> palettes = new List<Palette>();
+        public List<Tile> tiles = new List<Tile>();
     }
 
     public partial class Project
@@ -31,6 +32,8 @@ namespace kooltool
 
         public void AddTexture(KoolTexture texture)
         {
+            Debug.LogFormat("Adding Texture: {0}", texture);
+
             textures.Add(texture);
         }
 

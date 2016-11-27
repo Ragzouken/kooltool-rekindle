@@ -63,7 +63,6 @@ public class KoolTexture : TextureByte, ICopyable<KoolTexture>
     [JsonConstructor]
     public KoolTexture(int width, int height) : base(width, height)
     {
-        Debug.Log("Construct KOOLTEXTURE");
     }
 
     public void Copy(Copier copier, KoolTexture copy)
@@ -86,15 +85,11 @@ public class KoolSpriteConverter : JsonConverter
                                     object existingValue, 
                                     JsonSerializer serializer)
     {
-        Debug.Log("KOOLSPRITE");
-
         var obj = JObject.Load(reader);
 
         var sprite = new KoolSprite(obj["texture"].ToObject<KoolTexture>(serializer), 
                                     obj["rect"].ToObject<IntRect>(serializer),
                                     obj["pivot"].ToObject<IntVector2>(serializer));
-
-        Debug.Log("END KOOLSPRITE");
 
         return sprite;
     }
@@ -121,7 +116,7 @@ public class KoolSprite : ManagedSprite<byte>, ICopyable<KoolSprite>
 
     public KoolSprite(KoolTexture mTexture,
                       IntRect rect,
-                      IntVector2 pivot)
+                      IntVector2 pivot = default(IntVector2))
         : base(mTexture, rect, pivot)
     { }
 

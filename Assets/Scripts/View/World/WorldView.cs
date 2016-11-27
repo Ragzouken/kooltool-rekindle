@@ -10,7 +10,7 @@ using kooltool;
 public class WorldView : InstanceView<Scene> 
 {
     [SerializeField] private ImageGridView backgroundView;
-    
+    [SerializeField] private TileMapView tilemapView;   
     [SerializeField] private InstancePoolSetup actorSetup;
 
     public InstancePool<Actor> actors;
@@ -23,6 +23,7 @@ public class WorldView : InstanceView<Scene>
     protected override void Configure()
     {
         backgroundView.SetConfig(config.background);
+        tilemapView.SetConfig(config.tilemap);
 
         Refresh();
     }
@@ -33,5 +34,6 @@ public class WorldView : InstanceView<Scene>
         actors.Refresh();
 
         backgroundView.Refresh();
+        tilemapView.Refresh();
     }
 }

@@ -45,7 +45,7 @@ public class DrawHUD : MonoBehaviour
         {
             inside = false;
 
-            main.RecordPaletteHistory(selected, original, main.project.palettes.Single().colors[selected]);
+            main.RecordPaletteHistory(selected, original, main.project.palettes[0].colors[selected]);
         });
 
         for (int i = 0; i < colorToggles.Length; ++i)
@@ -79,7 +79,7 @@ public class DrawHUD : MonoBehaviour
         if (!inside)
         {
             inside = true;
-            original = main.project.palettes.Single().colors[selected];
+            original = main.project.palettes[0].colors[selected];
         }
 
         main.EditPalette(selected, Color.HSVToRGB(hueSaturationSlider.value.x, 
@@ -140,8 +140,7 @@ public class DrawHUD : MonoBehaviour
 
         float h=0, s=0, v=0;
 
-        // TODO: fix this
-        Color.RGBToHSV(project.palettes.Single().colors[index], out h, out s, out v);
+        Color.RGBToHSV(project.palettes[0].colors[index], out h, out s, out v);
 
         ignoreUI = true;
         hueSaturationSlider.value = new Vector2(h, s);

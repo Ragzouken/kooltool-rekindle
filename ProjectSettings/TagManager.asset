@@ -44,6 +44,9 @@ TagManager:
   - name: World - Background
     uniqueID: 1225492293
     locked: 0
+  - name: World - Tiles
+    uniqueID: 3376034149
+    locked: 0
   - name: World - Actors
     uniqueID: 4006360207
     locked: 0
