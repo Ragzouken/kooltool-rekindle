@@ -29,7 +29,11 @@ public class Main : MonoBehaviour
     }
 #endif
 
+    [SerializeField]
+    private KoolEditor editor;
+
     [SerializeField] private HUD hud;
+    [SerializeField] private TileHUD tiles;
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
@@ -251,6 +255,8 @@ public class Main : MonoBehaviour
 
         sprite.Clear((byte) Random.Range(1, 16));
         sprite.mTexture.Apply();
+        sprite.uSprite.name = "TEST TILE";
+        sprite.uSprite.texture.Apply();
 
         return tile;
     }
@@ -722,6 +728,11 @@ public class Main : MonoBehaviour
         SetScene(editScene);
     }
 
+    public void EnterTileMode()
+    {
+        hud.mode = HUD.Mode.Tile;
+    }
+
     private void SetProject(Project project)
     {
         this.project = project;
@@ -734,6 +745,24 @@ public class Main : MonoBehaviour
         {
             RefreshPalette(i);
         }
+
+        editor.tilePalette.Clear();
+        editor.tilePalette.AddRange(project.tiles.Take(16));
+        tiles.SetPalette(editor.tilePalette);
+    }
+
+    private void UpdateTileInput()
+    {
+        if (input.cancel.WasPressed)
+        {
+            hud.mode = HUD.Mode.Draw;
+            CleanupTiles();
+            return;
+        }
+    }
+
+    private void CleanupTiles()
+    {
     }
 
     private void SetScene(Scene scene)
@@ -1093,12 +1122,22 @@ public class Main : MonoBehaviour
             CleanupCharacter();
         }
 
+        if (hud.mode == HUD.Mode.Tile)
+        {
+            UpdateTileInput();
+        }
+        else
+        {
+            CleanupTiles();
+        }
+
         prevMouse = nextMouse;
         prevCursor = nextCursor;
     }
 
     private void EndStroke()
     {
+        background = false;
         dragging_ = false;
         targetActor = null;
         stippleOffset = 0;
@@ -1170,6 +1209,11 @@ public class Main : MonoBehaviour
             brushRenderer.sortingLayerName = "World - Actors";
             brushRenderer.sortingOrder = 1;
         }
+        else if (scene.tilemap.GetTileAtPosition(next) != null)
+        {
+            brushRenderer.sortingLayerName = "World - Tiles";
+            brushRenderer.sortingOrder = 1;
+        }
         else
         {
             brushRenderer.sortingLayerName = "World - Background";
@@ -1187,6 +1231,7 @@ public class Main : MonoBehaviour
                 dragging_ = true;
                 changes = new Changes();
                 scene.TryGetActor(next, out targetActor, 3);
+                background = scene.tilemap.GetTileAtPosition(next) == null;
             }
             else
             {
@@ -1204,9 +1249,13 @@ public class Main : MonoBehaviour
                 {
                     targetActor.Blend(changes, line, IntVector2.zero, blend_);
                 }
-                else
+                else if (background)
                 {
                     scene.background.Blend(changes, line, IntVector2.zero, blend_);
+                }
+                else
+                { 
+                    scene.tilemap.Blend(changes, line, IntVector2.zero, blend_);
                 }
 
                 TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
@@ -1537,6 +1586,7 @@ public class Main : MonoBehaviour
 
     private Changes changes;
     private bool dragging_;
+    private bool background;
 
     public bool locked { get; private set; }
 

@@ -184,6 +184,14 @@ public class InstancePoolSetup
         return new InstancePool<TConfig>(prefab, parent, sort: sort);
     }
 
+    public InstancePool<TConfig, TInstance> FinaliseMono<TConfig, TInstance>(bool sort=true)
+        where TInstance : InstanceView<TConfig>
+    {
+        var prefab = GetConcretePrefab<TInstance>();
+
+        return new MonoInstancePool<TConfig, TInstance>(prefab, parent, sort: sort);
+    }
+
     public AnonymousPool<TConfig, TInstance> Finalise<TConfig, TInstance>(Action<TConfig, TInstance> Configure = null,
                                                                           Action<TConfig, TInstance> Refresh   = null,
                                                                           Action<TInstance>          Cleanup   = null,
@@ -333,6 +341,54 @@ public class InstancePool<TConfig> : InstancePool<TConfig, InstanceView<TConfig>
     }
 
     protected override void Cleanup(TConfig config, InstanceView<TConfig> instance)
+    {
+        instance.gameObject.SetActive(false);
+
+        base.Cleanup(config, instance);
+    }
+
+    public override void SetActive(IEnumerable<TConfig> active)
+    {
+        base.SetActive(active);
+
+        if (sort)
+        {
+            foreach (TConfig shortcut in active)
+            {
+                Get(shortcut).transform.SetAsLastSibling();
+            }
+        }
+    }
+}
+
+public class MonoInstancePool<TConfig, TInstance> : InstancePool<TConfig, TInstance>
+    where TInstance : InstanceView<TConfig>
+{
+    protected TInstance prefab;
+    protected Transform parent;
+    protected bool sort;
+
+    public MonoInstancePool(TInstance prefab, Transform parent, bool sort=true)
+    {
+        this.prefab = prefab;
+        this.parent = parent;
+        this.sort = sort;
+    }
+
+    protected override TInstance CreateNew()
+    {
+        return UnityEngine.Object.Instantiate(prefab);
+    }
+
+    protected override void Configure(TConfig config, TInstance instance)
+    {
+        instance.transform.SetParent(parent, false);
+        instance.gameObject.SetActive(true);
+
+        base.Configure(config, instance);
+    }
+
+    protected override void Cleanup(TConfig config, TInstance instance)
     {
         instance.gameObject.SetActive(false);
 

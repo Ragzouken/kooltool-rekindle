@@ -150,7 +150,7 @@ public class CameraController : MonoBehaviour
 
     private void Update()
     {
-        focus = Vector2.SmoothDamp(focus, focusTarget, ref focusVelocity, .1f);
+        focus = Vector2.SmoothDamp(focus, focusTarget, ref focusVelocity, .1f, 1000, Time.deltaTime);
         scale = Mathf.SmoothDamp(scale, scaleTarget, ref scaleVelocity, .1f);
         rotation = Mathf.SmoothDampAngle(rotation, rotationTarget, ref rotationVelocity, .1f);
         pivot = Mathf.SmoothDampAngle(pivot, pivotTarget, ref pivotVelocity, .1f);

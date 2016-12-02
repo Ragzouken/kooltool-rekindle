@@ -15,6 +15,7 @@ public class HUD : MonoBehaviour
         Play,
         Draw,
         Character,
+        Tile,
     }
 
     private Mode mode_;

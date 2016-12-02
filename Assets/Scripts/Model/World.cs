@@ -111,7 +111,7 @@ public class KoolSpriteConverter : JsonConverter
 
 [JsonConverter(typeof(KoolSpriteConverter))]
 public class KoolSprite : ManagedSprite<byte>, ICopyable<KoolSprite>
-{
+{ 
     public KoolSprite() : base() { }
 
     public KoolSprite(KoolTexture mTexture,
