@@ -16,6 +16,8 @@ public class TileToggle : InstanceView<Tile>
     [SerializeField]
     private UIClicks clicks;
     [SerializeField]
+    private UIHover hover;
+    [SerializeField]
     private Toggle toggle;
     [SerializeField]
     private Image image;
@@ -30,7 +32,10 @@ public class TileToggle : InstanceView<Tile>
 
     private void Start()
     {
-        clicks.onSingleClick.AddListener(() => hud.SelectTile(config));
+        clicks.onSingleClick.AddListener(() => hud.selected = config);
+
+        hover.onHoverBegin.AddListener(() => hud.HoverTile(config));
+        hover.onHoverEnd.AddListener(() => hud.UnHoverTile());
     }
 
     public override void Refresh()

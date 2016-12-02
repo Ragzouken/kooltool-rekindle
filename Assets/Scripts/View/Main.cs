@@ -256,7 +256,6 @@ public class Main : MonoBehaviour
         sprite.Clear((byte) Random.Range(1, 16));
         sprite.mTexture.Apply();
         sprite.uSprite.name = "TEST TILE";
-        sprite.uSprite.texture.Apply();
 
         return tile;
     }
@@ -331,6 +330,8 @@ public class Main : MonoBehaviour
 
         var a = AddNewSimpleTile();
         var b = AddNewSimpleTile();
+        var c_ = AddNewSimpleTile();
+        var d = AddNewSimpleTile();
 
         foreach (int x in Enumerable.Range(-4, 9))
         {
@@ -338,12 +339,12 @@ public class Main : MonoBehaviour
             {
                 if (Random.value < 0.33f)
                 {
-                    w.tilemap.tiles[new IntVector2(x, y)] = a;
+                    continue;
                 }
-                else if (Random.value < 0.5f)
-                {
-                    w.tilemap.tiles[new IntVector2(x, y)] = b;
-                }
+
+                var coord = new IntVector2(x, y);
+                
+                w.tilemap.tiles[coord] = project.tiles[Random.Range(0, 4)];
             }
         }
 
@@ -751,6 +752,9 @@ public class Main : MonoBehaviour
         tiles.SetPalette(editor.tilePalette);
     }
 
+    private bool tileDragging;
+    private Changes tileChanges;
+
     private void UpdateTileInput()
     {
         if (input.cancel.WasPressed)
@@ -759,10 +763,65 @@ public class Main : MonoBehaviour
             CleanupTiles();
             return;
         }
+        
+        IntVector2 prevCell = ((IntVector2) prev).CellCoords(32);
+        IntVector2 nextCell = ((IntVector2) next).CellCoords(32);
+
+        if (tiles.selected != null)
+        {
+            brushRenderer.sortingLayerName = "World - Tiles";
+            brushRenderer.sortingOrder = 1;
+            brushRenderer.gameObject.SetActive(true);
+            brushRenderer.sprite = tiles.selected.sprites[0].uSprite;
+
+            brushRenderer.transform.localPosition = nextCell * 32;
+
+            brushRenderer.GetPropertyBlock(drawCursorBlock);
+            drawCursorBlock.SetFloat("_Cycle", 0);
+            brushRenderer.SetPropertyBlock(drawCursorBlock);
+        }
+        else
+        {
+            brushRenderer.gameObject.SetActive(false);
+        }
+
+        bool mouseCounts = (tileDragging && mouseHold) || mousePress;
+
+        if (mouseCounts)
+        {
+            if (!tileDragging)
+            {
+                tileDragging = true;
+                tileChanges = new Changes();
+            }
+            else if (tiles.selected != null)
+            {
+                Bresenham.Line(prevCell.x, prevCell.y, nextCell.x, nextCell.y, (x, y) =>
+                {
+                    project.scenes.First().tilemap.tiles[new IntVector2(x, y)] = tiles.selected;
+                });
+            }
+        }
+        else
+        {
+            EndTileStroke();
+        }
     }
 
     private void CleanupTiles()
     {
+        EndTileStroke();
+    }
+
+    private void EndTileStroke()
+    {
+        tileDragging = false;
+
+        if (tileChanges != null)
+        {
+            Do(tileChanges);
+            tileChanges = null;
+        }
     }
 
     private void SetScene(Scene scene)

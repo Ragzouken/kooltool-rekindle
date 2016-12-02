@@ -19,6 +19,7 @@ namespace kooltool
         public void Copy(Copier copier, Scene copy)
         {
             copy.background = background;
+            copy.tilemap = copier.Copy(tilemap);
             copy.actors = new HashSet<Actor>(actors.Select(actor => copier.Copy(actor)));
         }
     }

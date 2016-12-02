@@ -11,12 +11,20 @@ using Newtonsoft.Json;
 
 namespace kooltool
 {
-    public partial class TileMap
+    public partial class TileMap : ICopyable<TileMap>
     {
         [JsonConverter(typeof(DictionarySerializer<IntVector2, Tile, Data>))]
         public class Data : Dictionary<IntVector2, Tile> { }
 
         public Data tiles = new Data();
+
+        public void Copy(Copier copier, TileMap copy)
+        {
+            foreach (var pair in tiles)
+            {
+                copy.tiles.Add(pair.Key, pair.Value);
+            }
+        }
     }
 
     public partial class TileMap
@@ -45,6 +53,9 @@ namespace kooltool
             {
                 pair.Value.sprites[0].Blend(sprite8, blend, pair.Key * 32, brushPosition);
                 pair.Value.sprites[0].mTexture.Apply();
+
+                var change = changes.GetChange(pair.Value.sprites[0], () => new KoolSpriteChange(pair.Value.sprites[0]));
+                changes.sprites.Add(pair.Value.sprites[0]);
             }
         }
     }

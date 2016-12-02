@@ -18,6 +18,14 @@ public class TileHUD : MonoBehaviour
     private InstancePoolSetup paletteSetup;
     private InstancePool<Tile, TileToggle> palette;
 
+    [Header("Hovered Tile")]
+    [SerializeField]
+    private Image hoverImage;
+    [SerializeField]
+    private RectTransform hoverTransform;
+    [SerializeField]
+    private RectTransform hoverBounds;
+
     private Tile _selected;
     public Tile selected
     {
@@ -46,6 +54,21 @@ public class TileHUD : MonoBehaviour
     public void SetPalette(List<Tile> palette)
     {
         this.palette.SetActive(palette);
+    }
+
+    public void HoverTile(Tile tile)
+    {
+        hoverTransform.gameObject.SetActive(true);
+        hoverImage.sprite = tile.sprites[0].uSprite;
+
+        hoverTransform.position = palette.Get(tile).transform.position;
+
+        UIExtensions.BoundRectTransform(hoverTransform, hoverBounds);
+    }
+
+    public void UnHoverTile()
+    {
+        hoverTransform.gameObject.SetActive(false);
     }
 
     public void SelectTile(Tile tile)

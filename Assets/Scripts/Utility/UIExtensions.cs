@@ -26,6 +26,28 @@ public static partial class UIExtensions
                                corners[2].x, corners[2].y);
     }
 
+    public static void BoundRectTransform(RectTransform bounded,
+                                          RectTransform bounds,
+                                          RectTransform extent=null)
+    {
+        extent = extent ?? bounded; // allow you to bound less than the whole assembly
+
+        // work in world space because it's easier
+        var extentRect = extent.GetWorldRect();
+        var boundsRect = bounds.GetWorldRect();
+
+        // push the tooltip rect into the division
+        float pushR = Mathf.Max(0f, boundsRect.xMin - extentRect.xMin);
+        float pushU = Mathf.Max(0f, boundsRect.yMin - extentRect.yMin);
+
+        float pushL = Mathf.Min(0f, boundsRect.xMax - extentRect.xMax);
+        float pushD = Mathf.Min(0f, boundsRect.yMax - extentRect.yMax);
+
+        var push = new Vector2(pushL + pushR, pushU + pushD);
+
+        bounded.position += (Vector3) push;
+    }
+
     /// <summary>
     /// Reposition the tooltip so that it is within the bounds but not within
     /// the source
