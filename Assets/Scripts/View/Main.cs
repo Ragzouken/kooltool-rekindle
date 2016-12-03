@@ -37,6 +37,11 @@ public class Main : MonoBehaviour
     [SerializeField] private CameraController cameraController;
     [SerializeField] private WorldView worldView;
 
+    [SerializeField] private Sprite eraserTileSprite;
+    private Tile eraseTile;
+
+    [SerializeField] private AudioSource tileSound;
+
     [SerializeField] private SpriteRenderer pointerRenderer;
     [SerializeField] private Sprite pointerSprite;
     [SerializeField] private Trail trail;
@@ -68,7 +73,6 @@ public class Main : MonoBehaviour
     [SerializeField] private Sprite cellBorder;
 
     public Project project { get; private set; }
-    private Scene saved;
 
     private Actor possessed;
 
@@ -193,10 +197,43 @@ public class Main : MonoBehaviour
         }
     }
     
-    private void FillSimpleProject()
+    private Project CreateSimpleProject()
     {
-        var costume = NewSimpleCostume();
-        var scene = project.scenes.First();
+        var project = new Project();
+
+        var palette = new Palette();
+        project.AddPalette(palette);
+
+        for (int i = 1; i < 16; ++i)
+        {
+            palette.colors[i] = new Color(Random.value, Random.value, Random.value, 1f);
+        }
+
+        var scene = project.CreateScene();
+        scene.background.project = project;
+        scene.background.cellSize = 256;
+
+        AddNewSimpleTile(project);
+        AddNewSimpleTile(project);
+        AddNewSimpleTile(project);
+        AddNewSimpleTile(project);
+
+        foreach (int x in Enumerable.Range(-4, 9))
+        {
+            foreach (int y in Enumerable.Range(-4, 9))
+            {
+                if (Random.value < 0.33f)
+                {
+                    continue;
+                }
+
+                var coord = new IntVector2(x, y);
+                
+                scene.tilemap.tiles[coord] = project.tiles[Random.Range(0, 4)];
+            }
+        }
+
+        var costume = NewSimpleCostume(project);
         
         var actor = new Actor
         {
@@ -208,10 +245,10 @@ public class Main : MonoBehaviour
 
         scene.actors.Add(actor);
 
-        possessedActor = actor;
+        return project;
     }
 
-    private Costume NewCostume()
+    private Costume NewCostume(Project project)
     {
         var costume = project.CreateCostume4d1();
         costume.down.mTexture.SetPixels(test.pixels);
@@ -220,7 +257,7 @@ public class Main : MonoBehaviour
         return costume;
     }
 
-    private Costume NewSimpleCostume()
+    private Costume NewSimpleCostume(Project project)
     {
         var rect = new IntRect(0, 0, 32, 32);
 
@@ -241,7 +278,7 @@ public class Main : MonoBehaviour
         return costume;
     }
 
-    private Tile AddNewSimpleTile()
+    private Tile AddNewSimpleTile(Project project)
     {
         var texture = project.CreateTexture(32, 32);
         var sprite = new KoolSprite(texture, new IntRect(0, 0, 32, 32));
@@ -262,44 +299,45 @@ public class Main : MonoBehaviour
 
     private Costume defaultCostume;
 
-    private ManagedSprite<Color32> pointerMSprite;
-
     private void Start()
     { 
+#if UNITY_WEBGL && !UNITY_EDITOR
+        SetupPlayer();
+
+        try
+        {
+            string id = GetWindowSearch().Split('=')[1];
+            //string id = "83dcae5391dbe48c9d4abe61e1ff0cb6";
+
+            LoadGistAgain(id);
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log(e);
+        }
+#else
+        SetupEditor();
+        LoadDefaultProject();
+        //LoadGistAgain("83dcae5391dbe48c9d4abe61e1ff0cb6");
+#endif
+    }
+
+    private void SetupCommon()
+    {
         Cursor.visible = false;
 
-        {
-            var texture = new TextureColor32(19, 19);
-            pointerMSprite = new ManagedSprite<Color32>(texture, new IntRect(0, 0, 19, 19), new IntVector2(10, 10));
+        input = new TestInputSet();
+    }
 
-            pointerMSprite.SetPixels(pointerSprite.texture.GetPixels32());
-        }
+    private void SetupEditor()
+    {
+        SetupCommon();
 
-        {
-            test = new TextureByte(128, 128);
-            test.Clear(0);
+        hud.mode = HUD.Mode.Draw;
 
-            var pixels = costumeTexture.GetPixels32();
-            for (int i = 0; i < pixels.Length; ++i)
-            {
-                byte value = 0;
-
-                if (pixels[i] == Color.white) value = 1;
-                if (pixels[i] == Color.black) value = 2;
-
-                test.pixels[i] = value;
-            }
-
-            test.Apply();
-            test.uTexture.name = "Costume Texture";
-        }
-
+        borderSprite0 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
+        borderSprite1 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
         brushSpriteD = new TextureByte(64, 64).FullSprite(IntVector2.one * 32);
-
-        /*
-        string path = Application.streamingAssetsPath + @"\test.txt";
-        var script = ScriptFromCSV(File.ReadAllText(path));
-        */
 
         stampsp = new InstancePool<Stamp>(stampPrefab, stampParent);
 
@@ -320,74 +358,51 @@ public class Main : MonoBehaviour
         }
 
         stampsp.SetActive(stamps);
-
         SetStamp(stamps[0]);
-
         drawHUD.OnPaletteIndexSelected += i => RefreshBrushCursor();
 
-        project = new Project();
-        var w = new Scene();
-
-        var a = AddNewSimpleTile();
-        var b = AddNewSimpleTile();
-        var c_ = AddNewSimpleTile();
-        var d = AddNewSimpleTile();
-
-        foreach (int x in Enumerable.Range(-4, 9))
         {
-            foreach (int y in Enumerable.Range(-4, 9))
-            {
-                if (Random.value < 0.33f)
-                {
-                    continue;
-                }
+            test = new TextureByte(128, 128);
+            test.Clear(0);
 
-                var coord = new IntVector2(x, y);
-                
-                w.tilemap.tiles[coord] = project.tiles[Random.Range(0, 4)];
+            var pixels = costumeTexture.GetPixels32();
+            for (int i = 0; i < pixels.Length; ++i)
+            {
+                byte value = 0;
+
+                if (pixels[i] == Color.white) value = 1;
+                if (pixels[i] == Color.black) value = 2;
+
+                test.pixels[i] = value;
             }
+
+            test.Apply();
+            test.uTexture.name = "Costume Texture";
         }
 
-        var palette = new Palette();
-        project.AddPalette(palette);
+        //TestScripts();
+    }
+    
+    private void SetupPlayer()
+    {
+        SetupCommon();
+    }
 
-        for (int i = 1; i < 16; ++i)
-        {
-            palette.colors[i] = new Color(Random.value, Random.value, Random.value, 1f);
-        }
-
-        project.AddScene(w);
-        w.background.project = project;
-        w.background.cellSize = 256;
+    private void LoadDefaultProject()
+    {
+        var project = CreateSimpleProject();
+        defaultCostume = NewCostume(project);
         SetProject(project);
+    }
 
-        for (int i = 0; i < 16; ++i)
-        {
-            var next = Vector2.right * Random.Range(-4, 4) * 32
-                     + Vector2.up    * Random.Range(-4, 4) * 32;
+    private void TestScripts()
+    {
+                /*
+        string path = Application.streamingAssetsPath + @"\test.txt";
+        var script = ScriptFromCSV(File.ReadAllText(path));
+        */
 
-            /*
-            project.world.actors.Add(new Actor
-            {
-                world = project.world,
-                costume = costume,
-                //script = script,
-                state = new State { fragment = "start", line = 0 },
-                position = new Position
-                {
-                    prev = next,
-                    next = next + Vector2.right * 32,
-                    progress = 0,
-                },
-            });
-            */
-        }
-
-        saved = Copier.EZCopy(project.scenes.First());
-
-        //Debug.LogFormat("Original:\n{0}", File.ReadAllText(path));
-
-        /*
+                /*
         var watcher = new FileSystemWatcher(Application.streamingAssetsPath);
 
         watcher.Changed += (source, args) =>
@@ -411,33 +426,6 @@ public class Main : MonoBehaviour
         */
 
         //Application.OpenURL(path);
-
-        hud.mode = HUD.Mode.Draw;
-
-        input = new TestInputSet();
-
-        borderSprite0 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
-        borderSprite1 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
-
-        defaultCostume = NewCostume();
-
-        FillSimpleProject();
-
-#if UNITY_WEBGL
-        Debug.Log("Location: " + GetWindowSearch());
-
-        try
-        {
-            string id = GetWindowSearch().Split('=')[1];
-
-            LoadGistAgain(id);
-
-        }
-        catch (System.Exception e)
-        {
-            Debug.Log(e);
-        }
-#endif
     }
 
     public class TestInputSet : PlayerActionSet
@@ -685,6 +673,7 @@ public class Main : MonoBehaviour
         StartCoroutine(Gist.Download(id, gist =>
         {
             SetProject(Project.FromGist(gist));
+            EnterPlayMode();
         }));
     }
 
@@ -796,10 +785,33 @@ public class Main : MonoBehaviour
             }
             else if (tiles.selected != null)
             {
+                bool change = false;
+
                 Bresenham.Line(prevCell.x, prevCell.y, nextCell.x, nextCell.y, (x, y) =>
                 {
-                    project.scenes.First().tilemap.tiles[new IntVector2(x, y)] = tiles.selected;
+                    var coord = new IntVector2(x, y);
+                    var tiles_ = project.scenes.First().tilemap.tiles;
+
+                    change |= !tiles_.ContainsKey(coord) || tiles_[coord] != tiles.selected;
+                    tiles_[coord] = tiles.selected;
                 });
+
+                if (change) tileSound.Play();
+            }
+            else if (tiles.selected == null)
+            {
+                bool change = false;
+
+                Bresenham.Line(prevCell.x, prevCell.y, nextCell.x, nextCell.y, (x, y) =>
+                {
+                    var coord = new IntVector2(x, y);
+                    var tiles_ = project.scenes.First().tilemap.tiles;
+
+                    change |= tiles_.ContainsKey(coord);
+                    tiles_.Remove(coord);
+                });
+
+                if (change) tileSound.Play();
             }
         }
         else
@@ -949,9 +961,7 @@ public class Main : MonoBehaviour
 
     private void Update()
     {
-        ///System.GC.Collect();
-
-        if (locked) return;
+        if (locked || project == null) return;
 
         if (dialogue)
         {
@@ -1119,7 +1129,7 @@ public class Main : MonoBehaviour
             var view = worldView.actors.Get(possessedActor);
 
             //pointerRenderer.gameObject.SetActive(true);
-            trail.gameObject.SetActive(true);
+            //trail.gameObject.SetActive(true);
             
 
             float angle1 = (Time.timeSinceLevelLoad * 3) % (2 * Mathf.PI);
@@ -1128,21 +1138,7 @@ public class Main : MonoBehaviour
 
             trail.next = (Vector2) view.transform.position
                        + new Vector2(ox, oy);
-
-            /*
-            float angle2 = angle1 * Mathf.Rad2Deg + 180;
-            int rots = (int) (angle2 + 45) / 90;
-
-            var spr = TextureColor32.Pooler.Instance.Rotated(pointerMSprite, rots);
-            spr.mTexture.Apply();
-
-            pointerRenderer.sprite = spr.uSprite;
-
-            pointerRenderer.transform.position = view.transform.position
-                                               + new Vector3(ox, oy);
-            //pointerRenderer.transform.localEulerAngles = Vector3.forward * (angle1 * Mathf.Rad2Deg + 180);
-            */
-        }
+       }
         else
         {
             pointerRenderer.gameObject.SetActive(false);
@@ -1231,10 +1227,12 @@ public class Main : MonoBehaviour
 
     private void UpdatePlayInput()
     {
+#if !UNITY_WEBGL
         if (input.cancel.WasPressed)
         {
             ExitPlayMode();
         }
+#endif
     }
 
     private void CleanupPlay()
@@ -1445,7 +1443,7 @@ public class Main : MonoBehaviour
             var actor = new Actor
             {
                 world = scene,
-                costume = NewSimpleCostume(),
+                costume = NewSimpleCostume(project),
                 state = new State { fragment = "start", line = 0 },
                 position = new Position
                 {

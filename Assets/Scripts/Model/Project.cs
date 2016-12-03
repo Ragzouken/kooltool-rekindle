@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Assertions;
+using UnityEngine.Profiling;
 using System;
 using System.Text;
 using System.Linq;
@@ -32,8 +33,6 @@ namespace kooltool
 
         public void AddTexture(KoolTexture texture)
         {
-            Debug.LogFormat("Adding Texture: {0}", texture);
-
             textures.Add(texture);
         }
 
@@ -50,6 +49,14 @@ namespace kooltool
 
     public partial class Project
     {
+        public Scene CreateScene()
+        {
+            var scene = new Scene();
+            scenes.Add(scene);
+
+            return scene;
+        }
+
         public KoolTexture CreateTexture(int width, int height)
         {
             var texture = new KoolTexture(width, height);
@@ -93,16 +100,26 @@ namespace kooltool
         {
             var data = Encoding.UTF8.GetString(Convert.FromBase64String(gist["project"]));
 
-            //Debug.Log(data);
+            Profiler.BeginSample("Deserialize Project");
 
             var save = JSON.Deserialise<ProjectSave>(data);
 
+            Profiler.EndSample();
+
             foreach (var texture in save.project.textures)
             {
+                Profiler.BeginSample("Decode Texture Bytes");
+
                 string id = save.resources[texture];
                 byte[] tex = Convert.FromBase64String(gist[id]);
 
+                Profiler.EndSample();
+
+                Profiler.BeginSample("Decode PNG");
+
                 texture.DecodeFromPNG(tex);
+
+                Profiler.EndSample();
             }
 
             return save.project;
@@ -124,7 +141,7 @@ namespace kooltool
                 GC.Collect();
             }
 
-            string serialized = JSON.Serialise(save, true);
+            string serialized = JSON.Serialise(save);
 
             GC.Collect();
 

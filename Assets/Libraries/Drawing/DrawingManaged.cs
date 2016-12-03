@@ -423,7 +423,6 @@ public class ManagedPooler<TPooler, TPixel> : Singleton<TPooler>
         }
         else
         {
-            Debug.Log("Creating New Texture");
             dTexture = CreateTexture(Mathf.Max(256, width), Mathf.Max(256, height));
         }
 

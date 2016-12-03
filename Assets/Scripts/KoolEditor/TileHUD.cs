@@ -18,6 +18,9 @@ public class TileHUD : MonoBehaviour
     private InstancePoolSetup paletteSetup;
     private InstancePool<Tile, TileToggle> palette;
 
+    [SerializeField]
+    private Toggle eraserTile;
+
     [Header("Hovered Tile")]
     [SerializeField]
     private Image hoverImage;
@@ -42,6 +45,10 @@ public class TileHUD : MonoBehaviour
             if (selected != null)
             {
                 palette.Get(_selected).selected = true;
+            }
+            else
+            {
+                eraserTile.isOn = true;
             }
         }
     }
@@ -69,6 +76,11 @@ public class TileHUD : MonoBehaviour
     public void UnHoverTile()
     {
         hoverTransform.gameObject.SetActive(false);
+    }
+
+    public void SelectEraser()
+    {
+        selected = null;
     }
 
     public void SelectTile(Tile tile)

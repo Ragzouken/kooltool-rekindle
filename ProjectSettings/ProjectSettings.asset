@@ -425,10 +425,10 @@ PlayerSettings:
   splashScreenBackgroundSourceLandscape: {fileID: 0}
   splashScreenBackgroundSourcePortrait: {fileID: 0}
   spritePackerPolicy: 
-  webGLMemorySize: 768
+  webGLMemorySize: 1024
   webGLExceptionSupport: 1
-  webGLDataCaching: 0
-  webGLDebugSymbols: 0
+  webGLDataCaching: 1
+  webGLDebugSymbols: 1
   webGLEmscriptenArgs: 
   webGLModulesDirectory: 
   webGLTemplate: PROJECT:kooltool

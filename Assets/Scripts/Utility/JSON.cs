@@ -245,8 +245,6 @@ public class ColorConverter : JsonConverter
                                     object existingValue,
                                     JsonSerializer serializer)
     {
-        Debug.Log("READ COLOR");
-
         Color32 color = new Color32();
 
         color.r = (byte) reader.ReadAsDecimal().GetValueOrDefault();
