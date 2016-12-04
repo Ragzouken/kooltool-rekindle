@@ -91,19 +91,6 @@ namespace kooltool
                 name = "Autotile",
             };
 
-            /*
-            for (int i = 1; i < 6; ++i)
-            {
-                int x =      (i % 2) * 32;
-                int y = 64 - (i / 2) * 32;
-
-                tile.sprites.Add(new KoolSprite(texture, new IntRect(x,      y,      16, 16)));
-                tile.sprites.Add(new KoolSprite(texture, new IntRect(x + 16, y,      16, 16)));
-                tile.sprites.Add(new KoolSprite(texture, new IntRect(x,      y + 16, 16, 16)));
-                tile.sprites.Add(new KoolSprite(texture, new IntRect(x + 16, y + 16, 16, 16)));
-            }
-            */
-
             tile.sprites.Add(new KoolSprite(texture, new IntRect( 0,  0, 16, 16))); //
             tile.sprites.Add(new KoolSprite(texture, new IntRect(32,  0, 16, 16))); //
             tile.sprites.Add(new KoolSprite(texture, new IntRect( 0, 32, 16, 16))); //

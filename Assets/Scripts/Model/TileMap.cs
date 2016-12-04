@@ -169,12 +169,38 @@ namespace kooltool
             foreach (var pair in tiles)
             {
                 var instance = pair.Value;
+                var tile = instance.tile;
 
-                instance.tile.sprites[0].Blend(sprite8, blend, pair.Key * 32, brushPosition);
+                if (instance.minitiles == null)
+                {
+                    instance.tile.sprites[0].Blend(sprite8, blend, pair.Key * 32, brushPosition);
+
+                    var change = changes.GetChange(instance.tile.sprites[0], () => new KoolSpriteChange(instance.tile.sprites[0]));
+                    changes.sprites.Add(instance.tile.sprites[0]);
+                }
+                else
+                {
+                    int x0y0 = instance.minitiles[0];
+                    int x1y0 = instance.minitiles[1];
+                    int x0y1 = instance.minitiles[2];
+                    int x1y1 = instance.minitiles[3];
+
+                    tile.sprites[x0y0].Blend(sprite8, blend, (pair.Key * 32).Moved(0, 0), brushPosition);
+                    tile.sprites[x1y0].Blend(sprite8, blend, (pair.Key * 32).Moved(16, 0), brushPosition);
+                    tile.sprites[x0y1].Blend(sprite8, blend, (pair.Key * 32).Moved(0, 16), brushPosition);
+                    tile.sprites[x1y1].Blend(sprite8, blend, (pair.Key * 32).Moved(16, 16), brushPosition);
+
+                    changes.GetChange(instance.tile.sprites[x0y0], () => new KoolSpriteChange(instance.tile.sprites[x0y0]));
+                    changes.GetChange(instance.tile.sprites[x1y0], () => new KoolSpriteChange(instance.tile.sprites[x1y0]));
+                    changes.GetChange(instance.tile.sprites[x0y1], () => new KoolSpriteChange(instance.tile.sprites[x0y1]));
+                    changes.GetChange(instance.tile.sprites[x1y1], () => new KoolSpriteChange(instance.tile.sprites[x1y1]));
+                    changes.sprites.Add(instance.tile.sprites[x0y0]);
+                    changes.sprites.Add(instance.tile.sprites[x1y0]);
+                    changes.sprites.Add(instance.tile.sprites[x0y1]);
+                    changes.sprites.Add(instance.tile.sprites[x1y1]);
+                }
+
                 instance.tile.sprites[0].mTexture.Apply();
-
-                var change = changes.GetChange(instance.tile.sprites[0], () => new KoolSpriteChange(instance.tile.sprites[0]));
-                changes.sprites.Add(instance.tile.sprites[0]);
             }
         }
     }

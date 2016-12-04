@@ -44,6 +44,11 @@ public struct IntVector2 : System.IEquatable<IntVector2>
                               oy >= 0 ? oy : cellSize + oy);
     }
 
+    public IntVector2 Moved(int dx, int dy)
+    {
+        return new IntVector2(x + dx, y + dy);
+    }
+
     public static implicit operator Vector2(IntVector2 point)
     {
         return new Vector2(point.x, point.y);
