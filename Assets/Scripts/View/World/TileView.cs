@@ -8,17 +8,46 @@ using System.Collections.Generic;
 
 public class TileView : InstanceView<IntVector2>
 {
-    [SerializeField] new private SpriteRenderer renderer;
-    [SerializeField] private TileMapView tilemap;
+    [SerializeField]
+    private SpriteRenderer fullRenderer;
+    [SerializeField]
+    private SpriteRenderer[] subRenderers;
+    [SerializeField]
+    private TileMapView tilemap;
 
     protected override void Configure()
     {
-        renderer.transform.localPosition = config * 32;
-        renderer.sprite = tilemap.config.tiles[config].sprites[0].uSprite;
+        transform.localPosition = config * 32;
+
+        Refresh();
     }
 
     public override void Refresh()
     {
-        renderer.sprite = tilemap.config.tiles[config].sprites[0].uSprite;
+        var instance = tilemap.config.tiles[config];
+        var tile = instance.tile;
+
+        if (instance.minitiles != null)
+        {
+            fullRenderer.enabled = false;
+
+            for (int i = 0; i < 4; ++i)
+            {
+                int mini = instance.minitiles[i];
+
+                subRenderers[i].enabled = true;
+                subRenderers[i].sprite = tile.sprites[mini].uSprite;
+            }
+        }
+        else
+        {
+            fullRenderer.enabled = true;
+            fullRenderer.sprite = tile.sprites[0].uSprite;
+
+            for (int i = 0; i < 4; ++i)
+            {
+                subRenderers[i].enabled = false;
+            }
+        }
     }
 }

@@ -159,6 +159,9 @@ public class Main : MonoBehaviour
 
     private InstancePool<Stamp> stampsp;
 
+    [SerializeField]
+    private Texture2D autoTileTemplate;
+
     public Sprite[] testbrushes;
     private ManagedSprite<byte> brushSpriteD;
 
@@ -217,6 +220,25 @@ public class Main : MonoBehaviour
         AddNewSimpleTile(project);
         AddNewSimpleTile(project);
         AddNewSimpleTile(project);
+        var tile = project.CreateAutoTile();
+        tile.sprites[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
+                                                           .Select(color =>
+                                                           {
+                                                               if (color.a == 0)
+                                                               {
+                                                                   return (byte) 0;
+                                                               }
+                                                               else if (color.r == 0)
+                                                               {
+                                                                   return (byte) 1;
+                                                               }
+                                                               else
+                                                               {
+                                                                   return (byte) 2;
+                                                               }
+                                                           })
+                                                           .ToArray());
+        tile.sprites[0].mTexture.Apply();
 
         foreach (int x in Enumerable.Range(-4, 9))
         {
@@ -228,8 +250,11 @@ public class Main : MonoBehaviour
                 }
 
                 var coord = new IntVector2(x, y);
-                
-                scene.tilemap.tiles[coord] = project.tiles[Random.Range(0, 4)];
+
+                scene.tilemap.tiles[coord] = new TileInstance
+                {
+                    tile = project.tiles[Random.Range(0, 4)]
+                };
             }
         }
 
@@ -737,7 +762,7 @@ public class Main : MonoBehaviour
         }
 
         editor.tilePalette.Clear();
-        editor.tilePalette.AddRange(project.tiles.Take(16));
+        editor.tilePalette.AddRange(project.tiles.Take(15));
         tiles.SetPalette(editor.tilePalette);
     }
 
@@ -772,6 +797,7 @@ public class Main : MonoBehaviour
         else
         {
             brushRenderer.gameObject.SetActive(false);
+            // TODO: show eraser icon
         }
 
         bool mouseCounts = (tileDragging && mouseHold) || mousePress;
@@ -790,10 +816,10 @@ public class Main : MonoBehaviour
                 Bresenham.Line(prevCell.x, prevCell.y, nextCell.x, nextCell.y, (x, y) =>
                 {
                     var coord = new IntVector2(x, y);
-                    var tiles_ = project.scenes.First().tilemap.tiles;
+                    var tiles_ = editScene.tilemap.tiles;
 
-                    change |= !tiles_.ContainsKey(coord) || tiles_[coord] != tiles.selected;
-                    tiles_[coord] = tiles.selected;
+                    change |= !tiles_.ContainsKey(coord) || tiles_[coord].tile != tiles.selected;
+                    editScene.tilemap.SetTileAtPosition(coord, tiles.selected);
                 });
 
                 if (change) tileSound.Play();
@@ -805,7 +831,7 @@ public class Main : MonoBehaviour
                 Bresenham.Line(prevCell.x, prevCell.y, nextCell.x, nextCell.y, (x, y) =>
                 {
                     var coord = new IntVector2(x, y);
-                    var tiles_ = project.scenes.First().tilemap.tiles;
+                    var tiles_ = editScene.tilemap.tiles;
 
                     change |= tiles_.ContainsKey(coord);
                     tiles_.Remove(coord);
