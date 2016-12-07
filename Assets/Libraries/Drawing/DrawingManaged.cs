@@ -203,9 +203,8 @@ public class ManagedSprite<TPixel> : IDisposable
             if (_uSprite == null)
             {
                 Vector2 piv;
-                piv.x = pivot.x / (float) rect.width;
-                piv.y = pivot.y / (float) rect.height;
-
+                piv.x = pivot.x / (float) this.rect.width;
+                piv.y = pivot.y / (float) this.rect.height;
                 _uSprite = Sprite.Create(mTexture.uTexture, rect, piv, 1, 0, SpriteMeshType.FullRect);
             }
 
