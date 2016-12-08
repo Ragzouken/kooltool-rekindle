@@ -62,21 +62,6 @@ namespace kooltool
             return instance != null && instance.tile == tile;
         }
 
-        public void SetTileAtPosition(IntVector2 position, Tile tile)
-        {
-            if (tile.sprites.Count > 1)
-            {
-                SetTileAtPositionWithAutoTiling(position, tile);
-            }
-            else
-            {
-                tiles[position] = new TileInstance
-                {
-                    tile = tile,
-                };
-            }
-        }
-
         private int NeighboursToIndex(bool a, bool b, bool c)
         {
             //return Random.Range(0, 5);
@@ -107,7 +92,7 @@ namespace kooltool
             }
         }
 
-        public void SetTileAtPositionWithAutoTiling(IntVector2 position, Tile tile)
+        public void SetTileAtPosition(IntVector2 position, Tile tile)
         {
             tiles[position] = new TileInstance
             {
@@ -119,8 +104,6 @@ namespace kooltool
                 for (int x = -1; x <= 1; ++x)
                 {
                     var coord = position + new IntVector2(x, y);
-
-                    //Debug.Log("Refresh " + coord);
 
                     RefreshMinitiles(coord);
                 }
