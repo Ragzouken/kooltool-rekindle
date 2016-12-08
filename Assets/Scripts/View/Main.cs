@@ -771,9 +771,17 @@ public class Main : MonoBehaviour
     {
         if (input.cancel.WasPressed)
         {
-            hud.mode = HUD.Mode.Draw;
-            CleanupTiles();
-            return;
+            if (tiles.expanded)
+            {
+                tiles.expanded = false;
+                return;
+            }
+            else
+            {
+                hud.mode = HUD.Mode.Draw;
+                CleanupTiles();
+                return;
+            }
         }
         
         IntVector2 prevCell = ((IntVector2) prev).CellCoords(32);

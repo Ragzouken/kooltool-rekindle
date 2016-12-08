@@ -15,6 +15,8 @@ public class TileHUD : MonoBehaviour
     [SerializeField]
     private ToggleGroup group;
     [SerializeField]
+    private Animator animator;
+    [SerializeField]
     private InstancePoolSetup paletteSetup;
     private InstancePool<Tile, TileToggle> palette;
 
@@ -53,6 +55,19 @@ public class TileHUD : MonoBehaviour
         }
     }
 
+    public bool expanded
+    {
+        set
+        {
+            animator.SetBool("Expand Browser", value);
+        }
+
+        get
+        {
+            return animator.GetBool("Expand Browser");
+        }
+    }
+
     private void Awake()
     {
         palette = paletteSetup.FinaliseMono<Tile, TileToggle>();
@@ -86,5 +101,10 @@ public class TileHUD : MonoBehaviour
     public void SelectTile(Tile tile)
     {
         
+    }
+
+    public void ToggleBrowserExpanded()
+    {
+        expanded = !expanded;
     }
 }
