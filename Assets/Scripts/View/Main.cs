@@ -216,10 +216,6 @@ public class Main : MonoBehaviour
         scene.background.project = project;
         scene.background.cellSize = 256;
 
-        AddNewSimpleTile(project);
-        AddNewSimpleTile(project);
-        AddNewSimpleTile(project);
-        AddNewSimpleTile(project);
         var tile = project.CreateAutoTile();
         tile.sprites[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
                                                            .Select(color =>
@@ -240,6 +236,11 @@ public class Main : MonoBehaviour
                                                            .ToArray());
         tile.sprites[0].mTexture.Apply();
 
+        for (int i = 0; i < 32; ++i)
+        {
+            AddNewSimpleTile(project);
+        }
+
         foreach (int x in Enumerable.Range(-4, 9))
         {
             foreach (int y in Enumerable.Range(-4, 9))
@@ -251,10 +252,7 @@ public class Main : MonoBehaviour
 
                 var coord = new IntVector2(x, y);
 
-                scene.tilemap.tiles[coord] = new TileInstance
-                {
-                    tile = project.tiles[Random.Range(0, 4)]
-                };
+                scene.tilemap.SetTileAtPosition(coord, project.tiles[Random.Range(0, 4)]);
             }
         }
 

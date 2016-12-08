@@ -205,6 +205,9 @@ public class ManagedSprite<TPixel> : IDisposable
                 Vector2 piv;
                 piv.x = pivot.x / (float) this.rect.width;
                 piv.y = pivot.y / (float) this.rect.height;
+
+                // TODO: retry the centre-texel coords
+
                 _uSprite = Sprite.Create(mTexture.uTexture, rect, piv, 1, 0, SpriteMeshType.FullRect);
             }
 
