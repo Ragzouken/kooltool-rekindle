@@ -81,7 +81,7 @@ public class TileHUD : MonoBehaviour
     public void HoverTile(Tile tile)
     {
         hoverTransform.gameObject.SetActive(true);
-        hoverImage.sprite = tile.sprites[0].uSprite;
+        hoverImage.sprite = tile.thumbnail.uSprite;
 
         hoverTransform.position = palette.Get(tile).transform.position;
 

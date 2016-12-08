@@ -91,29 +91,32 @@ namespace kooltool
                 name = "Autotile",
             };
 
-            tile.sprites.Add(new KoolSprite(texture, new IntRect( 0,  0, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32,  0, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect( 0, 32, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32, 64, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32, 32, 16, 16))); //
+            tile.singular = new KoolSprite(texture, new IntRect(0, 64, 32, 32));
 
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(48,  0, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(16,  0, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(48, 32, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(48, 64, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(16, 32, 16, 16))); //
+            tile.minitiles = new List<KoolSprite>();
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect( 0,  0, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32,  0, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect( 0, 32, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 64, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 32, 16, 16))); //
 
-            tile.sprites.Add(new KoolSprite(texture, new IntRect( 0, 48, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32, 48, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect( 0, 16, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32, 80, 16, 16))); // 
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32, 16, 16, 16))); // 
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(48,  0, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(16,  0, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 32, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 64, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(16, 32, 16, 16))); //
 
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(48, 48, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(16, 48, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(48, 16, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(48, 80, 16, 16))); //
-            tile.sprites.Add(new KoolSprite(texture, new IntRect(32, 32, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect( 0, 48, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 48, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect( 0, 16, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 80, 16, 16))); // 
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 16, 16, 16))); // 
+
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 48, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(16, 48, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 16, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 80, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 32, 16, 16))); //
 
             tiles.Add(tile);
 

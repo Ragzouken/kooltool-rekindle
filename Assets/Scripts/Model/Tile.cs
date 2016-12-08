@@ -8,8 +8,29 @@ using System.Collections.Generic;
 
 using Random = UnityEngine.Random;
 
-public class Tile
+public partial class Tile
 {
     public string name;
-    public List<KoolSprite> sprites = new List<KoolSprite>();
+
+    public KoolSprite singular;
+    public List<KoolSprite> minitiles;
+}
+
+public partial class Tile
+{
+    public bool autotile
+    {
+        get
+        {
+            return minitiles != null;
+        }
+    }
+
+    public KoolSprite thumbnail
+    {
+        get
+        {
+            return singular;
+        }
+    }
 }

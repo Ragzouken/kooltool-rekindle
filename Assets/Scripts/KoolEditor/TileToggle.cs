@@ -40,6 +40,6 @@ public class TileToggle : InstanceView<Tile>
 
     public override void Refresh()
     {
-        image.sprite = config.sprites[0].uSprite;
+        image.sprite = config.thumbnail.uSprite;
     }
 }

@@ -217,7 +217,7 @@ public class Main : MonoBehaviour
         scene.background.cellSize = 256;
 
         var tile = project.CreateAutoTile();
-        tile.sprites[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
+        tile.minitiles[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
                                                            .Select(color =>
                                                            {
                                                                if (color.a == 0)
@@ -234,7 +234,7 @@ public class Main : MonoBehaviour
                                                                }
                                                            })
                                                            .ToArray());
-        tile.sprites[0].mTexture.Apply();
+        tile.minitiles[0].mTexture.Apply();
 
         for (int i = 0; i < 32; ++i)
         {
@@ -308,7 +308,7 @@ public class Main : MonoBehaviour
         var tile = new Tile
         {
             name = "Test Tile " + Random.Range(0, 256),
-            sprites = new List<KoolSprite> { sprite },
+            singular = sprite,
         };
 
         project.tiles.Add(tile);
@@ -792,7 +792,7 @@ public class Main : MonoBehaviour
             brushRenderer.sortingLayerName = "World - Tiles";
             brushRenderer.sortingOrder = 1;
             brushRenderer.gameObject.SetActive(true);
-            brushRenderer.sprite = tiles.selected.sprites[0].uSprite;
+            brushRenderer.sprite = tiles.selected.thumbnail.uSprite;
 
             brushRenderer.transform.localPosition = nextCell * 32;
 

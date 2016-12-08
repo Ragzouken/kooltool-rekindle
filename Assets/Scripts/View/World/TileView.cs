@@ -27,7 +27,7 @@ public class TileView : InstanceView<IntVector2>
         var instance = tilemap.config.tiles[config];
         var tile = instance.tile;
 
-        if (instance.minitiles != null)
+        if (tile.autotile)
         {
             fullRenderer.enabled = false;
 
@@ -36,13 +36,13 @@ public class TileView : InstanceView<IntVector2>
                 int mini = instance.minitiles[i];
 
                 subRenderers[i].enabled = true;
-                subRenderers[i].sprite = tile.sprites[mini].uSprite;
+                subRenderers[i].sprite = tile.minitiles[mini].uSprite;
             }
         }
         else
         {
             fullRenderer.enabled = true;
-            fullRenderer.sprite = tile.sprites[0].uSprite;
+            fullRenderer.sprite = tile.singular.uSprite;
 
             for (int i = 0; i < 4; ++i)
             {
