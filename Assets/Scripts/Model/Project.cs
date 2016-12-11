@@ -82,7 +82,7 @@ namespace kooltool
             return costume;
         }
 
-        public Tile CreateAutoTile()
+        public Tile CreateDynamicTile(bool auto=true)
         {
             var texture = CreateTexture(64, 96);
 
@@ -91,7 +91,9 @@ namespace kooltool
                 name = "Autotile",
             };
 
+            tile.autotile = auto;
             tile.singular = new KoolSprite(texture, new IntRect(0, 64, 32, 32));
+            tile.singular.Clear((byte) Random.Range(1, 16));
 
             tile.minitiles = new List<KoolSprite>();
             tile.minitiles.Add(new KoolSprite(texture, new IntRect( 0,  0, 16, 16))); //
@@ -119,6 +121,8 @@ namespace kooltool
             tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 32, 16, 16))); //
 
             tiles.Add(tile);
+
+            texture.Apply();
 
             return tile;
         }

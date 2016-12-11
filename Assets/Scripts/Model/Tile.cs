@@ -12,20 +12,13 @@ public partial class Tile
 {
     public string name;
 
+    public bool autotile;
     public KoolSprite singular;
     public List<KoolSprite> minitiles;
 }
 
 public partial class Tile
 {
-    public bool autotile
-    {
-        get
-        {
-            return minitiles != null;
-        }
-    }
-
     public KoolSprite thumbnail
     {
         get

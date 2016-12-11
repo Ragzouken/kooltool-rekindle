@@ -216,7 +216,7 @@ public class Main : MonoBehaviour
         scene.background.project = project;
         scene.background.cellSize = 256;
 
-        var tile = project.CreateAutoTile();
+        var tile = project.CreateDynamicTile();
         tile.minitiles[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
                                                            .Select(color =>
                                                            {
@@ -238,7 +238,7 @@ public class Main : MonoBehaviour
 
         for (int i = 0; i < 32; ++i)
         {
-            AddNewSimpleTile(project);
+            project.CreateDynamicTile(false);
         }
 
         foreach (int x in Enumerable.Range(-4, 9))
@@ -299,25 +299,6 @@ public class Main : MonoBehaviour
         };
 
         return costume;
-    }
-
-    private Tile AddNewSimpleTile(Project project)
-    {
-        var texture = project.CreateTexture(32, 32);
-        var sprite = new KoolSprite(texture, new IntRect(0, 0, 32, 32));
-        var tile = new Tile
-        {
-            name = "Test Tile " + Random.Range(0, 256),
-            singular = sprite,
-        };
-
-        project.tiles.Add(tile);
-
-        sprite.Clear((byte) Random.Range(1, 16));
-        sprite.mTexture.Apply();
-        sprite.uSprite.name = "TEST TILE";
-
-        return tile;
     }
 
     private Costume defaultCostume;
