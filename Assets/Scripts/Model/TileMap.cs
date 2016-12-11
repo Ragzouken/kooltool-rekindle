@@ -119,8 +119,8 @@ namespace kooltool
 
             var tile = instance.tile;
 
-            if (!tile.autotile)
-                return;
+            //if (!tile.autotile)
+            //    return;
 
             bool l = IsTileAtPositionSame(position + IntVector2.left,  tile);
             bool r = IsTileAtPositionSame(position + IntVector2.right, tile);

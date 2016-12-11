@@ -451,6 +451,7 @@ GameObject:
   - component: {fileID: 13774911}
   - component: {fileID: 13774912}
   - component: {fileID: 13774913}
+  - component: {fileID: 13774914}
   m_Layer: 0
   m_Name: Wall
   m_TagString: Untagged
@@ -542,6 +543,27 @@ MonoBehaviour:
   m_PreferredHeight: 16
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
+--- !u!114 &13774914
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 13774910}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ce3f0a8e3efd0c4ea7b5d3f77aaf5ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onSingleClick:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIClicks+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  onDoubleClick:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIClicks+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!1 &14424131
 GameObject:
   m_ObjectHideFlags: 0
@@ -11323,6 +11345,7 @@ GameObject:
   - component: {fileID: 577212927}
   - component: {fileID: 577212928}
   - component: {fileID: 577212929}
+  - component: {fileID: 577212930}
   m_Layer: 0
   m_Name: Auto
   m_TagString: Untagged
@@ -11414,6 +11437,27 @@ MonoBehaviour:
   m_PreferredHeight: 16
   m_FlexibleWidth: -1
   m_FlexibleHeight: -1
+--- !u!114 &577212930
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 577212926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3ce3f0a8e3efd0c4ea7b5d3f77aaf5ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  onSingleClick:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIClicks+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
+  onDoubleClick:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UIClicks+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
+      PublicKeyToken=null
 --- !u!1 &578528586
 GameObject:
   m_ObjectHideFlags: 0
@@ -13288,6 +13332,12 @@ MonoBehaviour:
   hoverImage: {fileID: 160357712}
   hoverTransform: {fileID: 199676614}
   hoverBounds: {fileID: 1183619651}
+  createButton: {fileID: 1248231683}
+  deleteButton: {fileID: 47164233}
+  autotileToggle: {fileID: 577212928}
+  autotileClicks: {fileID: 577212930}
+  passableToggle: {fileID: 13774912}
+  passableClicks: {fileID: 13774914}
 --- !u!95 &660312342
 Animator:
   serializedVersion: 3

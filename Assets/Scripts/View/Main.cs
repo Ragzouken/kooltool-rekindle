@@ -740,6 +740,7 @@ public class Main : MonoBehaviour
             RefreshPalette(i);
         }
 
+        editor.project = project;
         editor.tilePalette.Clear();
         editor.tilePalette.AddRange(project.tiles.Take(15));
         tiles.SetPalette(editor.tilePalette);

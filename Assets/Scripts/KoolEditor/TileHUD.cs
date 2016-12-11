@@ -31,6 +31,20 @@ public class TileHUD : MonoBehaviour
     [SerializeField]
     private RectTransform hoverBounds;
 
+    [Header("Browser Controls")]
+    [SerializeField]
+    private Button createButton;
+    [SerializeField]
+    private Button deleteButton;
+    [SerializeField]
+    private Toggle autotileToggle;
+    [SerializeField]
+    private UIClicks autotileClicks;
+    [SerializeField]
+    private Toggle passableToggle;
+    [SerializeField]
+    private UIClicks passableClicks;
+
     private Tile _selected;
     public Tile selected
     {
@@ -42,16 +56,8 @@ public class TileHUD : MonoBehaviour
         set
         {
             _selected = value;
-            group.SetAllTogglesOff();
 
-            if (selected != null)
-            {
-                palette.Get(_selected).selected = true;
-            }
-            else
-            {
-                eraserTile.isOn = true;
-            }
+            RefreshSelected();
         }
     }
 
@@ -71,6 +77,41 @@ public class TileHUD : MonoBehaviour
     private void Awake()
     {
         palette = paletteSetup.FinaliseMono<Tile, TileToggle>();
+    }
+
+    private void Start()
+    {
+        createButton.onClick.AddListener(OnCreateClicked);
+        deleteButton.onClick.AddListener(OnDeleteClicked);
+        passableClicks.onSingleClick.AddListener(OnPassableClicked);
+        autotileClicks.onSingleClick.AddListener(OnAutotileClicked);
+    }
+
+    private void OnCreateClicked()
+    {
+        selected = editor.CreateNewTile();
+    }
+
+    private void OnDeleteClicked()
+    {
+        if (selected != null)
+        {
+            editor.DeleteExistingTile(selected);
+            SetPalette(editor.tilePalette);
+        }
+    }
+
+    private void OnPassableClicked()
+    {
+
+    }
+
+    private void OnAutotileClicked()
+    {
+        if (selected != null)
+        {
+            editor.TileSetAutotile(selected, !selected.autotile);
+        }
     }
 
     public void SetPalette(List<Tile> palette)
@@ -98,13 +139,25 @@ public class TileHUD : MonoBehaviour
         selected = null;
     }
 
-    public void SelectTile(Tile tile)
-    {
-        
-    }
-
     public void ToggleBrowserExpanded()
     {
         expanded = !expanded;
+    }
+
+    private void RefreshSelected()
+    {
+        group.SetAllTogglesOff();
+
+        if (selected != null)
+        {
+            palette.DoIfActive(_selected, toggle => toggle.selected = true);
+
+            passableToggle.isOn = true;
+            autotileToggle.isOn = selected.autotile;
+        }
+        else
+        {
+            eraserTile.isOn = true;
+        }
     }
 }
