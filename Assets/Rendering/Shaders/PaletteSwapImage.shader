@@ -112,10 +112,10 @@
 			{
 				// sample the texture
 				fixed4 col = tex2D(_MainTex, IN.texcoord) ;
-				col += _TextureSampleAdd;
+				//col += _TextureSampleAdd;
 				col *= IN.color;
 
-				int c = col.r * 15;
+				int c = floor(col.a * 256) % 16;
 
 				if (c ==  0) col = _Palette00;
 				if (c ==  1) col = _Palette01;

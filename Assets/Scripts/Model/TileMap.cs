@@ -154,7 +154,7 @@ namespace kooltool
                 var instance = pair.Value;
                 var tile = instance.tile;
 
-                if (instance.minitiles == null)
+                if (!instance.tile.autotile)
                 {
                     instance.tile.singular.Blend(sprite8, blend, pair.Key * 32, brushPosition);
 

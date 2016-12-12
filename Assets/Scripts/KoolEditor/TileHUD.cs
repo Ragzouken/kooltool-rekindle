@@ -7,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 
 using Random = UnityEngine.Random;
+using kooltool;
 
 public class TileHUD : MonoBehaviour 
 {
@@ -19,6 +20,10 @@ public class TileHUD : MonoBehaviour
     [SerializeField]
     private InstancePoolSetup paletteSetup;
     private InstancePool<Tile, TileToggle> palette;
+
+    [SerializeField]
+    private InstancePoolSetup browserSetup;
+    private InstancePool<Tile, TileToggle> browser;
 
     [SerializeField]
     private Toggle eraserTile;
@@ -77,6 +82,7 @@ public class TileHUD : MonoBehaviour
     private void Awake()
     {
         palette = paletteSetup.FinaliseMono<Tile, TileToggle>();
+        browser = browserSetup.FinaliseMono<Tile, TileToggle>();
     }
 
     private void Start()
@@ -114,17 +120,24 @@ public class TileHUD : MonoBehaviour
         }
     }
 
+    public void SetProject(Project project)
+    {
+        browser.SetActive(project.tiles);
+    }
+
     public void SetPalette(List<Tile> palette)
     {
         this.palette.SetActive(palette);
     }
 
-    public void HoverTile(Tile tile)
+    public void HoverTile(TileToggle toggle)
     {
+        var tile = toggle.config;
+
         hoverTransform.gameObject.SetActive(true);
         hoverImage.sprite = tile.thumbnail.uSprite;
 
-        hoverTransform.position = palette.Get(tile).transform.position;
+        hoverTransform.position = toggle.transform.position;
 
         UIExtensions.BoundRectTransform(hoverTransform, hoverBounds);
     }
@@ -151,6 +164,7 @@ public class TileHUD : MonoBehaviour
         if (selected != null)
         {
             palette.DoIfActive(_selected, toggle => toggle.selected = true);
+            browser.DoIfActive(_selected, toggle => toggle.selected = true);
 
             passableToggle.isOn = true;
             autotileToggle.isOn = selected.autotile;

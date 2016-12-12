@@ -34,7 +34,7 @@ public class TileToggle : InstanceView<Tile>
     {
         clicks.onSingleClick.AddListener(() => hud.selected = config);
 
-        hover.onHoverBegin.AddListener(() => hud.HoverTile(config));
+        hover.onHoverBegin.AddListener(() => hud.HoverTile(this));
         hover.onHoverEnd.AddListener(() => hud.UnHoverTile());
     }
 
