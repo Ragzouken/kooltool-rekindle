@@ -128,6 +128,8 @@ public class TileHUD : MonoBehaviour
     public void SetPalette(List<Tile> palette)
     {
         this.palette.SetActive(palette);
+
+        RefreshSelected();
     }
 
     public void HoverTile(TileToggle toggle)

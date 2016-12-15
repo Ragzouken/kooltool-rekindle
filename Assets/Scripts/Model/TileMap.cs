@@ -94,10 +94,17 @@ namespace kooltool
 
         public void SetTileAtPosition(IntVector2 position, Tile tile)
         {
-            tiles[position] = new TileInstance
+            if (tile == null)
             {
-                tile = tile,
-            };
+                tiles.Remove(position);
+            }
+            else
+            {
+                tiles[position] = new TileInstance
+                {
+                    tile = tile,
+                };
+            }
 
             for (int y = -1; y <= 1; ++y)
             {

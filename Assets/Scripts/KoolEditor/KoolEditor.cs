@@ -13,8 +13,24 @@ public class KoolEditor : MonoBehaviour
 {
     public Project project;
 
+    [SerializeField]
+    private TileHUD tiles;
+
     [HideInInspector]
     public List<Tile> tilePalette = new List<Tile>();
+
+    public void ScenePlaceTile(Scene scene, IntVector2 cell, Tile tile)
+    {
+        scene.tilemap.SetTileAtPosition(cell, tile);
+
+        if (tilePalette.Count == 0 || tilePalette[0] != tile)
+        {
+            tilePalette.Remove(tile);
+            tilePalette.Insert(0, tile);
+            tilePalette = tilePalette.Take(16).ToList();
+            tiles.SetPalette(tilePalette);
+        }
+    }
 
     public Tile CreateNewTile()
     {

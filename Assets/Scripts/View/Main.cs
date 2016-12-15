@@ -252,7 +252,7 @@ public class Main : MonoBehaviour
 
                 var coord = new IntVector2(x, y);
 
-                scene.tilemap.SetTileAtPosition(coord, project.tiles[Random.Range(0, 4)]);
+                editor.ScenePlaceTile(scene, coord, project.tiles[Random.Range(0, 4)]);
             }
         }
 
@@ -741,8 +741,6 @@ public class Main : MonoBehaviour
         }
 
         editor.project = project;
-        editor.tilePalette.Clear();
-        editor.tilePalette.AddRange(project.tiles.Take(15));
         tiles.SetProject(project);
         tiles.SetPalette(editor.tilePalette);
     }
@@ -808,7 +806,7 @@ public class Main : MonoBehaviour
                     var tiles_ = editScene.tilemap.tiles;
 
                     change |= !tiles_.ContainsKey(coord) || tiles_[coord].tile != tiles.selected;
-                    editScene.tilemap.SetTileAtPosition(coord, tiles.selected);
+                    editor.ScenePlaceTile(editScene, coord, tiles.selected);
                 });
 
                 if (change) tileSound.Play();
@@ -823,7 +821,7 @@ public class Main : MonoBehaviour
                     var tiles_ = editScene.tilemap.tiles;
 
                     change |= tiles_.ContainsKey(coord);
-                    tiles_.Remove(coord);
+                    editor.ScenePlaceTile(editScene, coord, null);
                 });
 
                 if (change) tileSound.Play();
