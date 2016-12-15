@@ -118,7 +118,7 @@ namespace kooltool
             tile.minitiles.Add(new KoolSprite(texture, new IntRect(16, 48, 16, 16))); //
             tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 16, 16, 16))); //
             tile.minitiles.Add(new KoolSprite(texture, new IntRect(48, 80, 16, 16))); //
-            tile.minitiles.Add(new KoolSprite(texture, new IntRect(32, 32, 16, 16))); //
+            tile.minitiles.Add(new KoolSprite(texture, new IntRect(16, 16, 16, 16))); //
 
             tiles.Add(tile);
 
