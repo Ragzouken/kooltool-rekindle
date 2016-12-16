@@ -155,7 +155,6 @@ namespace kooltool
                           Blend<byte> blend)
         {
             // TODO: sprite8 + position => world rect
-            // TODO: support mini tiles
             foreach (var pair in tiles)
             {
                 var instance = pair.Value;
@@ -170,24 +169,24 @@ namespace kooltool
                 }
                 else
                 {
-                    int x0y0 = instance.minitiles[0];
-                    int x1y0 = instance.minitiles[1];
-                    int x0y1 = instance.minitiles[2];
-                    int x1y1 = instance.minitiles[3];
+                    KoolSprite x0y0 = tile.minitiles[instance.minitiles[0]];
+                    KoolSprite x1y0 = tile.minitiles[instance.minitiles[1]];
+                    KoolSprite x0y1 = tile.minitiles[instance.minitiles[2]];
+                    KoolSprite x1y1 = tile.minitiles[instance.minitiles[3]];
 
-                    tile.minitiles[x0y0].Blend(sprite8, blend, (pair.Key * 32).Moved(0, 0), brushPosition);
-                    tile.minitiles[x1y0].Blend(sprite8, blend, (pair.Key * 32).Moved(16, 0), brushPosition);
-                    tile.minitiles[x0y1].Blend(sprite8, blend, (pair.Key * 32).Moved(0, 16), brushPosition);
-                    tile.minitiles[x1y1].Blend(sprite8, blend, (pair.Key * 32).Moved(16, 16), brushPosition);
+                    x0y0.Blend(sprite8, blend, (pair.Key * 32).Moved(0, 0), brushPosition);
+                    x1y0.Blend(sprite8, blend, (pair.Key * 32).Moved(16, 0), brushPosition);
+                    x0y1.Blend(sprite8, blend, (pair.Key * 32).Moved(0, 16), brushPosition);
+                    x1y1.Blend(sprite8, blend, (pair.Key * 32).Moved(16, 16), brushPosition);
 
-                    changes.GetChange(instance.tile.minitiles[x0y0], () => new KoolSpriteChange(instance.tile.minitiles[x0y0]));
-                    changes.GetChange(instance.tile.minitiles[x1y0], () => new KoolSpriteChange(instance.tile.minitiles[x1y0]));
-                    changes.GetChange(instance.tile.minitiles[x0y1], () => new KoolSpriteChange(instance.tile.minitiles[x0y1]));
-                    changes.GetChange(instance.tile.minitiles[x1y1], () => new KoolSpriteChange(instance.tile.minitiles[x1y1]));
-                    changes.sprites.Add(instance.tile.minitiles[x0y0]);
-                    changes.sprites.Add(instance.tile.minitiles[x1y0]);
-                    changes.sprites.Add(instance.tile.minitiles[x0y1]);
-                    changes.sprites.Add(instance.tile.minitiles[x1y1]);
+                    changes.GetChange(x0y0, () => new KoolSpriteChange(x0y0));
+                    changes.GetChange(x1y0, () => new KoolSpriteChange(x1y0));
+                    changes.GetChange(x0y1, () => new KoolSpriteChange(x0y1));
+                    changes.GetChange(x1y1, () => new KoolSpriteChange(x1y1));
+                    changes.sprites.Add(x0y0);
+                    changes.sprites.Add(x1y0);
+                    changes.sprites.Add(x0y1);
+                    changes.sprites.Add(x1y1);
                 }
 
                 changes.ApplyTextures();
