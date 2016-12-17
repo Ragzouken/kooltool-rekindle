@@ -48,6 +48,7 @@ public class Main : MonoBehaviour
 
     [SerializeField] private DialogueBox dialogueBox;
     [SerializeField] private Toggle followToggle;
+    [SerializeField] private Toggle lockToggle;
 
     [SerializeField] private Slider zoomSlider;
     [SerializeField] private Texture2D costumeTexture;
@@ -1306,7 +1307,7 @@ public class Main : MonoBehaviour
                 changes = new Changes();
                 scene.TryGetActor(next, out targetActor, 3);
                 background = scene.tilemap.GetTileAtPosition(next) == null;
-                exclusiveTile = instance != null ? instance.tile : null;
+                exclusiveTile = instance != null && lockToggle.isOn ? instance.tile : null;
             }
             else
             {
