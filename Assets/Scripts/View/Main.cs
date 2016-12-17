@@ -222,7 +222,7 @@ public class Main : MonoBehaviour
                                                            {
                                                                if (color.a == 0)
                                                                {
-                                                                   return (byte) 0;
+                                                                   return (byte) 3;
                                                                }
                                                                else if (color.r == 0)
                                                                {
@@ -1253,6 +1253,8 @@ public class Main : MonoBehaviour
 
     }
 
+    private Tile exclusiveTile;
+
     private void UpdatePaintInput()
     {
         if (input.cancel.WasPressed)
@@ -1298,10 +1300,13 @@ public class Main : MonoBehaviour
         {
             if (!dragging_)
             {
+                var instance = scene.tilemap.GetTileAtPosition(next);
+
                 dragging_ = true;
                 changes = new Changes();
                 scene.TryGetActor(next, out targetActor, 3);
                 background = scene.tilemap.GetTileAtPosition(next) == null;
+                exclusiveTile = instance != null ? instance.tile : null;
             }
             else
             {
@@ -1325,7 +1330,7 @@ public class Main : MonoBehaviour
                 }
                 else
                 { 
-                    scene.tilemap.Blend(changes, line, IntVector2.zero, blend_);
+                    scene.tilemap.Blend(changes, line, IntVector2.zero, blend_, exclusive: exclusiveTile);
                 }
 
                 TextureByte.Pooler.Instance.FreeTexture(line.mTexture);

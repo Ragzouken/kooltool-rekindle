@@ -152,13 +152,19 @@ namespace kooltool
         public void Blend(Changes changes, 
                           ManagedSprite<byte> sprite8, 
                           IntVector2 brushPosition, 
-                          Blend<byte> blend)
+                          Blend<byte> blend,
+                          Tile exclusive=null)
         {
             // TODO: sprite8 + position => world rect
             foreach (var pair in tiles)
             {
                 var instance = pair.Value;
                 var tile = instance.tile;
+
+                if (exclusive != null && tile != exclusive)
+                {
+                    continue;
+                }
 
                 if (!instance.tile.autotile)
                 {
