@@ -52,8 +52,9 @@ namespace kooltool
         public Scene CreateScene()
         {
             var scene = new Scene();
-            scenes.Add(scene);
 
+            AddScene(scene);
+            
             return scene;
         }
 

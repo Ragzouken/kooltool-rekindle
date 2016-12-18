@@ -732,9 +732,8 @@ public class Main : MonoBehaviour
     {
         this.project = project;
 
-        editScene = project.scenes.Single();
+        editScene = project.scenes.First();
         SetScene(editScene);
-        possessedActor = null;
 
         for (int i = 0; i < 16; ++i)
         {
@@ -854,6 +853,7 @@ public class Main : MonoBehaviour
     {
         worldView.SetConfig(scene);
         drawHUD.SetProject(project);
+        possessedActor = null;
     }
 
     private Stamp stamp;
@@ -1232,7 +1232,7 @@ public class Main : MonoBehaviour
 
             if ((Input.GetMouseButtonDown(0) || input.click.WasPressed))
             {
-                int index = project.scenes.First().GetPixel(next);
+                int index = editScene.GetPixel(next);
 
                 drawHUD.SelectPaletteIndex(index);
             }
@@ -1275,7 +1275,7 @@ public class Main : MonoBehaviour
 
         Actor actor;
 
-        var scene = project.scenes.First();
+        var scene = editScene;
 
         if (scene.TryGetActor(next, out actor, 3))
         {
@@ -1410,7 +1410,7 @@ public class Main : MonoBehaviour
 
         Actor hoveredActor;
 
-        var scene = project.scenes.First();    
+        var scene = editScene;    
 
         scene.TryGetActor(next, out hoveredActor, 0);
 
@@ -1648,7 +1648,7 @@ public class Main : MonoBehaviour
         if (project == null)
             return;
 
-        var scene = project.scenes.First();
+        var scene = editScene;
 
         if (actor != null || scene.TryGetActor(next, out actor, 3))
         {

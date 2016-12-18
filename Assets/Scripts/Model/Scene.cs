@@ -10,11 +10,24 @@ using Random = UnityEngine.Random;
 
 namespace kooltool
 {
+    public class Bookmark : ICopyable<Bookmark>
+    {
+        public Scene scene;
+        public IntVector2 position;
+
+        public void Copy(Copier copier, Bookmark copy)
+        {
+            copy.scene = copier.Copy(scene);
+            copy.position = position;
+        }
+    }
+
     public partial class Scene : ICopyable<Scene>
     {
         public ImageGrid background = new ImageGrid();
         public TileMap tilemap = new TileMap();
         public HashSet<Actor> actors = new HashSet<Actor>();
+        public List<Bookmark> bookmarks = new List<Bookmark>();
 
         public void Copy(Copier copier, Scene copy)
         {
