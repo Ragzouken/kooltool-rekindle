@@ -11,13 +11,23 @@ using kooltool;
 
 public class KoolEditor : MonoBehaviour 
 {
+    [SerializeField]
+    private Main main;
+
     public Project project;
 
+    [SerializeField]
+    private SceneDrawer sceneDrawer;
     [SerializeField]
     private TileHUD tiles;
 
     [HideInInspector]
     public List<Tile> tilePalette = new List<Tile>();
+
+    public void SwitchActiveScene(Scene scene)
+    {
+        main.SetEditScene(scene);
+    }
 
     public void ScenePlaceTile(Scene scene, IntVector2 cell, Tile tile)
     {

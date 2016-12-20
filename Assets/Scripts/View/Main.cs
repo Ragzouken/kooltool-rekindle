@@ -201,46 +201,12 @@ public class Main : MonoBehaviour
         }
     }
     
-    private Project CreateSimpleProject()
+    private Scene CreateSimpleScene(Project project)
     {
-        var project = new Project();
-
-        var palette = new Palette();
-        project.AddPalette(palette);
-
-        for (int i = 1; i < 16; ++i)
-        {
-            palette.colors[i] = new Color(Random.value, Random.value, Random.value, 1f);
-        }
-
         var scene = project.CreateScene();
+        scene.name = "Test Scene " + Random.Range(0, 256);
         scene.background.project = project;
         scene.background.cellSize = 256;
-
-        var tile = project.CreateDynamicTile();
-        tile.minitiles[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
-                                                           .Select(color =>
-                                                           {
-                                                               if (color.a == 0)
-                                                               {
-                                                                   return (byte) 3;
-                                                               }
-                                                               else if (color.r == 0)
-                                                               {
-                                                                   return (byte) 1;
-                                                               }
-                                                               else
-                                                               {
-                                                                   return (byte) 2;
-                                                               }
-                                                           })
-                                                           .ToArray());
-        tile.minitiles[0].mTexture.Apply();
-
-        for (int i = 0; i < 32; ++i)
-        {
-            project.CreateDynamicTile(false);
-        }
 
         foreach (int x in Enumerable.Range(-4, 9))
         {
@@ -268,6 +234,49 @@ public class Main : MonoBehaviour
         };
 
         scene.actors.Add(actor);
+
+        return scene;
+    }
+
+    private Project CreateSimpleProject()
+    {
+        var project = new Project();
+
+        var palette = new Palette();
+        project.AddPalette(palette);
+
+        for (int i = 1; i < 16; ++i)
+        {
+            palette.colors[i] = new Color(Random.value, Random.value, Random.value, 1f);
+        }
+
+        var tile = project.CreateDynamicTile();
+        tile.minitiles[0].mTexture.SetPixels(autoTileTemplate.GetPixels()
+                                                           .Select(color =>
+                                                           {
+                                                               if (color.a == 0)
+                                                               {
+                                                                   return (byte) 3;
+                                                               }
+                                                               else if (color.r == 0)
+                                                               {
+                                                                   return (byte) 1;
+                                                               }
+                                                               else
+                                                               {
+                                                                   return (byte) 2;
+                                                               }
+                                                           })
+                                                           .ToArray());
+        tile.minitiles[0].mTexture.Apply();
+
+        for (int i = 0; i < 32; ++i)
+        {
+            project.CreateDynamicTile(false);
+        }
+
+        CreateSimpleScene(project);
+        CreateSimpleScene(project);
 
         return project;
     }
@@ -849,7 +858,13 @@ public class Main : MonoBehaviour
         }
     }
 
-    private void SetScene(Scene scene)
+    public void SetEditScene(Scene scene)
+    {
+        editScene = scene;
+        SetScene(scene);
+    }
+
+    public void SetScene(Scene scene)
     {
         worldView.SetConfig(scene);
         drawHUD.SetProject(project);

@@ -24,6 +24,7 @@ namespace kooltool
 
     public partial class Scene : ICopyable<Scene>
     {
+        public string name;
         public ImageGrid background = new ImageGrid();
         public TileMap tilemap = new TileMap();
         public HashSet<Actor> actors = new HashSet<Actor>();
@@ -31,6 +32,7 @@ namespace kooltool
 
         public void Copy(Copier copier, Scene copy)
         {
+            copy.name = name;
             copy.background = background;
             copy.tilemap = copier.Copy(tilemap);
             copy.actors = new HashSet<Actor>(actors.Select(actor => copier.Copy(actor)));
