@@ -22,7 +22,7 @@ public class SceneDrawer : MonoBehaviour
     private Animator animator;
     [SerializeField]
     private InstancePoolSetup scenesSetup;
-    private InstancePool<Scene> scenes;
+    private InstancePool<Scene, SceneToggle> scenes;
 
     public bool open
     {
@@ -46,12 +46,13 @@ public class SceneDrawer : MonoBehaviour
 
     private void Start()
     {
-        scenes = scenesSetup.Finalise<Scene>();
+        scenes = scenesSetup.FinaliseMono<Scene, SceneToggle>();
     }
 
     public void Refresh()
     {
         scenes.SetActive(editor.project.scenes);
+        scenes.Get(editor.main.editScene).selected = true;
     }
 
     public void ToggleOpen()

@@ -12,11 +12,13 @@ namespace kooltool
 {
     public class Bookmark : ICopyable<Bookmark>
     {
+        public string name;
         public Scene scene;
         public IntVector2 position;
 
         public void Copy(Copier copier, Bookmark copy)
         {
+            copy.name = name;
             copy.scene = copier.Copy(scene);
             copy.position = position;
         }

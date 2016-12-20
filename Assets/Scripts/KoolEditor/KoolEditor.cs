@@ -12,7 +12,9 @@ using kooltool;
 public class KoolEditor : MonoBehaviour 
 {
     [SerializeField]
-    private Main main;
+    public Main main;
+    [SerializeField]
+    private CameraController camera;
 
     public Project project;
 
@@ -27,6 +29,11 @@ public class KoolEditor : MonoBehaviour
     public void SwitchActiveScene(Scene scene)
     {
         main.SetEditScene(scene);
+    }
+
+    public void MoveToBookmark(Bookmark bookmark)
+    {
+        camera.focusTarget = bookmark.position * 32;
     }
 
     public void ScenePlaceTile(Scene scene, IntVector2 cell, Tile tile)

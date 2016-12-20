@@ -200,13 +200,17 @@ public class Main : MonoBehaviour
             return dialogueActor != null;
         }
     }
-    
+
     private Scene CreateSimpleScene(Project project)
     {
         var scene = project.CreateScene();
         scene.name = "Test Scene " + Random.Range(0, 256);
         scene.background.project = project;
         scene.background.cellSize = 256;
+
+        scene.bookmarks.Add(new Bookmark { scene = scene, position = Random.insideUnitSphere * 8, name = "test bookmark " + Random.Range(0, 100) });
+        scene.bookmarks.Add(new Bookmark { scene = scene, position = Random.insideUnitSphere * 8, name = "test bookmark " + Random.Range(0, 100) });
+        scene.bookmarks.Add(new Bookmark { scene = scene, position = Random.insideUnitSphere * 8, name = "test bookmark " + Random.Range(0, 100) });
 
         foreach (int x in Enumerable.Range(-4, 9))
         {
@@ -707,7 +711,7 @@ public class Main : MonoBehaviour
                        }));
     }
 
-    private Scene editScene;
+    public Scene editScene;
     private Scene playScene;
 
     public void EnterPlayMode()
