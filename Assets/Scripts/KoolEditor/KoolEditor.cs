@@ -69,4 +69,29 @@ public class KoolEditor : MonoBehaviour
     {
         tile.autotile = autotile;
     }
+
+    public Scene CreateNewScene()
+    {
+        var scene = project.CreateScene();
+        scene.name = "Test Scene " + Random.Range(0, 256);
+        scene.background.project = project;
+        scene.background.cellSize = 256;
+
+        foreach (int x in Enumerable.Range(-4, 9))
+        {
+            foreach (int y in Enumerable.Range(-4, 9))
+            {
+                if (Random.value < 0.33f)
+                {
+                    continue;
+                }
+
+                var coord = new IntVector2(x, y);
+
+                ScenePlaceTile(scene, coord, project.tiles[Random.Range(0, 4)]);
+            }
+        }
+
+        return scene;
+    }
 }

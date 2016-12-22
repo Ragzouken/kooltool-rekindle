@@ -201,6 +201,81 @@ public class Main : MonoBehaviour
         }
     }
 
+    private struct Turtle
+    {
+        public IntVector2 position;
+        public int direction;
+    }
+
+    public void GenerateRooms(Project project, Scene scene)
+    {
+        var turtle = new Turtle { position = IntVector2.zero, direction = Random.Range(0, 4) };
+        var floor = project.tiles[0];
+        var wall = project.tiles[1];
+
+        for (int i = 0; i < Random.Range(7, 11); ++i)
+        {
+            for (int j = 0; j < Random.Range(4, 9); ++j)
+            {
+                turtle.position += new IntVector2(Mathf.RoundToInt(Mathf.Cos(Mathf.PI * 0.5f * turtle.direction)),
+                                                  Mathf.RoundToInt(Mathf.Sin(Mathf.PI * 0.5f * turtle.direction)));
+                scene.tilemap.SetTileAtPosition(turtle.position, floor);
+            }
+
+            turtle.direction = (turtle.direction + Random.Range(1, 4)) % 4;
+
+            int w = Random.Range(1, 3);
+            int h = Random.Range(1, 3);
+
+            for (int y = -h; y <= h; ++y)
+            {
+                for (int x = -w; x <= w; ++x)
+                {
+                    scene.tilemap.SetTileAtPosition(turtle.position + new IntVector2(x, y), floor);
+                }
+            }
+        }
+
+        int xmin = scene.tilemap.tiles.Keys.Min(cell => cell.x) - 1;
+        int ymin = scene.tilemap.tiles.Keys.Min(cell => cell.y) - 1;
+        int xmax = scene.tilemap.tiles.Keys.Max(cell => cell.x) + 1;
+        int ymax = scene.tilemap.tiles.Keys.Max(cell => cell.y) + 1;
+
+        Debug.LogFormat("{0}, {1}, {2}, {3}", xmin, ymin, xmax, ymax);
+        
+        for (int y = ymin; y <= ymax; ++y)
+        {
+            for (int x = xmin; x <= xmax; ++x)
+            {
+                var coord = new IntVector2(x, y);
+                
+                if (scene.tilemap.GetTileAtPosition(coord * 32) != null)
+                {
+                    continue;
+                }
+
+                bool neighbour = false;
+
+                for (int i = 0; i < 8; ++i)
+                {
+                    var final = coord + IntVector2.adjacent8[i];
+                    var inst = scene.tilemap.GetTileAtPosition(final * 32);
+
+                    if (inst != null && inst.tile != wall)
+                    {
+                        neighbour = true;
+                        break;
+                    }
+                }
+
+                if (neighbour)
+                {
+                    scene.tilemap.SetTileAtPosition(coord, wall);
+                }
+            }
+        }
+    }
+
     private Scene CreateSimpleScene(Project project)
     {
         var scene = project.CreateScene();
@@ -210,8 +285,8 @@ public class Main : MonoBehaviour
 
         scene.bookmarks.Add(new Bookmark { scene = scene, position = Random.insideUnitSphere * 8, name = "test bookmark " + Random.Range(0, 100) });
         scene.bookmarks.Add(new Bookmark { scene = scene, position = Random.insideUnitSphere * 8, name = "test bookmark " + Random.Range(0, 100) });
-        scene.bookmarks.Add(new Bookmark { scene = scene, position = Random.insideUnitSphere * 8, name = "test bookmark " + Random.Range(0, 100) });
 
+        /*
         foreach (int x in Enumerable.Range(-4, 9))
         {
             foreach (int y in Enumerable.Range(-4, 9))
@@ -226,6 +301,10 @@ public class Main : MonoBehaviour
                 editor.ScenePlaceTile(scene, coord, project.tiles[Random.Range(0, 4)]);
             }
         }
+        */
+
+        GenerateRooms(project, scene);
+        GenerateRooms(project, scene);
 
         var costume = NewSimpleCostume(project);
         
@@ -279,7 +358,6 @@ public class Main : MonoBehaviour
             project.CreateDynamicTile(false);
         }
 
-        CreateSimpleScene(project);
         CreateSimpleScene(project);
 
         return project;

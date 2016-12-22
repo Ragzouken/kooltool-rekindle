@@ -43,12 +43,19 @@ Tim Sweeney (@TimSweeneyEpic)
 
 Stephen Lavelle (@increpare)
 * PuzzleScript (game maker)
+* Flickgame (game maker)
 
 James Paige, Brian Fisher
 * OHRRPGCE (game maker)
 
 Chris Klimas (@klembot)
 * Twine (game maker)
+
+joni kittaka (@jonikitsu)
+* Even Scene (image maker)
+
+Pierre-Yves Hurel (@pyhurel)
+* "Playing RPG Maker"? Amateur Game Design and Video Gaming (article)
 
 Aesthetic Inspiration
 ---------------------
@@ -67,6 +74,7 @@ Lana Polansky
 Niall Moody
 Terry Cavanagh
 Mattie Brice
+Chris Raadjes
 
 Expression & Usability Testing
 ------------------------------
@@ -100,3 +108,7 @@ Liz Rainsberry (@LizRainsberry)
 
 Chris Martens (@chrisamaphone)
 * Publishing kooltool zine in Model & Apparatus
+
+Other
+-----
+Emilie Reed         (@netgal_emi)

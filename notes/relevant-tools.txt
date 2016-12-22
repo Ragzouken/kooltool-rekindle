@@ -7,6 +7,7 @@ sandbox game maker
 dreampath - cyoa in rich text
 
 http://ambrosine.com/resource.php
+http://creatools.gameclassification.com/EN/index.html
 
 lsdj - music tracks, waveform drawer
 milkytracker - music tracks, waveform drawer?

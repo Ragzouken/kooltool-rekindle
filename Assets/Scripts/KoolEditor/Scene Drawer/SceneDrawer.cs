@@ -59,4 +59,13 @@ public class SceneDrawer : MonoBehaviour
     {
         open = !open;
     }
+
+    public void CreateScene()
+    {
+        var scene = editor.CreateNewScene();
+
+        editor.SwitchActiveScene(scene);
+
+        Refresh();
+    }
 }

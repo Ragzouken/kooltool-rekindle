@@ -13,6 +13,16 @@ public struct IntVector2 : System.IEquatable<IntVector2>
     public static IntVector2 up    = new IntVector2( 0,  1);
     public static IntVector2 down  = new IntVector2( 0, -1);
 
+    public static IntVector2[] ortho = new IntVector2[]
+    {
+        right, down, left, up
+    };
+
+    public static IntVector2[] adjacent8 = new IntVector2[]
+    {
+        right, right + down, down, down + left, left, left + up, up, up + right,
+    };
+
     public IntVector2(int x, int y)
     {
         this.x = x;
