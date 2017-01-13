@@ -15,6 +15,8 @@ public partial class Tile
     public bool autotile;
     public KoolSprite singular;
     public List<KoolSprite> minitiles;
+
+    public bool _test_wall;
 }
 
 public partial class Tile

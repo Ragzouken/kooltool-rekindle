@@ -306,6 +306,8 @@ public class Main : MonoBehaviour
         GenerateRooms(project, scene);
         GenerateRooms(project, scene);
 
+        editor.TileSetTestWall(project.tiles[1], true);
+
         var costume = NewSimpleCostume(project);
         
         var actor = new Actor
@@ -1641,6 +1643,13 @@ public class Main : MonoBehaviour
                 bool blocked = playing 
                             && scene.TryGetActor(next, out collider)
                             && collider != possessedActor;
+
+                var tile = scene.tilemap.GetTileAtPosition(next);
+
+                if (playing && tile != null && tile.tile._test_wall)
+                {
+                    blocked = true;
+                }
 
                 if (!blocked)
                 {

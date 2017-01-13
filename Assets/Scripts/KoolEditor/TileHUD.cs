@@ -120,6 +120,14 @@ public class TileHUD : MonoBehaviour
         }
     }
 
+    private void OnWallClicked()
+    {
+        if (selected != null)
+        {
+            editor.TileSetTestWall(selected, !selected._test_wall);
+        }
+    }
+
     public void SetProject(Project project)
     {
         browser.SetActive(project.tiles);
@@ -168,7 +176,7 @@ public class TileHUD : MonoBehaviour
             palette.DoIfActive(_selected, toggle => toggle.selected = true);
             browser.DoIfActive(_selected, toggle => toggle.selected = true);
 
-            passableToggle.isOn = true;
+            passableToggle.isOn = !selected._test_wall;
             autotileToggle.isOn = selected.autotile;
         }
         else

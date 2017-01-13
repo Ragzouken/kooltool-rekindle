@@ -70,6 +70,11 @@ public class KoolEditor : MonoBehaviour
         tile.autotile = autotile;
     }
 
+    public void TileSetTestWall(Tile tile, bool wall)
+    {
+        tile._test_wall = wall;
+    }
+
     public Scene CreateNewScene()
     {
         var scene = project.CreateScene();
