@@ -44,9 +44,9 @@ public static class Gist
 
         yield return request;
 
-        var response = SimpleJSON.JSON.Parse(request.text);
+        var response = LitJson.JsonMapper.ToObject(request.text);
 
-        onComplete(response["id"]);
+        onComplete((string) response["id"]);
     }
 
     public static IEnumerator Download(string id, 
@@ -57,11 +57,16 @@ public static class Gist
 
         yield return request;
 
-        var response = SimpleJSON.JSON.Parse(request.text);
+        UnityEngine.Profiling.Profiler.BeginSample("PARSE GIST");
+
+        var response = LitJson.JsonMapper.ToObject(new LitJson.JsonReader(request.text));
+        //var response = SimpleJSON.JSON.Parse(request.text);
+
+        UnityEngine.Profiling.Profiler.EndSample();
 
         foreach (string file in response["files"].Keys)
         {
-            files.Add(file, response["files"][file]["content"]);
+            files.Add(file, (string) response["files"][file]["content"]);
         }
 
         onComplete(files);

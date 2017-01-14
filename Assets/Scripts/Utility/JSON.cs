@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+using Profiler = UnityEngine.Profiling.Profiler;
+
 public static class JSON
 {
     public static JsonSerializerSettings settings;
@@ -78,6 +80,8 @@ public class DictionarySerializer<K, V, T> : JsonConverter
                                     object existingValue,
                                     JsonSerializer serializer)
     {
+        Profiler.BeginSample("Read Json Dictionary");
+
         var map = new T();
 
         var array = JArray.Load(reader);
@@ -89,6 +93,8 @@ public class DictionarySerializer<K, V, T> : JsonConverter
 
             map[key] = val; 
         }
+
+        Profiler.EndSample();
 
         return map;
     }

@@ -11,6 +11,8 @@ using System;
 
 using kooltool;
 
+using Profiler = UnityEngine.Profiling.Profiler;
+
 /*
 public class TextureByteConverter : JsonConverter
 {
@@ -85,11 +87,15 @@ public class KoolSpriteConverter : JsonConverter
                                     object existingValue, 
                                     JsonSerializer serializer)
     {
+        Profiler.BeginSample("Read JSON KoolSprite");
+
         var obj = JObject.Load(reader);
 
         var sprite = new KoolSprite(obj["texture"].ToObject<KoolTexture>(serializer), 
                                     obj["rect"].ToObject<IntRect>(serializer),
                                     obj["pivot"].ToObject<IntVector2>(serializer));
+
+        Profiler.EndSample();
 
         return sprite;
     }

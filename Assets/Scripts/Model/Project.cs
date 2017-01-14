@@ -142,6 +142,42 @@ namespace kooltool
             public Index resources = new Index();
         }
 
+        public static IEnumerator FromGistTest(Dictionary<string, string> gist)
+        {
+            var data = Encoding.UTF8.GetString(Convert.FromBase64String(gist["project"]));
+
+            Profiler.BeginSample("Deserialize Project");
+
+            var save = JSON.Deserialise<ProjectSave>(data);
+
+            Profiler.EndSample();
+
+            GC.Collect();
+            yield return new WaitForSeconds(0.5f);
+
+            foreach (var texture in save.project.textures)
+            {
+                Profiler.BeginSample("Decode Texture Bytes");
+
+                string id = save.resources[texture];
+                byte[] tex = Convert.FromBase64String(gist[id]);
+
+                GC.Collect();
+
+                Profiler.EndSample();
+
+                Profiler.BeginSample("Decode PNG");
+
+                texture.DecodeFromPNG(tex);
+
+                Profiler.EndSample();
+
+                GC.Collect();
+                
+                yield return new WaitForSeconds(0.5f);
+            }
+        }
+
         public static Project FromGist(Dictionary<string, string> gist)
         {
             var data = Encoding.UTF8.GetString(Convert.FromBase64String(gist["project"]));
@@ -152,6 +188,8 @@ namespace kooltool
 
             Profiler.EndSample();
 
+            GC.Collect();
+
             foreach (var texture in save.project.textures)
             {
                 Profiler.BeginSample("Decode Texture Bytes");
@@ -159,11 +197,15 @@ namespace kooltool
                 string id = save.resources[texture];
                 byte[] tex = Convert.FromBase64String(gist[id]);
 
+                GC.Collect();
+
                 Profiler.EndSample();
 
                 Profiler.BeginSample("Decode PNG");
 
                 texture.DecodeFromPNG(tex);
+
+                GC.Collect();
 
                 Profiler.EndSample();
             }

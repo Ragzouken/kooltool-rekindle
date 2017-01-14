@@ -355,7 +355,7 @@ public class Main : MonoBehaviour
                                                            .ToArray());
         tile.minitiles[0].mTexture.Apply();
 
-        for (int i = 0; i < 32; ++i)
+        for (int i = 0; i < 2; ++i)
         {
             project.CreateDynamicTile(false);
         }
@@ -667,12 +667,12 @@ public class Main : MonoBehaviour
     {
         var pan = input.move.Value;
 
-        /*
         if (Input.GetKeyDown(KeyCode.LeftBracket))
         {
-            StartCoroutine(LoadProject());
+            //StartCoroutine(LoadProject());
         }
 
+        /*
         if (Input.GetKeyDown(KeyCode.RightBracket))
         {
             StartCoroutine(SaveProject());
@@ -766,6 +766,13 @@ public class Main : MonoBehaviour
         */
     }
 
+    private IEnumerator Test(Dictionary<string, string> gist)
+    {
+        yield return new WaitForSeconds(5);
+
+        StartCoroutine(Project.FromGistTest(gist));
+    }
+
     private void LoadGistAgain(string id)
     {
         StartCoroutine(Gist.Download(id, gist =>
@@ -777,6 +784,8 @@ public class Main : MonoBehaviour
 
     public void SaveGistAgain()
     {
+        project.ToDisk();
+
         StartCoroutine(Gist.Create("test gist",
                        project.ToGist(),
                        id => 
@@ -1644,7 +1653,7 @@ public class Main : MonoBehaviour
                             && scene.TryGetActor(next, out collider)
                             && collider != possessedActor;
 
-                var tile = scene.tilemap.GetTileAtPosition(next);
+                var tile = playing ? scene.tilemap.GetTileAtPosition(next) : null;
 
                 if (playing && tile != null && tile.tile._test_wall)
                 {
