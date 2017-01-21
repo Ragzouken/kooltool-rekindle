@@ -120,7 +120,7 @@ PlayerSettings:
     16:10: 0
     16:9: 0
     Others: 0
-  bundleIdentifier: com.Company.ProductName
+  bundleIdentifier: tools.kool
   bundleVersion: 1.0
   preloadedAssets: []
   metroInputSource: 0
@@ -198,8 +198,8 @@ PlayerSettings:
   androidSplashScreen: {fileID: 0}
   AndroidKeystoreName: 
   AndroidKeyaliasName: 
-  AndroidTVCompatibility: 1
-  AndroidIsGame: 1
+  AndroidTVCompatibility: 0
+  AndroidIsGame: 0
   androidEnableBanner: 1
   m_AndroidBanners:
   - width: 320
@@ -218,6 +218,9 @@ PlayerSettings:
   m_BuildTargetGraphicsAPIs:
   - m_BuildTarget: WebGLSupport
     m_APIs: 08000000
+    m_Automatic: 1
+  - m_BuildTarget: AndroidPlayer
+    m_APIs: 0b00000008000000
     m_Automatic: 1
   m_BuildTargetVRSettings:
   - m_BuildTarget: Android
@@ -425,7 +428,7 @@ PlayerSettings:
   splashScreenBackgroundSourceLandscape: {fileID: 0}
   splashScreenBackgroundSourcePortrait: {fileID: 0}
   spritePackerPolicy: 
-  webGLMemorySize: 1024
+  webGLMemorySize: 256
   webGLExceptionSupport: 1
   webGLDataCaching: 1
   webGLDebugSymbols: 1

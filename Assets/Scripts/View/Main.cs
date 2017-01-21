@@ -400,18 +400,32 @@ public class Main : MonoBehaviour
     private void Start()
     { 
 #if UNITY_WEBGL && !UNITY_EDITOR
-        SetupPlayer();
+        SetupEditor();
 
         try
         {
             string id = GetWindowSearch().Split('=')[1];
             //string id = "83dcae5391dbe48c9d4abe61e1ff0cb6";
 
-            LoadGistAgain(id);
+            if (id.Length > 4)
+            {
+                Debug.LogFormat("Getting ID '{0}'", id);
+
+                LoadGistAgain(id);
+            }
+            else
+            {
+                Debug.Log("Loading default project");
+
+                LoadDefaultProject();
+            }
+            
         }
         catch (System.Exception e)
         {
-            Debug.Log(e);
+            Debug.Log("Loading default project");
+
+            LoadDefaultProject();
         }
 #else
         SetupEditor();
@@ -488,9 +502,14 @@ public class Main : MonoBehaviour
 
     private void LoadDefaultProject()
     {
+        Debug.Log("Attempt Default Project");
+
         var project = CreateSimpleProject();
-        defaultCostume = NewCostume(project);
         SetProject(project);
+
+        Debug.Log("Attempt Default Costume");
+
+        defaultCostume = NewCostume(project);
     }
 
     private void TestScripts()
@@ -792,7 +811,7 @@ public class Main : MonoBehaviour
                        {
                            Debug.Log(id);
 
-#if UNITY_WEBGL
+#if UNITY_WEBGL && !UNITY_EDITOR
                             UpdateGistID(id);
 #else
                            Application.OpenURL(@"http://kooltool.nice.lgbt/?id=" + id);
@@ -1188,7 +1207,7 @@ public class Main : MonoBehaviour
         Vector2 point = ray.GetPoint(t);
 
         Vector2 screenMouse;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(mouseCursorTransform.parent as RectTransform, Input.mousePosition, null, out screenMouse);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(mouseCursorTransform.parent as RectTransform, Input.mousePosition, cameraController.camera, out screenMouse);
         mouseCursorTransform.localPosition = screenMouse;
 
         {

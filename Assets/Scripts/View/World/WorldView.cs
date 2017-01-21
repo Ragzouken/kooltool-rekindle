@@ -15,6 +15,8 @@ public class WorldView : InstanceView<Scene>
 
     public InstancePool<Actor> actors;
 
+    public IntRect clipping;
+
     private void Awake()
     {
         actors = actorSetup.Finalise<Actor>(sort: false);

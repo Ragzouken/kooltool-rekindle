@@ -6,11 +6,11 @@ Material:
   m_ObjectHideFlags: 0
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: PaletteSwapSprite
-  m_Shader: {fileID: 4800000, guid: 873aa5863ed7f2548900c1ef14e7e236, type: 3}
+  m_Name: HSVImage
+  m_Shader: {fileID: 4800000, guid: afe3633b6bc1d5a44b27eacc133bbc96, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 5
-  m_CustomRenderQueue: -1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   m_SavedProperties:
     serializedVersion: 2
@@ -48,7 +48,7 @@ Material:
     - first:
         name: _MainTex
       second:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 1eae312baf4ae304fbc63d424cc2dc02, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - first:
@@ -71,9 +71,6 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - first:
-        name: PixelSnap
-      second: 0
-    - first:
         name: _BumpScale
       second: 1
     - first:
@@ -83,23 +80,14 @@ Material:
         name: _Cutoff
       second: 0.5
     - first:
-        name: _Cutout
-      second: 1
-    - first:
         name: _DetailNormalMapScale
       second: 1
     - first:
         name: _DstBlend
       second: 0
     - first:
-        name: _GlossMapScale
-      second: 1
-    - first:
         name: _Glossiness
       second: 0.5
-    - first:
-        name: _GlossyReflections
-      second: 1
     - first:
         name: _Metallic
       second: 0
@@ -112,12 +100,6 @@ Material:
     - first:
         name: _Parallax
       second: 0.02
-    - first:
-        name: _SmoothnessTextureChannel
-      second: 0
-    - first:
-        name: _SpecularHighlights
-      second: 1
     - first:
         name: _SrcBlend
       second: 1
@@ -157,46 +139,46 @@ Material:
       second: {r: 0, g: 0, b: 0, a: 0}
     - first:
         name: _Palette01
-      second: {r: 0.8589307, g: 0.38340825, b: 0.06000603, a: 1}
+      second: {r: 0.36086825, g: 0.12877299, b: 0.6691304, a: 1}
     - first:
         name: _Palette02
-      second: {r: 0.7476292, g: 0.7635969, b: 0.46218783, a: 1}
+      second: {r: 0.16254665, g: 0.29042915, b: 0.4849307, a: 1}
     - first:
         name: _Palette03
-      second: {r: 0.6466711, g: 0.28637198, b: 0.4599139, a: 1}
+      second: {r: 0.092403896, g: 0.14316358, b: 0.45250243, a: 1}
     - first:
         name: _Palette04
-      second: {r: 0.9282783, g: 0.9338461, b: 0.050914176, a: 1}
+      second: {r: 0.890259, g: 0.96893036, b: 0.7280335, a: 1}
     - first:
         name: _Palette05
-      second: {r: 0.53637606, g: 0.80870485, b: 0.75466776, a: 1}
+      second: {r: 0.31170872, g: 0.6115908, b: 0.6550998, a: 1}
     - first:
         name: _Palette06
-      second: {r: 0.17138769, g: 0.2960917, b: 0.6764175, a: 1}
+      second: {r: 0.76670825, g: 0.6387356, b: 0.08485497, a: 1}
     - first:
         name: _Palette07
-      second: {r: 0.8955575, g: 0.2384918, b: 0.4629572, a: 1}
+      second: {r: 0.94487906, g: 0.12730898, b: 0.96808434, a: 1}
     - first:
         name: _Palette08
-      second: {r: 0.8429333, g: 0.17738916, b: 0.29455975, a: 1}
+      second: {r: 0.42895168, g: 0.01352966, b: 0.7030675, a: 1}
     - first:
         name: _Palette09
-      second: {r: 0.07179762, g: 0.8162769, b: 0.13246097, a: 1}
+      second: {r: 0.13525142, g: 0.38418263, b: 0.44496244, a: 1}
     - first:
         name: _Palette10
-      second: {r: 0.7291793, g: 0.95413387, b: 0.6123572, a: 1}
+      second: {r: 0.15826167, g: 0.6924693, b: 0.050252803, a: 1}
     - first:
         name: _Palette11
-      second: {r: 0.8819493, g: 0.32184914, b: 0.7702886, a: 1}
+      second: {r: 0.110884205, g: 0.7592344, b: 0.24199918, a: 1}
     - first:
         name: _Palette12
-      second: {r: 0.44495076, g: 0.41671842, b: 0.074690945, a: 1}
+      second: {r: 0.26592425, g: 0.48832697, b: 0.48868102, a: 1}
     - first:
         name: _Palette13
-      second: {r: 0.6109181, g: 0.988104, b: 0.68408865, a: 1}
+      second: {r: 0.4070229, g: 0.33283833, b: 0.13179411, a: 1}
     - first:
         name: _Palette14
-      second: {r: 0.75567293, g: 0.25993505, b: 0.48460048, a: 1}
+      second: {r: 0.72524637, g: 0.42338258, b: 0.7293387, a: 1}
     - first:
         name: _Palette15
-      second: {r: 0.40601677, g: 0.4686374, b: 0.044993404, a: 1}
+      second: {r: 0.93320143, g: 0.4430706, b: 0.89938474, a: 1}

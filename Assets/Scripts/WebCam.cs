@@ -14,10 +14,10 @@ public class WebCam : MonoBehaviour
 
     private void Start()
     {
-        var texture = new WebCamTexture();
+        //var texture = new WebCamTexture();
 
-        image.texture = texture;
+        //image.texture = texture;
 
-        texture.Play();
+        //texture.Play();
     }
 }

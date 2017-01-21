@@ -40,6 +40,8 @@ public class KoolEditor : MonoBehaviour
     {
         scene.tilemap.SetTileAtPosition(cell, tile);
 
+        if (tile == null) return;
+
         if (tilePalette.Count == 0 || tilePalette[0] != tile)
         {
             tilePalette.Remove(tile);

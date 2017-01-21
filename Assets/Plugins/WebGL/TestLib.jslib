@@ -3,7 +3,9 @@
     {
         var str = Pointer_stringify(id);
     	//document.getElementById("gistid").value = str;
-        window.location.assign(window.location.href.split("?")[0] + "?id=" + str);
+        //window.location.assign(window.location.href.split("?")[0] + "?id=" + str);
+
+        window.history.pushState("object or string", "project saved at id", "?id=" + str);
     },
 
     GetWindowSearch: function()

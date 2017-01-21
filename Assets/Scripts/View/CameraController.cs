@@ -7,7 +7,7 @@ public class CameraController : MonoBehaviour
 {
     private static Rect unit = new Rect(0, 0, 1, 1);
 
-    [SerializeField] new private Camera camera;
+    new public Camera camera;
     [SerializeField] private Transform focusTransform;
     [SerializeField] private Transform scaleTransform;
     [SerializeField] private Transform pivotTransform;
