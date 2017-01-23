@@ -83,8 +83,20 @@ public class Main : MonoBehaviour
     {
         get
         {
-            return EventSystem.current.IsPointerOverGameObject();
+            return EventSystem.current.IsPointerOverGameObject()
+                || !Camera.main.pixelRect.Contains(Input.mousePosition);
         }
+    }
+
+    public bool PointOverUI(Vector2 point)
+    {
+        var raycastResults = new List<RaycastResult>();
+        var pointer = new PointerEventData(EventSystem.current);
+        pointer.position = cameraController.camera.WorldToScreenPoint(point);
+
+        EventSystem.current.RaycastAll(pointer, raycastResults);
+
+        return raycastResults.Count > 0;
     }
 
     private Script ScriptFromCSV(string csv)
@@ -587,6 +599,7 @@ public class Main : MonoBehaviour
                 right.AddDefaultBinding(InputControlType.LeftStickRight);
 
                 move = CreateTwoAxisPlayerAction(left, right, down, up);
+                move.StateThreshold = 0.5f;
             }
 
             {
@@ -699,7 +712,7 @@ public class Main : MonoBehaviour
         */
 
         cameraController.focusTarget += pan * 64 * Time.deltaTime;
-        cameraController.scaleTarget = zoomSlider.value * (Screen.width / 256);
+        cameraController.scaleTarget = zoomSlider.value * (cameraController.camera.pixelWidth / 256);
 
         float mult = input.click.IsPressed ? 32 : 64;
 
@@ -1100,6 +1113,8 @@ public class Main : MonoBehaviour
     bool mouseHold, mousePress;
     float timer;
 
+    public Canvas screenCanvas;
+
     private void Update()
     {
         if (locked || project == null) return;
@@ -1206,8 +1221,10 @@ public class Main : MonoBehaviour
         plane.Raycast(ray, out t);
         Vector2 point = ray.GetPoint(t);
 
+        
+
         Vector2 screenMouse;
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(mouseCursorTransform.parent as RectTransform, Input.mousePosition, cameraController.camera, out screenMouse);
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(mouseCursorTransform.parent as RectTransform, Input.mousePosition, screenCanvas.worldCamera, out screenMouse);
         mouseCursorTransform.localPosition = screenMouse;
 
         {

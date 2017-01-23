@@ -22,6 +22,8 @@ public class CameraFramer : MonoBehaviour
     [Range(0, 1)]
     public float alignment;
 
+    public bool extra;
+
     private void Update()
     {
 #if UNITY_EDITOR
@@ -34,7 +36,7 @@ public class CameraFramer : MonoBehaviour
         int xscale = (int) res.x / baseWidth;
         int yscale = (int) res.y / baseHeight;
 
-        int scale = Mathf.Min(xscale, yscale);
+        int scale = Mathf.Min(xscale, yscale) + (extra ? 1 : 0);
         int width = baseWidth * scale;
         int height = baseHeight * scale;
 
