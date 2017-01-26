@@ -514,12 +514,10 @@ public class Main : MonoBehaviour
 
     private void LoadDefaultProject()
     {
-        Debug.Log("Attempt Default Project");
-
         var project = CreateSimpleProject();
         SetProject(project);
-
-        Debug.Log("Attempt Default Costume");
+        editor.tilePalette = project.tiles.Take(16).ToList();
+        tiles.SetPalette(editor.tilePalette);
 
         defaultCostume = NewCostume(project);
     }
@@ -811,6 +809,8 @@ public class Main : MonoBehaviour
         {
             SetProject(Project.FromGist(gist));
             EnterPlayMode();
+            editor.tilePalette = project.tiles.Take(16).ToList();
+            tiles.SetPalette(editor.tilePalette);
         }));
     }
 
@@ -827,7 +827,7 @@ public class Main : MonoBehaviour
 #if UNITY_WEBGL && !UNITY_EDITOR
                             UpdateGistID(id);
 #else
-                           Application.OpenURL(@"http://kooltool.nice.lgbt/?id=" + id);
+                           Application.OpenURL(@"http://ragzouken.github.io/?id=" + id);
 #endif
                        }));
     }

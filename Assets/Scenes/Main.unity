@@ -1470,7 +1470,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &47164230
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1486,10 +1486,10 @@ RectTransform:
   m_Father: {fileID: 1655864416}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 16}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 94, y: -9}
+  m_SizeDelta: {x: 60, y: 16}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &47164231
 MonoBehaviour:
@@ -12457,6 +12457,7 @@ GameObject:
   - component: {fileID: 577212928}
   - component: {fileID: 577212929}
   - component: {fileID: 577212930}
+  - component: {fileID: 577212931}
   m_Layer: 0
   m_Name: Auto
   m_TagString: Untagged
@@ -12569,6 +12570,21 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UIClicks+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
       PublicKeyToken=null
+--- !u!114 &577212931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 577212926}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 577212927}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: switch selected tile between having edges and not
 --- !u!1 &578528586
 GameObject:
   m_ObjectHideFlags: 0
@@ -20619,6 +20635,7 @@ GameObject:
   - component: {fileID: 933213564}
   - component: {fileID: 933213563}
   - component: {fileID: 933213562}
+  - component: {fileID: 933213565}
   m_Layer: 0
   m_Name: TextMeshPro - InputField
   m_TagString: Untagged
@@ -20753,6 +20770,21 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 933213560}
+--- !u!114 &933213565
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 933213560}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 611876696}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: set dialogue for this character when touched
 --- !u!1 &941321575
 GameObject:
   m_ObjectHideFlags: 0
@@ -23750,7 +23782,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1061115676
 RectTransform:
   m_ObjectHideFlags: 0
@@ -28874,8 +28906,6 @@ GameObject:
   - component: {fileID: 1282173194}
   - component: {fileID: 1282173196}
   - component: {fileID: 1282173195}
-  - component: {fileID: 1282173198}
-  - component: {fileID: 1282173197}
   m_Layer: 0
   m_Name: Off Icon
   m_TagString: Untagged
@@ -28934,53 +28964,6 @@ CanvasRenderer:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1282173193}
---- !u!114 &1282173197
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1282173193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  source: {fileID: 1282173194}
-  bias: 1
-  tooltip: {fileID: 1344759522}
-  text: tile is passable, click to make it a wall
---- !u!114 &1282173198
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1282173193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004561631d5ba8744a1b98a6e750f4c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  triggerTime: 0.25
-  onHoverBegin:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onTriggerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onTriggerEnd:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onHoverEnd:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
 --- !u!1 &1292736263
 GameObject:
   m_ObjectHideFlags: 0
@@ -40778,7 +40761,7 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1768723135}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 3471f3fdc2e03624dbbef7e94bd0356d, type: 3}
   m_Name: 
@@ -47173,7 +47156,6 @@ GameObject:
   - component: {fileID: 2050908666}
   - component: {fileID: 2050908668}
   - component: {fileID: 2050908667}
-  - component: {fileID: 2050908670}
   - component: {fileID: 2050908669}
   m_Layer: 0
   m_Name: On Icon
@@ -47247,39 +47229,7 @@ MonoBehaviour:
   source: {fileID: 2050908666}
   bias: 1
   tooltip: {fileID: 1344759522}
-  text: tile is a wall, click to make it passable
---- !u!114 &2050908670
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2050908665}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004561631d5ba8744a1b98a6e750f4c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  triggerTime: 0.25
-  onHoverBegin:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onTriggerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onTriggerEnd:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onHoverEnd:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+  text: switch selected tile between wall and not-wall
 --- !u!1 &2054919088
 GameObject:
   m_ObjectHideFlags: 0
