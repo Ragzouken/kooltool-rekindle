@@ -89,8 +89,9 @@ public class TileHUD : MonoBehaviour
     {
         createButton.onClick.AddListener(OnCreateClicked);
         deleteButton.onClick.AddListener(OnDeleteClicked);
-        passableClicks.onSingleClick.AddListener(OnPassableClicked);
-        autotileClicks.onSingleClick.AddListener(OnAutotileClicked);
+        
+        passableToggle.onValueChanged.AddListener(OnWallToggled);
+        autotileToggle.onValueChanged.AddListener(OnAutotileToggled);
     }
 
     private void OnCreateClicked()
@@ -107,24 +108,19 @@ public class TileHUD : MonoBehaviour
         }
     }
 
-    private void OnPassableClicked()
+    private void OnWallToggled(bool on)
     {
-
-    }
-
-    private void OnAutotileClicked()
-    {
-        if (selected != null)
+        if (selected != null && on != selected._test_wall)
         {
-            editor.TileSetAutotile(selected, !selected.autotile);
+            editor.TileSetTestWall(selected, on);
         }
     }
 
-    private void OnWallClicked()
+    private void OnAutotileToggled(bool on)
     {
-        if (selected != null)
+        if (selected != null && on != selected.autotile)
         {
-            editor.TileSetTestWall(selected, !selected._test_wall);
+            editor.TileSetAutotile(selected, on);
         }
     }
 
@@ -176,7 +172,7 @@ public class TileHUD : MonoBehaviour
             palette.DoIfActive(_selected, toggle => toggle.selected = true);
             browser.DoIfActive(_selected, toggle => toggle.selected = true);
 
-            passableToggle.isOn = !selected._test_wall;
+            passableToggle.isOn = selected._test_wall;
             autotileToggle.isOn = selected.autotile;
         }
         else
