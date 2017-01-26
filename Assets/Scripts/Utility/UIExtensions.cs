@@ -58,7 +58,10 @@ public static partial class UIExtensions
                                          RectTransform extent=null,
                                          TooltipBias bias=TooltipBias.Down)
     {
-        tooltip.position = source.position;
+        Vector3 position = source.GetWorldRect().center;
+        position.z = tooltip.position.z;
+
+        tooltip.position = position;
 
         extent = extent ?? tooltip; // allow you to bound less than the whole assembly
         

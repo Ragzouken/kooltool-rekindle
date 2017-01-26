@@ -10004,6 +10004,7 @@ GameObject:
   - component: {fileID: 499780176}
   - component: {fileID: 499780175}
   - component: {fileID: 499780174}
+  - component: {fileID: 499780178}
   m_Layer: 5
   m_Name: Share
   m_TagString: Untagged
@@ -10137,6 +10138,21 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 499780172}
+--- !u!114 &499780178
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 499780172}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 357585219}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: share to web
 --- !u!1 &504266561
 GameObject:
   m_ObjectHideFlags: 0
@@ -16617,6 +16633,7 @@ GameObject:
   - component: {fileID: 745378647}
   - component: {fileID: 745378646}
   - component: {fileID: 745378645}
+  - component: {fileID: 745378649}
   m_Layer: 5
   m_Name: Tiles
   m_TagString: Untagged
@@ -16750,6 +16767,21 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 745378643}
+--- !u!114 &745378649
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 745378643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 357585219}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: tile mode
 --- !u!1 &750206871
 GameObject:
   m_ObjectHideFlags: 0
@@ -28399,6 +28431,7 @@ GameObject:
   - component: {fileID: 1247651982}
   - component: {fileID: 1247651984}
   - component: {fileID: 1247651981}
+  - component: {fileID: 1247651985}
   m_Layer: 5
   m_Name: Character
   m_TagString: Untagged
@@ -28532,6 +28565,21 @@ MonoBehaviour:
   m_FillAmount: 1
   m_FillClockwise: 1
   m_FillOrigin: 0
+--- !u!114 &1247651985
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1247651979}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 357585219}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: character mode
 --- !u!1 &1248231681
 GameObject:
   m_ObjectHideFlags: 0
@@ -31991,6 +32039,7 @@ GameObject:
   - component: {fileID: 1463151687}
   - component: {fileID: 1463151686}
   - component: {fileID: 1463151685}
+  - component: {fileID: 1463151689}
   m_Layer: 5
   m_Name: Draw
   m_TagString: Untagged
@@ -32117,6 +32166,21 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1463151683}
+--- !u!114 &1463151689
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1463151683}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 821688947}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: draw a continous line
 --- !u!1 &1463623587
 GameObject:
   m_ObjectHideFlags: 0
@@ -33730,7 +33794,6 @@ GameObject:
   - component: {fileID: 1518120523}
   - component: {fileID: 1518120522}
   - component: {fileID: 1518120521}
-  - component: {fileID: 1518120520}
   - component: {fileID: 1518120519}
   m_Layer: 5
   m_Name: Stop Playing
@@ -33774,39 +33837,7 @@ MonoBehaviour:
   source: {fileID: 1518120518}
   bias: 0
   tooltip: {fileID: 1344759522}
-  text: share project
---- !u!114 &1518120520
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1518120517}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 004561631d5ba8744a1b98a6e750f4c1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  triggerTime: 0.25
-  onHoverBegin:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onTriggerBegin:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onTriggerEnd:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
-  onHoverEnd:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UIHover+OnAction, Assembly-CSharp, Version=0.0.0.0, Culture=neutral,
-      PublicKeyToken=null
+  text: return to editing
 --- !u!114 &1518120521
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -36068,6 +36099,7 @@ GameObject:
   - component: {fileID: 1607614105}
   - component: {fileID: 1607614104}
   - component: {fileID: 1607614103}
+  - component: {fileID: 1607614107}
   m_Layer: 5
   m_Name: Play
   m_TagString: Untagged
@@ -36201,6 +36233,21 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1607614101}
+--- !u!114 &1607614107
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1607614101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 357585219}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: playtest
 --- !u!1 &1609450812
 GameObject:
   m_ObjectHideFlags: 0
@@ -37318,6 +37365,7 @@ GameObject:
   - component: {fileID: 1645262692}
   - component: {fileID: 1645262691}
   - component: {fileID: 1645262690}
+  - component: {fileID: 1645262694}
   m_Layer: 5
   m_Name: Tiles
   m_TagString: Untagged
@@ -37444,6 +37492,21 @@ CanvasRenderer:
     type: 2}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1645262688}
+--- !u!114 &1645262694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1645262688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bec210d44e085de4daa315ee52ca7b5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  source: {fileID: 821688947}
+  bias: 0
+  tooltip: {fileID: 1344759522}
+  text: draw with a line of stamps
 --- !u!1 &1646735579
 GameObject:
   m_ObjectHideFlags: 0

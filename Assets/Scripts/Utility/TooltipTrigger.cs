@@ -6,7 +6,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-[RequireComponent(typeof(UIHover))]
 public class TooltipTrigger : MonoBehaviour 
 {
     [SerializeField] private RectTransform source;
@@ -19,7 +18,8 @@ public class TooltipTrigger : MonoBehaviour
 
     private void Awake()
     {
-        hover = GetComponent<UIHover>();
+        hover = gameObject.AddComponent<UIHover>();
+        hover.triggerTime = 0.25f;
 
         hover.onHoverBegin.AddListener(() => tooltip.SetText(text));
         hover.onTriggerBegin.AddListener(() => tooltip.Show(source, text, bias));
