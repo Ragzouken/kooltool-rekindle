@@ -918,6 +918,9 @@ public class Main : MonoBehaviour
         else
         {
             brushRenderer.gameObject.SetActive(false);
+            regCursor.gameObject.SetActive(true);
+            regCursor.sprite = eraserTileSprite;
+            regCursor.transform.localPosition = (nextCell * 32) + (IntVector2) (Vector2.one * 16);
             // TODO: show eraser icon
         }
 
