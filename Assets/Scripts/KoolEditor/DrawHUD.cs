@@ -100,6 +100,17 @@ public class DrawHUD : MonoBehaviour
                                                   brightnessSlider.value));
     }
 
+    private void Update()
+    {
+        if (project == null)
+            return;
+
+        for (int i = 0; i < 16; ++i)
+        {
+            colorImages[i].color = project.palettes[0].colors[i];
+        }
+    }
+
     public void SetProject(Project project)
     {
         this.project = project;

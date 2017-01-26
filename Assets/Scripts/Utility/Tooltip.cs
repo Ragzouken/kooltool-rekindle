@@ -20,7 +20,12 @@ public class Tooltip : MonoBehaviour
     
     private void Update()
     {
-        if (source == null) return;
+        if (source == null)
+        {
+            transform.position = Vector2.left * 9999f;
+
+            return;
+        }
 
         UIExtensions.RepositionTooltip(transform as RectTransform,
                                        source,
