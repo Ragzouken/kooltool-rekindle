@@ -29,12 +29,25 @@ public class DrawHUD : MonoBehaviour
 
     [SerializeField] private Tooltip tooltip;
 
+    [SerializeField]
+    private Toggle drawToggle;
+    [SerializeField]
+    private Toggle stampToggle;
+
     public event System.Action<int> OnPaletteIndexSelected = delegate { };
 
     public Mode mode { get; private set; }
     public int selected { get; private set; }
 
     private Project project;
+
+    public bool stamping
+    {
+        get
+        {
+            return stampToggle.isOn;
+        }
+    }
 
     private void Awake()
     {

@@ -1455,11 +1455,15 @@ public class Main : MonoBehaviour
             }
             else
             {
+                int stipple = drawHUD.stamping
+                            ? (int) stippleSlider.value
+                            : 1;
+
                 var line = TextureByte.Pooler.Instance.Sweep(brushSpriteD, 
                                                 prev, 
                                                 next, 
                                                 (canvas, brush) => brush == 0 ? canvas : brush,
-                                                (int) stippleSlider.value,
+                                                stipple,
                                                 ref stippleOffset);
 
                 byte value = (byte) drawHUD.selected;
