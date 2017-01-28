@@ -388,13 +388,13 @@ public class Main : MonoBehaviour
 
     private Costume NewSimpleCostume(Project project)
     {
-        var rect = new IntRect(0, 0, 32, 32);
+        var rect = new IntRect(0, 0, 64, 64);
 
-        var texture = project.CreateTexture(32, 32);
-        texture.SetPixels(test.GetPixels(new IntRect(0, 64, 32, 32)));
+        var texture = project.CreateTexture(64, 64);
+        texture.SetPixels(new IntRect(16, 16, 32, 32), test.GetPixels(new IntRect(0, 64, 32, 32)));
         texture.Apply();
 
-        var spr = new KoolSprite(texture, new IntRect(0, 0, 32, 32), IntVector2.one * 16);
+        var spr = new KoolSprite(texture, new IntRect(0, 0, 64, 64), IntVector2.one * 32);
 
         var costume = new Costume
         {
