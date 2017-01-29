@@ -857,6 +857,11 @@ public class Main : MonoBehaviour
         SetScene(editScene);
     }
 
+    public void EnterCharacterMode()
+    {
+        hud.mode = HUD.Mode.Character;
+    }
+
     public void EnterTileMode()
     {
         hud.mode = HUD.Mode.Tile;
@@ -1010,6 +1015,9 @@ public class Main : MonoBehaviour
 
     public void EditPalette(int i, Color color)
     {
+        if (i == 0)
+            return;
+
         project.palettes[0].colors[i] = color;
 
         RefreshPalette(i);

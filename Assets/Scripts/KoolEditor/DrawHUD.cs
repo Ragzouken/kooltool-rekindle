@@ -69,7 +69,11 @@ public class DrawHUD : MonoBehaviour
             var clicks = toggle.gameObject.AddComponent<UIClicks>();
 
             clicks.onSingleClick.AddListener(() => SelectPaletteIndex(index));
-            clicks.onDoubleClick.AddListener(() => SetMode(Mode.Colors));
+
+            if (i != 0)
+            {
+                clicks.onDoubleClick.AddListener(() => SetMode(Mode.Colors));
+            }
 
             /*
             var hover = toggle.gameObject.AddComponent<UIHover>();
@@ -162,14 +166,21 @@ public class DrawHUD : MonoBehaviour
 
         selected = index;
 
-        float h=0, s=0, v=0;
+        if (index == 0)
+        {
+            SetModePaint();
+        }
+        else
+        {
+            float h = 0, s = 0, v = 0;
 
-        Color.RGBToHSV(project.palettes[0].colors[index], out h, out s, out v);
+            Color.RGBToHSV(project.palettes[0].colors[index], out h, out s, out v);
 
-        ignoreUI = true;
-        hueSaturationSlider.value = new Vector2(h, s);
-        brightnessSlider.value = v;
-        ignoreUI = false;
+            ignoreUI = true;
+            hueSaturationSlider.value = new Vector2(h, s);
+            brightnessSlider.value = v;
+            ignoreUI = false;
+        }
 
         OnPaletteIndexSelected(selected);
     }
