@@ -22,7 +22,7 @@ public class Tooltip : MonoBehaviour
     {
         if (source == null)
         {
-            transform.position = Vector2.left * 9999f;
+            //transform.position = Vector2.left * 9999f;
 
             return;
         }
