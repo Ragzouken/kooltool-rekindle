@@ -12,7 +12,7 @@ public class TextureColor : ManagedTexture<TextureColor, Color>
     public static Blend<Color> stencilKeep = (canvas, brush) => Lerp(Color.clear, canvas, brush.a);
     public static Blend<Color> stencilCut  = (canvas, brush) => Lerp(canvas, Color.clear, brush.a);
 
-    public static Pooler pooler = new Pooler(mask);
+    public static DrawTools Draw = new DrawTools(mask, Color.clear);
 
     public static Color Lerp(Color a, Color b, float u)
     {

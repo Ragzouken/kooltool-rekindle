@@ -105,20 +105,20 @@ public class DrawingTests
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3  = TextureColor.pooler.Circle(3,  Color.black);
-        var circle4  = TextureColor.pooler.Circle(4,  Color.black);
-        var circle16 = TextureColor.pooler.Circle(16, Color.black);
+        var circle3  = TextureColor.Draw.Circle(3,  Color.black);
+        var circle4  = TextureColor.Draw.Circle(4,  Color.black);
+        var circle16 = TextureColor.Draw.Circle(16, Color.black);
 
-        var generated = TextureColor.pooler.GetSprite(64, 64);
+        var generated = TextureColor.Draw.GetSprite(64, 64);
         generated.Clear(Color.white);
         generated.Blend(circle3, TextureColor.alpha, brushPosition: Vector2.one * 4);
 
         Assert.AreNotEqual(Difference(reference, GetExact(generated)), 0, "Generated image should be different to reference at this point!");
 
-        var line1 = TextureColor.pooler.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
+        var line1 = TextureColor.Draw.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
         generated.Blend(line1, TextureColor.alpha);
 
-        var line2 = TextureColor.pooler.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
+        var line2 = TextureColor.Draw.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
         generated.Blend(line2, TextureColor.alpha);
 
         generated.Blend(circle4, TextureColor.alpha, brushPosition: new Vector2( 5, 17));
@@ -128,12 +128,12 @@ public class DrawingTests
 
         generated.Blend(circle16, TextureColor.alpha, brushPosition: new Vector2(23, 11));
 
-        TextureColor.pooler.Line(generated, new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.alpha);
+        TextureColor.Draw.Line(generated, new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.alpha);
 
-        var lineB = TextureColor.pooler.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4);
+        var lineB = TextureColor.Draw.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4);
         generated.Blend(lineB, TextureColor.alpha);
 
-        var lineG = TextureColor.pooler.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2);
+        var lineG = TextureColor.Draw.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2);
         generated.Blend(lineG, TextureColor.alpha);
 
         int difference = Difference(reference, GetExact(generated));

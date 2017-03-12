@@ -4,7 +4,7 @@ using Mathf = UnityEngine.Mathf;
 public partial class ManagedTexture<TTexture, TPixel>
     where TTexture : ManagedTexture<TTexture, TPixel>, new()
 {
-    public class Pooler
+    public class DrawTools
     {
         private List<Sprite> sprites = new List<Sprite>();
         private List<TTexture> textures = new List<TTexture>();
@@ -12,7 +12,7 @@ public partial class ManagedTexture<TTexture, TPixel>
         private Blend<TPixel> mask;
         private TPixel transparent;
 
-        public Pooler(Blend<TPixel> mask, TPixel transparent = default(TPixel))
+        public DrawTools(Blend<TPixel> mask, TPixel transparent = default(TPixel))
         {
             this.mask = mask;
             this.transparent = transparent;

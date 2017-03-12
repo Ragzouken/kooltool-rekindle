@@ -14,7 +14,7 @@ public class BasicDrawing : MonoBehaviour
     private void Awake()
     {
         // create a 512x512 pixel canvas to draw on
-        canvasSprite = TextureColor32.pooler.GetSprite(512, 512);
+        canvasSprite = TextureColor32.Draw.GetSprite(512, 512);
         // tell unity that for every 512 pixels wide this sprite is, it should
         // be one world unit wide
         canvasSprite.SetPixelsPerUnit(512);
@@ -57,7 +57,7 @@ public class BasicDrawing : MonoBehaviour
 
                 // draw a line onto the canvas sprite using alpha blending, 
                 // then apply the changes to the real unity texture
-                TextureColor32.pooler.Line(canvasSprite, prevMouse, nextMouse, color, thickness, TextureColor32.alpha);
+                TextureColor32.Draw.Line(canvasSprite, prevMouse, nextMouse, color, thickness, TextureColor32.alpha);
                 canvasSprite.Apply();
             }
         }

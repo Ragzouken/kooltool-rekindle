@@ -464,8 +464,8 @@ public class Main : MonoBehaviour
 
         hud.mode = HUD.Mode.Draw;
 
-        borderSprite0 = TextureByte.pooler.GetSprite(40, 40, IntVector2.one * 20);
-        borderSprite1 = TextureByte.pooler.GetSprite(40, 40, IntVector2.one * 20);
+        borderSprite0 = TextureByte.Draw.GetSprite(40, 40, IntVector2.one * 20);
+        borderSprite1 = TextureByte.Draw.GetSprite(40, 40, IntVector2.one * 20);
         brushSpriteD = new TextureByte(64, 64).FullSprite(IntVector2.one * 32);
 
         stampsp = new InstancePool<Stamp>(stampPrefab, stampParent);
@@ -1475,12 +1475,12 @@ public class Main : MonoBehaviour
                             ? (int) stippleSlider.value
                             : 1;
 
-                var line = TextureByte.pooler.Sweep(brushSpriteD, 
-                                                    prev, 
-                                                    next, 
-                                                    (canvas, brush) => brush == 0 ? canvas : brush,
-                                                    stipple,
-                                                    ref stippleOffset);
+                var line = TextureByte.Draw.Sweep(brushSpriteD, 
+                                                  prev, 
+                                                  next, 
+                                                  (canvas, brush) => brush == 0 ? canvas : brush,
+                                                  stipple,
+                                                  ref stippleOffset);
 
                 byte value = (byte) drawHUD.selected;
                 Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
@@ -1498,8 +1498,8 @@ public class Main : MonoBehaviour
                     scene.tilemap.Blend(changes, line, IntVector2.zero, blend_, exclusive: exclusiveTile);
                 }
 
-                TextureByte.pooler.FreeTexture(line.mTexture);
-                TextureByte.pooler.FreeSprite(line);
+                TextureByte.Draw.FreeTexture(line.mTexture);
+                TextureByte.Draw.FreeSprite(line);
 
                 changes.ApplyTextures();
             }
@@ -1791,23 +1791,23 @@ public class Main : MonoBehaviour
 
         if (followToggle.isOn)
         {
-            var shearSprite1 = TextureByte.pooler.Rotated(stamp.brush, rots);
+            var shearSprite1 = TextureByte.Draw.Rotated(stamp.brush, rots);
             //var shearSprite1 = TextureByte.Pooler.Instance.Copy(stamp.brush);
-            var shearSprite2 = TextureByte.pooler.ShearX(shearSprite1, alpha);
-            TextureByte.pooler.FreeTexture(shearSprite1.mTexture);
-            TextureByte.pooler.FreeSprite(shearSprite1);
-            var shearSprite3 = TextureByte.pooler.ShearY(shearSprite2, beta);
-            TextureByte.pooler.FreeTexture(shearSprite2.mTexture);
-            TextureByte.pooler.FreeSprite(shearSprite2);
-            var shearSprite4 = TextureByte.pooler.ShearX(shearSprite3, alpha);
-            TextureByte.pooler.FreeTexture(shearSprite3.mTexture);
-            TextureByte.pooler.FreeSprite(shearSprite3);
+            var shearSprite2 = TextureByte.Draw.ShearX(shearSprite1, alpha);
+            TextureByte.Draw.FreeTexture(shearSprite1.mTexture);
+            TextureByte.Draw.FreeSprite(shearSprite1);
+            var shearSprite3 = TextureByte.Draw.ShearY(shearSprite2, beta);
+            TextureByte.Draw.FreeTexture(shearSprite2.mTexture);
+            TextureByte.Draw.FreeSprite(shearSprite2);
+            var shearSprite4 = TextureByte.Draw.ShearX(shearSprite3, alpha);
+            TextureByte.Draw.FreeTexture(shearSprite3.mTexture);
+            TextureByte.Draw.FreeSprite(shearSprite3);
 
             ////var shearSprite4 = shearSprite1;
 
             brushSpriteD.Blend(shearSprite4, blend_);
-            TextureByte.pooler.FreeTexture(shearSprite4.mTexture);
-            TextureByte.pooler.FreeSprite(shearSprite4);
+            TextureByte.Draw.FreeTexture(shearSprite4.mTexture);
+            TextureByte.Draw.FreeSprite(shearSprite4);
         }
         else
         {

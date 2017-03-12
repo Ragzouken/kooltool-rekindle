@@ -4,7 +4,7 @@ using UnityEngine;
 public class TextureByte : ManagedTexture<TextureByte, byte>
 {
     public static Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : brush;
-    public static Pooler pooler = new Pooler(mask);
+    public static DrawTools Draw = new DrawTools(mask, 0);
 
     public static byte Lerp(byte a, byte b, byte u)
     {

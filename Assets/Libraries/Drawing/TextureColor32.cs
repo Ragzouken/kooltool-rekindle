@@ -9,7 +9,7 @@ public class TextureColor32 : ManagedTexture<TextureColor32, Color32>
     public static Blend<Color32> stencilKeep = (canvas, brush) => Lerp(Color.clear, canvas, brush.a);
     public static Blend<Color32> stencilCut  = (canvas, brush) => Lerp(canvas, Color.clear, brush.a);
 
-    public static Pooler pooler = new Pooler(mask);
+    public static DrawTools Draw = new DrawTools(mask, Color.clear);
 
     public static byte Lerp(byte a, byte b, byte u)
     {
