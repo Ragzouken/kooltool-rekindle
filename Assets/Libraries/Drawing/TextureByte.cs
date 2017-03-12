@@ -1,14 +1,10 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
-public class TextureByte : ManagedTexture<byte>
+public class TextureByte : ManagedTexture<TextureByte, byte>
 {
-    public class Pooler : ManagedPooler<Pooler, byte>
-    {
-        public override ManagedTexture<byte> CreateTexture(int width, int height)
-        {
-            return new TextureByte(width, height);
-        }
-    }
+    public static Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : brush;
+    public static Pooler pooler = new Pooler(mask);
 
     public static byte Lerp(byte a, byte b, byte u)
     {
@@ -16,30 +12,22 @@ public class TextureByte : ManagedTexture<byte>
     }
 
     public static Texture2D temporary;
-    public static Blend<byte> mask = (canvas, brush) => brush == 0 ? canvas : brush;
 
     static TextureByte()
     {
         temporary = Texture2DExtensions.Blank(1, 1);
     }
 
-    public TextureByte() : base() { }
+    public TextureByte() : base(TextureFormat.Alpha8) { }
 
     public TextureByte(int width, int height) 
         : base(width, height, TextureFormat.Alpha8)
     {
     }
 
-    public override void Apply()
+    public override void ApplyPixels()
     {
-        base.Apply();
-
-        if (dirty)
-        {
-            uTexture.LoadRawTextureData(pixels);
-            uTexture.Apply();
-            dirty = false;
-        }
+        uTexture.LoadRawTextureData(pixels);
     }
 
     public void SetPixels32(Color32[] pixels)

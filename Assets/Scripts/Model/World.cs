@@ -116,7 +116,7 @@ public class KoolSpriteConverter : JsonConverter
 }
 
 [JsonConverter(typeof(KoolSpriteConverter))]
-public class KoolSprite : ManagedSprite<byte>, ICopyable<KoolSprite>
+public class KoolSprite : TextureByte.Sprite, ICopyable<KoolSprite>
 { 
     public KoolSprite() : base() { }
 
@@ -167,7 +167,7 @@ public interface IChange
 
 public class Changes
 {
-    public HashSet<ManagedSprite<byte>> sprites = new HashSet<ManagedSprite<byte>>();
+    public HashSet<TextureByte.Sprite> sprites = new HashSet<TextureByte.Sprite>();
 
     public Dictionary<object, IChange> changes = new Dictionary<object, IChange>();
 
@@ -334,7 +334,7 @@ public class ImageGrid : ICopyable<ImageGrid>
         return sprite;
     }
 
-    public void Blend(Changes changes, ManagedSprite<byte> sprite8, IntVector2 brushPosition, Blend<byte> blend)
+    public void Blend(Changes changes, TextureByte.Sprite sprite8, IntVector2 brushPosition, Blend<byte> blend)
     {
         IntVector2 cell;
         KoolSprite sprite;
@@ -424,7 +424,7 @@ public class Actor : ICopyable<Actor>
         copy.state = copier.Copy(state);
     }
 
-    public void Blend(Changes changes, ManagedSprite<byte> sprite8, IntVector2 brushPosition, Blend<byte> blend)
+    public void Blend(Changes changes, TextureByte.Sprite sprite8, IntVector2 brushPosition, Blend<byte> blend)
     {
         //chang.Changed(cell);
 

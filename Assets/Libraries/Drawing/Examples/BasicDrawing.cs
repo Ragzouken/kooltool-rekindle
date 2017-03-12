@@ -4,7 +4,7 @@ public class BasicDrawing : MonoBehaviour
 {
     [SerializeField] private SpriteRenderer drawing;
 
-    private ManagedSprite<Color32> sprite;
+    private TextureColor32.Sprite canvasSprite;
 
     private new Collider collider;
 
@@ -13,12 +13,18 @@ public class BasicDrawing : MonoBehaviour
 
     private void Awake()
     {
-        sprite = TextureColor32.Pooler.Instance.GetSprite(512, 512);
-        sprite.SetPixelsPerUnit(512);
-        sprite.Clear(Color.clear);
-        sprite.mTexture.Apply();
+        // create a 512x512 pixel canvas to draw on
+        canvasSprite = TextureColor32.pooler.GetSprite(512, 512);
+        // tell unity that for every 512 pixels wide this sprite is, it should
+        // be one world unit wide
+        canvasSprite.SetPixelsPerUnit(512);
+        // fill the sprite with transparent pixels
+        canvasSprite.Clear(Color.clear);
+        // update the real unity texture so that it can be displayed
+        canvasSprite.mTexture.Apply();
 
-        drawing.sprite = sprite.uSprite;
+        // set the existing SpriteRenderer to use the newly created sprite
+        drawing.sprite = canvasSprite.uSprite;
 
         collider = drawing.GetComponent<Collider>();
     }
@@ -44,17 +50,15 @@ public class BasicDrawing : MonoBehaviour
             }
             else
             {
+                // pick a random line thickness and colour
                 int thickness = Random.Range(1, 6);
                 Color color = Color.HSVToRGB(Random.value, 0.75f, 1f);
                 color.a = .75f;
 
-                var line = TextureColor32.Pooler.Instance.Line(prevMouse, nextMouse, color, thickness, TextureColor32.mask);
-
-                sprite.Blend(line, TextureColor32.alpha);
-                sprite.mTexture.Apply();
-
-                TextureColor32.Pooler.Instance.FreeTexture(line.mTexture);
-                TextureColor32.Pooler.Instance.FreeSprite(line);
+                // draw a line onto the canvas sprite using alpha blending, 
+                // then apply the changes to the real unity texture
+                TextureColor32.pooler.Line(canvasSprite, prevMouse, nextMouse, color, thickness, TextureColor32.alpha);
+                canvasSprite.Apply();
             }
         }
         else

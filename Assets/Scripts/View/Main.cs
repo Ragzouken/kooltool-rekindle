@@ -23,11 +23,11 @@ public class Main : MonoBehaviour
 {
 #if UNITY_EDITOR
     [MenuItem("Tools/Delete Prefs")]
+#endif
     public static void DeletePrefs()
     {
         PlayerPrefs.DeleteAll();
     }
-#endif
 
     [SerializeField]
     private KoolEditor editor;
@@ -159,7 +159,7 @@ public class Main : MonoBehaviour
     public class Stamp
     {
         public Sprite thumbnail;
-        public ManagedSprite<byte> brush;
+        public TextureByte.Sprite brush;
     }
 
     [Header("Stamps")]
@@ -176,7 +176,7 @@ public class Main : MonoBehaviour
     private Texture2D autoTileTemplate;
 
     public Sprite[] testbrushes;
-    private ManagedSprite<byte> brushSpriteD;
+    private TextureByte.Sprite brushSpriteD;
 
     [Header("Character Toggles")]
     [SerializeField]
@@ -410,7 +410,9 @@ public class Main : MonoBehaviour
     private Costume defaultCostume;
 
     private void Start()
-    { 
+    {
+        DeletePrefs();
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         SetupEditor();
 
@@ -444,6 +446,9 @@ public class Main : MonoBehaviour
         LoadDefaultProject();
         //LoadGistAgain("83dcae5391dbe48c9d4abe61e1ff0cb6");
 #endif
+#if !UNITY_WEBGL && !UNITY_EDITOR
+        Screen.SetResolution(768, 768, false);
+#endif
     }
 
     private void SetupCommon()
@@ -459,8 +464,8 @@ public class Main : MonoBehaviour
 
         hud.mode = HUD.Mode.Draw;
 
-        borderSprite0 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
-        borderSprite1 = TextureByte.Pooler.Instance.GetSprite(40, 40, IntVector2.one * 20);
+        borderSprite0 = TextureByte.pooler.GetSprite(40, 40, IntVector2.one * 20);
+        borderSprite1 = TextureByte.pooler.GetSprite(40, 40, IntVector2.one * 20);
         brushSpriteD = new TextureByte(64, 64).FullSprite(IntVector2.one * 32);
 
         stampsp = new InstancePool<Stamp>(stampPrefab, stampParent);
@@ -1078,8 +1083,8 @@ public class Main : MonoBehaviour
 
     [SerializeField] private Slider stippleSlider;
 
-    private ManagedSprite<byte> borderSprite0;
-    private ManagedSprite<byte> borderSprite1;
+    private TextureByte.Sprite borderSprite0;
+    private TextureByte.Sprite borderSprite1;
 
     public int borderSize = 1;
 
@@ -1263,7 +1268,7 @@ public class Main : MonoBehaviour
         prev = gamep ? prevCursor : prevMouse;
         next = gamep ? nextCursor : nextMouse;
 
-        #region angle bullshit
+#region angle bullshit
         var delta2 = next - prev;
         if (delta2.magnitude > 1)
         {
@@ -1277,7 +1282,7 @@ public class Main : MonoBehaviour
 
         if (angles.Count > 3) angles.Dequeue();
         if (angles.Count > 0) angle = angles.Average();
-        #endregion
+#endregion
 
         prev.x = Mathf.FloorToInt(prev.x);
         prev.y = Mathf.FloorToInt(prev.y);
@@ -1470,12 +1475,12 @@ public class Main : MonoBehaviour
                             ? (int) stippleSlider.value
                             : 1;
 
-                var line = TextureByte.Pooler.Instance.Sweep(brushSpriteD, 
-                                                prev, 
-                                                next, 
-                                                (canvas, brush) => brush == 0 ? canvas : brush,
-                                                stipple,
-                                                ref stippleOffset);
+                var line = TextureByte.pooler.Sweep(brushSpriteD, 
+                                                    prev, 
+                                                    next, 
+                                                    (canvas, brush) => brush == 0 ? canvas : brush,
+                                                    stipple,
+                                                    ref stippleOffset);
 
                 byte value = (byte) drawHUD.selected;
                 Blend<byte> blend_ = (canvas, brush) => brush == 0 ? canvas : value;
@@ -1493,8 +1498,8 @@ public class Main : MonoBehaviour
                     scene.tilemap.Blend(changes, line, IntVector2.zero, blend_, exclusive: exclusiveTile);
                 }
 
-                TextureByte.Pooler.Instance.FreeTexture(line.mTexture);
-                TextureByte.Pooler.Instance.FreeSprite(line);
+                TextureByte.pooler.FreeTexture(line.mTexture);
+                TextureByte.pooler.FreeSprite(line);
 
                 changes.ApplyTextures();
             }
@@ -1734,7 +1739,7 @@ public class Main : MonoBehaviour
         characterDialogue.DeactivateInputField();
     }
 
-    private ManagedSprite<byte> shearSprite;
+    private TextureByte.Sprite shearSprite;
     private float angle;
     private Queue<float> angles = new Queue<float>();
 
@@ -1786,23 +1791,23 @@ public class Main : MonoBehaviour
 
         if (followToggle.isOn)
         {
-            var shearSprite1 = TextureByte.Pooler.Instance.Rotated(stamp.brush, rots);
+            var shearSprite1 = TextureByte.pooler.Rotated(stamp.brush, rots);
             //var shearSprite1 = TextureByte.Pooler.Instance.Copy(stamp.brush);
-            var shearSprite2 = TextureByte.Pooler.Instance.ShearX(shearSprite1, alpha);
-            TextureByte.Pooler.Instance.FreeTexture(shearSprite1.mTexture);
-            TextureByte.Pooler.Instance.FreeSprite(shearSprite1);
-            var shearSprite3 = TextureByte.Pooler.Instance.ShearY(shearSprite2, beta);
-            TextureByte.Pooler.Instance.FreeTexture(shearSprite2.mTexture);
-            TextureByte.Pooler.Instance.FreeSprite(shearSprite2);
-            var shearSprite4 = TextureByte.Pooler.Instance.ShearX(shearSprite3, alpha);
-            TextureByte.Pooler.Instance.FreeTexture(shearSprite3.mTexture);
-            TextureByte.Pooler.Instance.FreeSprite(shearSprite3);
+            var shearSprite2 = TextureByte.pooler.ShearX(shearSprite1, alpha);
+            TextureByte.pooler.FreeTexture(shearSprite1.mTexture);
+            TextureByte.pooler.FreeSprite(shearSprite1);
+            var shearSprite3 = TextureByte.pooler.ShearY(shearSprite2, beta);
+            TextureByte.pooler.FreeTexture(shearSprite2.mTexture);
+            TextureByte.pooler.FreeSprite(shearSprite2);
+            var shearSprite4 = TextureByte.pooler.ShearX(shearSprite3, alpha);
+            TextureByte.pooler.FreeTexture(shearSprite3.mTexture);
+            TextureByte.pooler.FreeSprite(shearSprite3);
 
             ////var shearSprite4 = shearSprite1;
 
             brushSpriteD.Blend(shearSprite4, blend_);
-            TextureByte.Pooler.Instance.FreeTexture(shearSprite4.mTexture);
-            TextureByte.Pooler.Instance.FreeSprite(shearSprite4);
+            TextureByte.pooler.FreeTexture(shearSprite4.mTexture);
+            TextureByte.pooler.FreeSprite(shearSprite4);
         }
         else
         {

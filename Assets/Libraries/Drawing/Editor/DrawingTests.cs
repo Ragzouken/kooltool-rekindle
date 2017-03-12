@@ -29,7 +29,9 @@ public class DrawingTests
         return difference;
     }
 
-    private int Difference<TPixel>(ManagedSprite<TPixel> a, ManagedSprite<TPixel> b)
+    private int Difference<TTexture, TPixel>(ManagedTexture<TTexture, TPixel>.Sprite a, 
+                                             ManagedTexture<TTexture, TPixel>.Sprite b)
+        where TTexture : ManagedTexture<TTexture, TPixel>, new()
     {
         Color[] pixelsA = GetPixels(a);
         Color[] pixelsB = GetPixels(b);
@@ -56,26 +58,31 @@ public class DrawingTests
 
     private void SaveOut(Sprite sprite, string name)
     {
+        System.IO.Directory.CreateDirectory(Application.dataPath + "/Tests Output/");
         sprite.texture.Apply();
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Libraries/Drawing/Editor/Output/" + name + ".png", sprite.texture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Tests Output/" + name + ".png", sprite.texture.EncodeToPNG());
         AssetDatabase.Refresh();
     }
 
-    private void SaveOut<TPixel>(ManagedSprite<TPixel> sprite, string name)
+    private void SaveOut<TTexture, TPixel>(ManagedTexture<TTexture, TPixel>.Sprite sprite, string name)
+        where TTexture : ManagedTexture<TTexture, TPixel>, new()
     {
+        System.IO.Directory.CreateDirectory(Application.dataPath + "/Tests Output/");
         sprite.mTexture.Apply();
-        System.IO.File.WriteAllBytes(Application.dataPath + "/Libraries/Drawing/Editor/Output/" + name + ".png", sprite.mTexture.uTexture.EncodeToPNG());
+        System.IO.File.WriteAllBytes(Application.dataPath + "/Tests Output/" + name + ".png", sprite.mTexture.uTexture.EncodeToPNG());
         AssetDatabase.Refresh();
     }
 
-    private Color[] GetPixels<TPixel>(ManagedSprite<TPixel> sprite)
+    private Color[] GetPixels<TTexture, TPixel>(ManagedTexture<TTexture, TPixel>.Sprite sprite)
+        where TTexture : ManagedTexture<TTexture, TPixel>, new()
     {
         sprite.mTexture.Apply();
 
         return sprite.mTexture.uTexture.GetPixels(sprite.uSprite.textureRect);
     }
 
-    private Texture2D GetExact<TPixel>(ManagedSprite<TPixel> sprite)
+    private Texture2D GetExact<TTexture, TPixel>(ManagedTexture<TTexture, TPixel>.Sprite sprite)
+        where TTexture : ManagedTexture<TTexture, TPixel>, new()
     {
         var tex = Texture2DExtensions.Blank((int) sprite.rect.width, (int) sprite.rect.height);
         tex.SetPixels(GetPixels(sprite));
@@ -84,7 +91,8 @@ public class DrawingTests
         return tex;
     }
 
-    private void SaveOutExact<TPixel>(ManagedSprite<TPixel> sprite, string name)
+    private void SaveOutExact<TTexture, TPixel>(ManagedTexture<TTexture, TPixel>.Sprite sprite, string name)
+        where TTexture : ManagedTexture<TTexture, TPixel>, new()
     {
         SaveOut(GetExact(sprite).FullSprite(), name);
         AssetDatabase.Refresh();
@@ -97,20 +105,20 @@ public class DrawingTests
 
         Assert.AreEqual(Difference(reference, reference), 0, "Reference image doesn't equal itself!");
 
-        var circle3  = TextureColor.Pooler.Instance.Circle(3,  Color.black);
-        var circle4  = TextureColor.Pooler.Instance.Circle(4,  Color.black);
-        var circle16 = TextureColor.Pooler.Instance.Circle(16, Color.black);
+        var circle3  = TextureColor.pooler.Circle(3,  Color.black);
+        var circle4  = TextureColor.pooler.Circle(4,  Color.black);
+        var circle16 = TextureColor.pooler.Circle(16, Color.black);
 
-        var generated = TextureColor.Pooler.Instance.GetSprite(64, 64);
+        var generated = TextureColor.pooler.GetSprite(64, 64);
         generated.Clear(Color.white);
         generated.Blend(circle3, TextureColor.alpha, brushPosition: Vector2.one * 4);
 
         Assert.AreNotEqual(Difference(reference, GetExact(generated)), 0, "Generated image should be different to reference at this point!");
 
-        var line1 = TextureColor.Pooler.Instance.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3, TextureColor.mask);
+        var line1 = TextureColor.pooler.Line(new Vector2(8, 4), new Vector2(12, 4), Color.black, 3);
         generated.Blend(line1, TextureColor.alpha);
 
-        var line2 = TextureColor.Pooler.Instance.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3, TextureColor.mask);
+        var line2 = TextureColor.pooler.Line(new Vector2(4, 8), new Vector2(8, 12), Color.black, 3);
         generated.Blend(line2, TextureColor.alpha);
 
         generated.Blend(circle4, TextureColor.alpha, brushPosition: new Vector2( 5, 17));
@@ -120,13 +128,12 @@ public class DrawingTests
 
         generated.Blend(circle16, TextureColor.alpha, brushPosition: new Vector2(23, 11));
 
-        var lineR = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.mask);
-        generated.Blend(lineR, TextureColor.alpha);
+        TextureColor.pooler.Line(generated, new Vector2(35, 3), new Vector2(59, 3), Color.red, 6, TextureColor.alpha);
 
-        var lineB = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4, TextureColor.mask);
+        var lineB = TextureColor.pooler.Line(new Vector2(35, 3), new Vector2(59, 3), Color.blue, 4);
         generated.Blend(lineB, TextureColor.alpha);
 
-        var lineG = TextureColor.Pooler.Instance.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2, TextureColor.mask);
+        var lineG = TextureColor.pooler.Line(new Vector2(35, 3), new Vector2(59, 3), Color.green, 2);
         generated.Blend(lineG, TextureColor.alpha);
 
         int difference = Difference(reference, GetExact(generated));

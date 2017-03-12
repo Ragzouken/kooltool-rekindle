@@ -150,7 +150,7 @@ namespace kooltool
         }
 
         public void Blend(Changes changes, 
-                          ManagedSprite<byte> sprite8, 
+                          TextureByte.Sprite sprite8, 
                           IntVector2 brushPosition, 
                           Blend<byte> blend,
                           Tile exclusive=null)
